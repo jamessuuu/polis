@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-05T17:36:44.332Z",
+  "generatedAt": "2026-09-05T18:11:30.194Z",
   "scope": "personal",
   "divisions": [
     {
@@ -1326,7 +1326,7 @@
     },
     {
       "id": "idea",
-      "description": ">"
+      "description": "Personal project Idea Vault. Use when James says /idea, \"I have an idea\", \"add to idea vault\", \"show my ideas\", or \"what ideas do I have\". Captures project ideas, queues personal ones for weekends, routes work ideas to the right world. Distinct from /note (raw capture) and /task (actionable now)."
     },
     {
       "id": "inbox",
@@ -1362,7 +1362,7 @@
     },
     {
       "id": "note",
-      "description": ">"
+      "description": "Quick note capture into the Personal Vault. Use when James says /note, \"capture this\", \"jot down\", \"remember\", or provides a thought he wants saved without building a full task or idea around it yet. Distinct from /idea (structured project ideas) and /save (session checkpoint)."
     },
     {
       "id": "offline-pwa",
@@ -1370,7 +1370,7 @@
     },
     {
       "id": "openclaw",
-      "description": ">"
+      "description": "OpenClaw — mobile control for Claude Code via WhatsApp, Viber, or iPhone app. Use when James wants to send commands to his desktop/laptop Claude Code from his phone, or when designing/building the OpenClaw webhook bridge. Distinct from AgentJames Control (local browser dashboard) — OpenClaw is the REMOTE channel layer."
     },
     {
       "id": "pitch",
@@ -1387,10 +1387,6 @@
     {
       "id": "pulse",
       "description": "Runs the PULSE recency radar — three scanner agents sweep the last ~2 weeks of AI/agentic, dev-ecosystem, and market signals, prioritized into a digest with concrete so-what actions, saved to the vault. Use on request (/pulse) or on schedule to keep the ecosystem current."
-    },
-    {
-      "id": "quality-gate",
-      "description": ">"
     },
     {
       "id": "reach-kit",
@@ -1414,7 +1410,7 @@
     },
     {
       "id": "seal",
-      "description": ">"
+      "description": "Secret Vault manager. Use when James says /seal, \"get my key for X\", \"store a secret\", \"what keys do I have\", or \"rotate secrets\". Manages per-project and general secrets in ~/.claude/secrets/ (gitignored, local-only). Enforces account isolation: personal keys never leak into Lift work and vice versa."
     },
     {
       "id": "ship-it",
@@ -1434,7 +1430,7 @@
     },
     {
       "id": "sync-config",
-      "description": ">"
+      "description": "Ecosystem config sync between devices. Use when James wants to push his Claude Code config to GitHub for the laptop, pull on the laptop, or check sync status. Wrapper for ~/.claude/tools/ecosystem-sync.ps1."
     },
     {
       "id": "taste",
@@ -1463,12 +1459,12 @@
   ],
   "stats": {
     "agents": 45,
-    "skills": 51,
+    "skills": 50,
     "divisions": 8,
     "edges": 105,
     "directors": 7,
     "unreachable": 2,
-    "withheld": 1
+    "withheld": 2
   },
   "unreachable": [
     "knowledge-librarian",
@@ -1477,6 +1473,10 @@
   "withheld": [
     {
       "id": "prompt-engineer",
+      "reason": "id or description names a client or employer"
+    },
+    {
+      "id": "quality-gate",
       "reason": "id or description names a client or employer"
     }
   ]

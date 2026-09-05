@@ -41,12 +41,33 @@ export function parseFrontmatter(text) {
   const m = /^---\r?\n([\s\S]*?)\r?\n---/.exec(String(text ?? ''));
   if (!m) return { data: {}, body: String(text ?? '') };
   const data = {};
-  for (const line of m[1].split(/\r?\n/)) {
+  const lines = m[1].split(/\r?\n/);
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
     const idx = line.indexOf(':');
     if (idx < 0) continue;
     const key = line.slice(0, idx).trim();
     let value = line.slice(idx + 1).trim();
     if (!key || key.startsWith('#')) continue;
+
+    // Block scalars: `key: >` (folded) and `key: |` (literal), with optional
+    // chomping indicators. Six real skills write their description this way,
+    // and treating the marker as the value stored a literal ">" as the
+    // description for every one of them. Found on 2026-09-06 by looking at the
+    // rendered output rather than at the parser.
+    if (/^[>|][-+]?$/.test(value)) {
+      const folded = value[0] === '>';
+      const collected = [];
+      while (i + 1 < lines.length && (lines[i + 1].trim() === '' || /^\s/.test(lines[i + 1]))) {
+        collected.push(lines[++i].trim());
+      }
+      // Folded joins with spaces, literal keeps the line breaks. Trailing blank
+      // lines are dropped either way.
+      value = folded ? collected.join(' ').replace(/\s+/g, ' ').trim() : collected.join('\n').trim();
+      data[key] = value;
+      continue;
+    }
+
     if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
       value = value.slice(1, -1);
     }

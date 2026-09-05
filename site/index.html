@@ -29,10 +29,12 @@
       <p>Every number below comes straight from <code>ecosystem.json</code>. The two findings underneath are not decoration.</p>
       <dl class="stats-grid">
         <div><dt>Citizens</dt><dd>45</dd></div>
-        <div><dt>Skills</dt><dd>51</dd></div>
+        <div><dt>Skills</dt><dd>50</dd></div>
         <div><dt>Districts</dt><dd>8</dd></div>
         <div><dt>Roads</dt><dd>105</dd></div>
         <div><dt>Directors</dt><dd>7</dd></div>
+        <div><dt>Unreachable</dt><dd>2</dd></div>
+        <div><dt>Withheld</dt><dd>2</dd></div>
       </dl>
 
       <div class="finding finding-warn" id="unreachable-finding">
@@ -99,9 +101,10 @@
 
     <section aria-labelledby="static-roster-heading" id="static-roster-section">
       <h2 id="static-roster-heading">Districts and citizens</h2>
-      <p>This is the full roster as plain HTML. It is not a JavaScript-off fallback bolted on afterward: it is always in the page, and is only hidden once the interactive map and list above have finished building successfully. If anything above fails to load, this stays exactly what you see.</p>
-
-      <div class="static-district">
+      <p>Generated from <code>ecosystem.json</code> by <code>bin/build-site.mjs</code>. Snapshot taken 2026-09-05T18:11:30.194Z.</p>
+      <p class="static-meta">2 member(s) withheld: id or description names a client or employer; id or description names a client or employer. Their names are not printed.</p>
+      <ul class="static-district-list">
+      <li class="static-district">
         <h3>00 &middot; Cabinet <span class="static-count">(5 citizens)</span></h3>
         <ul class="static-agent-list">
         <li class="static-agent" id="static-chief-of-staff">
@@ -140,8 +143,8 @@
           <p class="static-edges"><strong>Receives work from:</strong> chief-of-staff, competitive-analyst</p>
         </li>
         </ul>
-      </div>
-      <div class="static-district">
+      </li>
+      <li class="static-district">
         <h3>01 &middot; Intelligence <span class="static-count">(4 citizens)</span></h3>
         <ul class="static-agent-list">
         <li class="static-agent" id="static-competitive-analyst">
@@ -173,8 +176,8 @@
           <p class="static-edges"><strong>Receives work from:</strong> chief-of-staff, product-manager, product-strategist</p>
         </li>
         </ul>
-      </div>
-      <div class="static-district">
+      </li>
+      <li class="static-district">
         <h3>02 &middot; Product <span class="static-count">(3 citizens)</span></h3>
         <ul class="static-agent-list">
         <li class="static-agent" id="static-pricing-strategist">
@@ -199,8 +202,8 @@
           <p class="static-edges"><strong>Receives work from:</strong> architect, metrics-analyst, product-manager, ui-designer</p>
         </li>
         </ul>
-      </div>
-      <div class="static-district">
+      </li>
+      <li class="static-district">
         <h3>03 &middot; Engineering <span class="static-count">(15 citizens)</span></h3>
         <ul class="static-agent-list">
         <li class="static-agent" id="static-accessibility-engineer">
@@ -308,8 +311,8 @@
           <p class="static-edges"><strong>Receives work from:</strong> chief-of-staff</p>
         </li>
         </ul>
-      </div>
-      <div class="static-district">
+      </li>
+      <li class="static-district">
         <h3>04 &middot; Design &amp; Story <span class="static-count">(5 citizens)</span></h3>
         <ul class="static-agent-list">
         <li class="static-agent" id="static-copywriter">
@@ -347,8 +350,8 @@
           <p class="static-edges"><strong>Receives work from:</strong> architect, creative-director, product-manager, trust-safety, ux-researcher</p>
         </li>
         </ul>
-      </div>
-      <div class="static-district">
+      </li>
+      <li class="static-district">
         <h3>05 &middot; Growth &amp; Revenue <span class="static-count">(4 citizens)</span></h3>
         <ul class="static-agent-list">
         <li class="static-agent" id="static-content-strategist">
@@ -379,8 +382,8 @@
           <p class="static-edges"><strong>Receives work from:</strong> growth-engineer</p>
         </li>
         </ul>
-      </div>
-      <div class="static-district">
+      </li>
+      <li class="static-district">
         <h3>06 &middot; Trust &amp; Operations <span class="static-count">(4 citizens)</span></h3>
         <ul class="static-agent-list">
         <li class="static-agent" id="static-incident-commander">
@@ -412,8 +415,8 @@
           <p class="static-edges"><strong>Receives work from:</strong> chief-of-staff, counsel, security-auditor, support-community</p>
         </li>
         </ul>
-      </div>
-      <div class="static-district">
+      </li>
+      <li class="static-district static-district-flagged">
         <h3>07 &middot; Knowledge &amp; Craft <span class="static-count">(3 citizens)</span></h3>
         <ul class="static-agent-list">
         <li class="static-agent" id="static-educator">
@@ -423,10 +426,9 @@
           <p class="static-edges"><strong>Receives work from:</strong> architect, chief-of-staff, cto</p>
         </li>
         <li class="static-agent" id="static-knowledge-librarian">
-          <h4>knowledge-librarian <span class="tag tag-warn">Unreachable</span></h4>
+          <h4>knowledge-librarian <span class="tag tag-warn">Nobody hands this work</span></h4>
           <p>Memory-layer curator for the FOUR world vaults (Personal, Freelance, Lift, General - registry at ~/.claude/WORLDS.md) and agent/skill files — taxonomy, retrieval paths, deduplication, decay detection, world-routing compliance, and routing lessons to the exact agent that must hold them. Use after retro/save/boardroom sessions produce Lesson artifacts, during the weekly ecosystem-groomer sweep, when a vault search takes more than two hops, or when James asks &quot;where did we decide X&quot; and the answer is not found in under a minute.</p>
           <p class="static-meta"><strong>Model:</strong> no fixed model &middot; <strong>Tools:</strong> Read, Glob, Grep, Bash, Write, Edit</p>
-          <p class="static-edges static-edges-none"><strong>Wiring:</strong> named by no one, upstream or downstream.</p>
         </li>
         <li class="static-agent" id="static-technical-writer">
           <h4>technical-writer</h4>
@@ -435,44 +437,29 @@
           <p class="static-edges"><strong>Receives work from:</strong> api-designer, architect</p>
         </li>
         </ul>
-      </div>
-      <div class="static-district static-district-flagged">
-        <h3>No division declared <span class="static-count">(1 citizen)</span></h3>
-        <p class="static-note">Not listed under any division in ECOSYSTEM.md's organization section.</p>
-        <ul class="static-agent-list">
-        <li class="static-agent" id="static-mentor">
-          <h4>mentor <span class="tag tag-warn">Unreachable</span></h4>
-          <p>James's personal adaptive tutor for the AI Solutions Architect Track - long-horizon, self-paced, conversation-first learning toward systems/cloud/AI architecture and certification. Use for /learn sessions, any &quot;teach me / explain / I don't get X&quot; moment tied to the curriculum, or when James wants to talk through a concept out loud. Distinct from educator (which unblocks a specific project fast); mentor owns James's multi-year capability growth and adapts continuously to his learner state.</p>
-          <p class="static-meta"><strong>Model:</strong> no fixed model &middot; <strong>Tools:</strong> Read, Glob, Grep, Bash, Write, Edit</p>
-          <p class="static-edges static-edges-none"><strong>Wiring:</strong> named by no one, upstream or downstream.</p>
-        </li>
-        </ul>
-      </div>
-      <div class="static-district">
-        <h3>System utilities <span class="static-count">(1 utility)</span></h3>
-        <p class="static-note">Ship with Claude Code, sit in no division, and the constitution exempts them from the admission standard and the reciprocity rule.</p>
+      </li>
+      <li class="static-district">
+        <h3>No district <span class="static-count">(2 citizens)</span></h3>
         <ul class="static-agent-list">
         <li class="static-agent" id="static-Explore">
           <h4>Explore</h4>
           <p>Read-only search agent for broad fan-out searches — when answering means sweeping many files, directories, or naming conventions and only the conclusion is needed, not the file dumps. Reads excerpts rather than whole files; locates code, doesn't review it. Specify search breadth (&quot;medium&quot; or &quot;very thorough&quot;).</p>
           <p class="static-meta"><strong>Model:</strong> haiku &middot; <strong>Tools:</strong> Read, Glob, Grep, Bash</p>
-          <p class="static-edges static-edges-none"><strong>Wiring:</strong> named by no one, upstream or downstream.</p>
+        </li>
+        <li class="static-agent" id="static-mentor">
+          <h4>mentor <span class="tag tag-warn">Nobody hands this work</span></h4>
+          <p>James's personal adaptive tutor for the AI Solutions Architect Track - long-horizon, self-paced, conversation-first learning toward systems/cloud/AI architecture and certification. Use for /learn sessions, any &quot;teach me / explain / I don't get X&quot; moment tied to the curriculum, or when James wants to talk through a concept out loud. Distinct from educator (which unblocks a specific project fast); mentor owns James's multi-year capability growth and adapts continuously to his learner state.</p>
+          <p class="static-meta"><strong>Model:</strong> no fixed model &middot; <strong>Tools:</strong> Read, Glob, Grep, Bash, Write, Edit</p>
         </li>
         </ul>
-      </div>
-    </section>
+      </li>
+      </ul>
+      </section>
 
     <section aria-labelledby="skills-heading">
       <h2 id="skills-heading">The archive &mdash; skills</h2>
-      <p>51 procedures the citizens draw on. Skills are not citizens: they carry no division, no Director, and no wiring of their own. A handful of the descriptions below read as a bare <code>&gt;</code> character; that is a real limitation of the parser that produced <code>ecosystem.json</code> (it does not follow YAML's multi-line block-scalar syntax), not something rewritten here to look tidier. See the README's Limitations section.</p>
-      <div id="skills-search-box" hidden>
-        <div class="field">
-          <label for="skills-q">Search skills</label>
-          <input type="search" id="skills-q" autocomplete="off">
-        </div>
-        <p id="skills-filter-summary" role="status" aria-live="polite"></p>
-      </div>
-      <ul id="skills-list" class="static-skill-list">
+      <p>50 procedures the citizens draw on. Skills are not citizens: they carry no division, no Director, and no wiring of their own.</p>
+      <ul class="static-skill-list">
         <li class="static-skill"><strong>a11y-audit</strong> &mdash; Accessibility conformance pass on a LIVE interface (not just source) - keyboard traversal, focus order and visibility, screen-reader semantics, contrast against real rendered pixels, motion sensitivity, and mobile touch targets. Invokes accessibility-engineer; produces a ranked, WCAG-SC-referenced defect list with the exact fix per item. Use before any public launch, after any change to gesture-based interaction/modals/sheets/forms/animation, or when James asks for an &quot;a11y pass&quot; or &quot;WCAG check&quot;.</li>
         <li class="static-skill"><strong>agent-forge</strong> &mdash; Admit or revise a member of the ecosystem (agent, skill, or tool) against the constitution's admission standard. Use when James wants a new persona/procedure/capability added, when a capability gap is found mid-task, or when the ecosystem-groomer's digest proposes a new member rather than an edit. THE meta-procedure every future addition must go through — never hand-write a file into ~/.claude/agents or ~/.claude/skills without it.</li>
         <li class="static-skill"><strong>agents-sdk</strong> &mdash; Build AI agents on Cloudflare Workers using the Agents SDK. Load when creating stateful agents, durable workflows, real-time WebSocket apps, scheduled tasks, MCP servers, chat applications, voice agents, or browser automation. Covers Agent class, state management, callable RPC, Workflows, durable execution, queues, retries, observability, and React hooks. Biases towards retrieval from Cloudflare docs over pre-trained knowledge.</li>
@@ -490,7 +477,7 @@
         <li class="static-skill"><strong>ecosystem-groomer</strong> &mdash; The self-improvement flywheel. Run weekly (manually via /ecosystem-groomer or on a schedule) to sweep recent lessons, outcomes, and agent performance, then propose concrete agent/skill edits through a mini-board and present James one approvable digest. This is how the ecosystem improves continuously without being asked.</li>
         <li class="static-skill"><strong>eval-suite</strong> &mdash; Design and run evaluations for LLM/agent features shipped to users — task set construction, rubric or programmatic scoring, regression baselines, cost/latency tracking, and failure taxonomy. Use when a prompt, tool schema, model, or RAG shape changes on a live LLM-backed feature, before any such feature first ships, or on a recurring cadence to catch silent quality/cost drift. Invokes ai-engineer.</li>
         <li class="static-skill"><strong>hub</strong> &mdash; One-command orientation across the whole ecosystem — active bets, open gates, task state, recent pipeline output, and pending decisions. Use at session start, after time away, or whenever the question is &quot;where were we and what needs me&quot;.</li>
-        <li class="static-skill"><strong>idea</strong> &mdash; &gt;</li>
+        <li class="static-skill"><strong>idea</strong> &mdash; Personal project Idea Vault. Use when James says /idea, &quot;I have an idea&quot;, &quot;add to idea vault&quot;, &quot;show my ideas&quot;, or &quot;what ideas do I have&quot;. Captures project ideas, queues personal ones for weekends, routes work ideas to the right world. Distinct from /note (raw capture) and /task (actionable now).</li>
         <li class="static-skill"><strong>inbox</strong> &mdash; Works the personal-project task queue — GitHub issues labeled claude-task on allowlisted personal repos, filed from any device. Lists the queue, picks up tasks, works them into PRs, and hands finished work back with needs-james for review. Use via /inbox, &quot;/inbox work &lt;issue&gt;&quot;, or &quot;check my inbox&quot;.</li>
         <li class="static-skill"><strong>launch</strong> &mdash; Distribution playbook for shipping a project publicly. Use when a project is ready to launch or needs a launch plan — pre-flight checks, channel sequence, launch assets, and post-launch loop, tuned to 2026 evidence.</li>
         <li class="static-skill"><strong>learn</strong> &mdash; Run a guided ~30-minute build-first lesson from the AI Solutions Architect Track. Use when James says /learn, &quot;teach me&quot;, &quot;continue my course&quot;, names a lesson id (F1.1, S3.3, A4.2), or names a topic from the curriculum. Designed for a learner with deep practical exposure but no formal coding or CS background - hands-on artifacts, Socratic dialogue, spaced recall, progress that survives shutdowns.</li>
@@ -499,25 +486,24 @@
         <li class="static-skill"><strong>new-guild</strong> &mdash; Forges a new field ecosystem (guild) for any tech or business field — research pass, director agent, specialist bench, curated skill library — following the construction standard. Use when entering a new field (&quot;build the game guild&quot;, &quot;I need a legal-ops guild&quot;) or when the Field Map queues the next wave.</li>
         <li class="static-skill"><strong>new-project</strong> &mdash; Bootstrap a new project the ecosystem way. Use when starting any new project or repo — runs the strategy gate, then scaffolds the standard structure, CLAUDE.md, stack defaults, and the linked Obsidian vault note.</li>
         <li class="static-skill"><strong>new-world</strong> &mdash; Scaffold a new isolated &quot;world&quot; (employment/business identity) on this machine - root folder, boundary CLAUDE.md, vault with private repo and autosync, git identity, scheduled tasks, registry entries. Use when James takes a new job, employer, or business line that needs full separation (like Lift or Freelance). A new freelance CLIENT is a folder in the Freelance world, NOT a new world.</li>
-        <li class="static-skill"><strong>note</strong> &mdash; &gt;</li>
+        <li class="static-skill"><strong>note</strong> &mdash; Quick note capture into the Personal Vault. Use when James says /note, &quot;capture this&quot;, &quot;jot down&quot;, &quot;remember&quot;, or provides a thought he wants saved without building a full task or idea around it yet. Distinct from /idea (structured project ideas) and /save (session checkpoint).</li>
         <li class="static-skill"><strong>offline-pwa</strong> &mdash; Offline-first installable web app as an ordered, gated procedure — manifest and icon family, the service-worker strategy table (Workbox injectManifest, revision-hashed precache, registerType 'prompt' update chip, content kept OUT of the precache and swapped atomically after a hash check), the IndexedDB event-sourced local model with a one-line conflict rule and navigator.storage.persist(), iOS Safari install and eviction limits verified at run time, privacy by encrypting the content bundle instead of an auth proxy, the Playwright setOffline(true) e2e and byte budgets as CI assertions, and pwa-audit as the deterministic gate. Use when a project must install to a phone or desktop from a URL and work with no signal, when a deployed PWA serves stale content or breaks offline, when deciding how a private offline app is protected, or before calling any installable surface done. Not for native/store apps (mobile-guild) or server-side caching (cloudflare skills).</li>
-        <li class="static-skill"><strong>openclaw</strong> &mdash; &gt;</li>
+        <li class="static-skill"><strong>openclaw</strong> &mdash; OpenClaw — mobile control for Claude Code via WhatsApp, Viber, or iPhone app. Use when James wants to send commands to his desktop/laptop Claude Code from his phone, or when designing/building the OpenClaw webhook bridge. Distinct from AgentJames Control (local browser dashboard) — OpenClaw is the REMOTE channel layer.</li>
         <li class="static-skill"><strong>pitch</strong> &mdash; Turns a client lead into a signable proposal draft — discovery questions, scoped deliverables with explicit exclusions, tiered pricing, portfolio-grounded proof, and a follow-up cadence. Use when a client conversation needs a real proposal, before a scoping/demo call, or when James says &quot;draft a pitch/proposal for &lt;client&gt;&quot;. Invokes sales-engineer and pricing-strategist. Drafts only — always stops at James for sending.</li>
         <li class="static-skill"><strong>postmortem</strong> &mdash; Blameless incident review for a resolved production incident (outage, data exposure, bad deploy, security event) - reconstructs an evidence-cited timeline, names multiple contributing factors and the detection gap, and converts findings into owned action items that land in agent doctrine or the backlog same day. Use when James says &quot;postmortem&quot;, &quot;what went wrong&quot;, or a live product (Klik, future products) just had an incident that is now mitigated.</li>
         <li class="static-skill"><strong>promo-studio</strong> &mdash; High-end programmatic video and marketing-material studio. Use when a project needs promo videos, launch assets, social banners, personalized/interactive video, or any motion design. Builds everything as code (Remotion) from the project's real design system, never generic AI-generated footage.</li>
         <li class="static-skill"><strong>pulse</strong> &mdash; Runs the PULSE recency radar — three scanner agents sweep the last ~2 weeks of AI/agentic, dev-ecosystem, and market signals, prioritized into a digest with concrete so-what actions, saved to the vault. Use on request (/pulse) or on schedule to keep the ecosystem current.</li>
-        <li class="static-skill"><strong>quality-gate</strong> &mdash; &gt;</li>
         <li class="static-skill"><strong>reach-kit</strong> &mdash; Per-project reach kit — the gated distribution deliverable a showcase project ships once it is live. Assembles and verifies, in order, the receipts (every headline number traced to a committed artifact), the one-click-try URL (200 with a content assertion), the OG image (fetched from the live URL, exactly 1200x630, PNG/JPEG, under 1 MB), the demo clip (60 s cap, muted-legible, creative-director gate), the DRAFT-WRITEUP in BATCH-2 format, and then a social-ops post draft. Use when a project is deployed and needs its reach assets, when a writeup is staged but nothing else exists, or before any post that references a project. James posts; this never publishes.</li>
         <li class="static-skill"><strong>retro</strong> &mdash; Self-improvement engine for the agent ecosystem. Run after finishing a milestone, shipping something, or any session with real lessons — distills learnings into memory and the OWNING WORLD'S vault (Personal / Freelance / Lift; agentic-craft lessons to the General Vault - route per ~/.claude/WORLDS.md), and proposes concrete ecosystem upgrades.</li>
         <li class="static-skill"><strong>sandbox-sdk</strong> &mdash; Build sandboxed applications for secure code execution. Load when building AI code execution, code interpreters, CI/CD systems, interactive dev environments, or executing untrusted code. Covers Sandbox SDK lifecycle, commands, files, code interpreter, and preview URLs. Biases towards retrieval from Cloudflare docs over pre-trained knowledge.</li>
         <li class="static-skill"><strong>save</strong> &mdash; Checkpoints the session's durable knowledge into all three memory layers — Claude's auto-memory, the project folder docs, and the OWNING WORLD'S vault (Personal / Freelance / Lift / General; route per ~/.claude/WORLDS.md) — and performs vault maintenance. Use on request (/save), before ending a significant session, or after decisions worth keeping.</li>
         <li class="static-skill"><strong>scout</strong> &mdash; Runs the SCOUT idea pipeline — multi-agent opportunity scan (four hunting angles, strategist scoring) producing a ranked shortlist saved to the vault. Use on request (/scout, optionally with a focus like &quot;/scout chrome extensions&quot;), or on schedule. Research and rank only; James picks what gets built.</li>
-        <li class="static-skill"><strong>seal</strong> &mdash; &gt;</li>
+        <li class="static-skill"><strong>seal</strong> &mdash; Secret Vault manager. Use when James says /seal, &quot;get my key for X&quot;, &quot;store a secret&quot;, &quot;what keys do I have&quot;, or &quot;rotate secrets&quot;. Manages per-project and general secrets in ~/.claude/secrets/ (gitignored, local-only). Enforces account isolation: personal keys never leak into Lift work and vice versa.</li>
         <li class="static-skill"><strong>ship-it</strong> &mdash; The release protocol for taking a change on a live Cloudflare product to production — pre-flight checks, remote migration verification, secret presence, staged deploy, post-deploy E2E against real production, test-data purge, and outcomes-ledger pre-registration with rollback triggers. Use whenever code is about to go live on a shipped product (Klik or any other deployed project), not while still building the feature.</li>
         <li class="static-skill"><strong>social-ops</strong> &mdash; Per-project social media operations — generates platform-adapted post drafts from real project milestones, reply drafts, and researched prospect lists with personalized outreach drafts, all landing in a review queue James approves and sends himself. Use via /social-ops &lt;project&gt; or when a project ships something worth posting.</li>
         <li class="static-skill"><strong>spec-it</strong> &mdash; Turns a raw idea or feature request into a buildable Spec — acceptance criteria, edge cases, data model implications, and an explicit scope cut — by running product-manager, ux-researcher, architect and data-engineer in sequence. Use when &quot;build X&quot; arrives with no written spec, when a backlog item needs acceptance criteria before engineering touches it, or when a feature will change the data model and needs a safe migration path decided before code is written.</li>
         <li class="static-skill"><strong>supabase-security-review</strong> &mdash; Attended, verifier-gated review pipeline for a Supabase (Postgres RLS + PostgREST + GoTrue) + Next.js codebase, from preflight to a client-grade technical review (and optional minimal patch) inside a fixed time box, with three human gates. Use when a client engagement under a contractor agreement scopes a review of Supabase data access, auth/session handling, RLS coverage, or server-side authorization.</li>
-        <li class="static-skill"><strong>sync-config</strong> &mdash; &gt;</li>
+        <li class="static-skill"><strong>sync-config</strong> &mdash; Ecosystem config sync between devices. Use when James wants to push his Claude Code config to GitHub for the laptop, pull on the laptop, or check sync status. Wrapper for ~/.claude/tools/ecosystem-sync.ps1.</li>
         <li class="static-skill"><strong>taste</strong> &mdash; Anti-slop constitution for design, UI, copy, and naming. Load before designing any interface, writing public-facing text, naming anything, or making aesthetic choices — enforces decision-driven, non-generic output.</li>
         <li class="static-skill"><strong>teardown</strong> &mdash; Deep teardown of a named competitor or reference product — signup-to-value walkthrough, feature/pricing matrix, positioning read, technical inference, and 2-3 ranked exploitable weaknesses — invoking competitive-analyst and landing in a dated per-project living competitor file. Use when a named rival or reference product needs a full teardown before a build, pricing, or positioning decision, or on a quarterly refresh cadence.</li>
         <li class="static-skill"><strong>turnstile-spin</strong> &mdash; Set up Cloudflare Turnstile end-to-end in a project. Scan the codebase, create the widget via the Cloudflare API, embed it on the right forms, wire canonical server-side siteverify in the customer's existing backend, validate, and persist the skill. Load this when a user asks to add Turnstile, set up CAPTCHA, protect a form from bots, or fix a Turnstile integration. Mirrors developers.cloudflare.com/turnstile/spin.</li>
@@ -525,7 +511,7 @@
         <li class="static-skill"><strong>workers-best-practices</strong> &mdash; Reviews and authors Cloudflare Workers code against production best practices. Load when writing new Workers, reviewing Worker code, configuring wrangler.jsonc, or checking for common Workers anti-patterns (streaming, floating promises, global state, secrets, bindings, observability). Biases towards retrieval from Cloudflare docs over pre-trained knowledge.</li>
         <li class="static-skill"><strong>wrangler</strong> &mdash; Cloudflare Workers CLI for deploying, developing, and managing Workers, KV, R2, D1, Vectorize, Hyperdrive, Workers AI, Containers, Queues, Workflows, Pipelines, and Secrets Store. Load before running wrangler commands to ensure correct syntax and best practices. Biases towards retrieval from Cloudflare docs over pre-trained knowledge.</li>
       </ul>
-    </section>
+      </section>
 
     <aside class="citizen-panel" id="citizen-panel" aria-labelledby="panel-heading" hidden>
       <button type="button" id="panel-close" aria-label="Close citizen panel">&times;</button>

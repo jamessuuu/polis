@@ -272,9 +272,13 @@ button:hover {
   font-weight: 600;
 }
 
+/* No side-tab accent bar. A thick coloured border down one edge of a card is
+   the most recognisable tell of generated UI, and this panel is the one that
+   reports honest findings, so it is the last place that should look generated.
+   The emphasis comes from the tinted background and the heading colour below,
+   which carry the same meaning without the tell. */
 .finding {
   border: 1.5px solid var(--border-strong);
-  border-left-width: 6px;
   border-radius: var(--radius);
   background: var(--bg-elevated);
   padding: 0.9rem 1.1rem;
@@ -285,7 +289,7 @@ button:hover {
   font-size: 1.05rem;
 }
 .finding-warn {
-  border-left-color: var(--warn);
+  border-color: var(--warn);
   background: var(--warn-bg);
 }
 .finding-warn h3 {
@@ -541,9 +545,15 @@ button:hover {
   border-top: 1px solid var(--border-subtle);
   padding-top: 0.5rem;
 }
+/* Same reasoning as .finding: a tint and a coloured heading say "look here"
+   without the side-tab tell. The district's own <h3> carries the emphasis. */
 .static-district-flagged {
-  border-left: 4px solid var(--warn);
-  padding-left: 0.9rem;
+  background: var(--warn-bg);
+  border-radius: var(--radius);
+  padding: 0.5rem 0.9rem;
+}
+.static-district-flagged > h3 {
+  color: var(--warn);
 }
 .static-count, .roster-count {
   font-family: var(--font-mono);

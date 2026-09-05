@@ -51,6 +51,33 @@ test('a file with no frontmatter yields no data and keeps its body', () => {
   assert.equal(body, 'just text');
 });
 
+test('a folded block scalar (key: >) becomes its text, not the marker', () => {
+  // Six real skills write their description as a YAML folded block. Storing the
+  // marker meant every one of them had a description of literally ">". Found by
+  // looking at the rendered page, not at the parser.
+  const { data } = parseFrontmatter(
+    '---\nname: quality-gate\ndescription: >\n  Quality standards enforcement\n  across two lines.\n---\nbody'
+  );
+  assert.equal(data.name, 'quality-gate');
+  assert.equal(data.description, 'Quality standards enforcement across two lines.');
+});
+
+test('a literal block scalar (key: |) keeps its line breaks', () => {
+  const { data } = parseFrontmatter('---\ndescription: |\n  line one\n  line two\n---\nbody');
+  assert.equal(data.description, 'line one\nline two');
+});
+
+test('a block scalar does not swallow the key that follows it', () => {
+  // The failure that would be invisible: over-consuming lines would silently
+  // drop every field declared after a block scalar.
+  const { data } = parseFrontmatter(
+    '---\ndescription: >\n  folded text\nmodel: opus\ntools: Read, Grep\n---\nbody'
+  );
+  assert.equal(data.description, 'folded text');
+  assert.equal(data.model, 'opus', 'the field after a block scalar must survive');
+  assert.equal(data.tools, 'Read, Grep');
+});
+
 test('divisions come from ECOSYSTEM.md, and the Director is identified', () => {
   const d = parseDivisions(ECOSYSTEM);
   assert.equal(d.length, 2);
