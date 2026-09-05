@@ -1,0 +1,559 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Polis</title>
+<meta name="description" content="A walkable map of James Lorenz Santos's agent ecosystem: the districts, the citizens, the roads between them, and what the declared wiring gets wrong.">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='5' fill='%230d4d55'/%3E%3Cpath d='M6 25V15l4-4 4 4v10M16 25V11l4-4 4 4v14' stroke='%23f6f1e6' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+
+<div class="page">
+  <header class="site-header">
+    <div class="titles">
+      <h1>Polis</h1>
+      <p class="tagline">A map of James Lorenz Santos's agent ecosystem you can walk around: districts for divisions, citizens for agents, roads for the work that actually flows between them.</p>
+    </div>
+    <div class="header-controls">
+      <button type="button" id="theme-toggle" class="theme-toggle" aria-label="Theme: system. Activate to cycle system, light, dark.">Theme: system</button>
+    </div>
+  </header>
+
+  <main id="main">
+
+    <section aria-labelledby="status-heading" class="status-board">
+      <h2 id="status-heading">Status</h2>
+      <p>Every number below comes straight from <code>ecosystem.json</code>. The two findings underneath are not decoration.</p>
+      <dl class="stats-grid">
+        <div><dt>Citizens</dt><dd>45</dd></div>
+        <div><dt>Skills</dt><dd>51</dd></div>
+        <div><dt>Districts</dt><dd>8</dd></div>
+        <div><dt>Roads</dt><dd>105</dd></div>
+        <div><dt>Directors</dt><dd>7</dd></div>
+      </dl>
+
+      <div class="finding finding-warn" id="unreachable-finding">
+        <h3>Unreachable &mdash; 2</h3>
+        <p>Nobody hands these two citizens work through the declared wiring: no charter names them UPSTREAM or DOWNSTREAM. The constitution's reciprocity rule calls that a violation, not a curiosity.</p>
+        <ul>
+          <li><button type="button" class="jump-to-citizen" data-id="knowledge-librarian">knowledge-librarian</button> &mdash; memory-layer curator for the world vaults; sits in 07 Knowledge &amp; Craft.</li>
+          <li><button type="button" class="jump-to-citizen" data-id="mentor">mentor</button> &mdash; James's personal tutor; also has no division declared.</li>
+        </ul>
+      </div>
+
+      <div class="finding" id="withheld-finding">
+        <h3>Withheld &mdash; 1</h3>
+        <p>1 member is not shown here. Its id or description names a real client or employer, so it is counted honestly and withheld, not published. Its identifier is left out too, on purpose: the point of withholding is to not publish anything that could identify who it names, and that judgment call should hold even when, as here, the identifier itself looks harmless.</p>
+      </div>
+    </section>
+
+    <section aria-labelledby="filters-heading" id="filters-section" hidden>
+      <h2 id="filters-heading">Find a citizen</h2>
+      <p>Search by name or description, or narrow by district, tool, or Director status. Filters affect the map and the list below together.</p>
+      <form id="filter-form">
+        <div class="field-row">
+          <div class="field">
+            <label for="q">Search</label>
+            <input type="search" id="q" name="q" placeholder="name or description" autocomplete="off">
+          </div>
+          <div class="field">
+            <label for="division-filter">District</label>
+            <select id="division-filter" name="division">
+              <option value="">All districts</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="tool-filter">Tool</label>
+            <select id="tool-filter" name="tool">
+              <option value="">All tools</option>
+            </select>
+          </div>
+          <div class="field field-checkbox">
+            <input type="checkbox" id="director-filter" name="director">
+            <label for="director-filter">Directors only</label>
+          </div>
+          <button type="button" id="clear-filters">Clear</button>
+        </div>
+        <p id="filter-summary" role="status" aria-live="polite">Showing 45 of 45 citizens.</p>
+      </form>
+    </section>
+
+    <section aria-labelledby="map-heading" id="map-section" hidden>
+      <h2 id="map-heading">The map</h2>
+      <p><a href="#list-heading">Skip the map, go to the list</a></p>
+      <div class="map-scroll">
+        <svg id="city-map" viewBox="0 0 1000 800" role="img" aria-label="A map of the agent society: eight districts ringed around a central plaza, citizens drawn as dots sized and ringed by role, roads drawn as the lines between them.">
+        </svg>
+      </div>
+      <p class="map-hint">Hover or focus a citizen to see its roads highlighted. Directors are always named; everyone else's name appears on hover, focus, or when a direct neighbour is highlighted. <a href="#list-heading">Use the list below</a> to browse by keyboard alone, with no need to touch the map at all.</p>
+      <ul class="legend" id="map-legend" aria-label="District colour key"></ul>
+    </section>
+
+    <section aria-labelledby="list-heading" id="list-section" hidden>
+      <h2 id="list-heading">Districts and citizens</h2>
+      <div id="roster-list"></div>
+    </section>
+
+    <section aria-labelledby="static-roster-heading" id="static-roster-section">
+      <h2 id="static-roster-heading">Districts and citizens</h2>
+      <p>This is the full roster as plain HTML. It is not a JavaScript-off fallback bolted on afterward: it is always in the page, and is only hidden once the interactive map and list above have finished building successfully. If anything above fails to load, this stays exactly what you see.</p>
+
+      <div class="static-district">
+        <h3>00 &middot; Cabinet <span class="static-count">(5 citizens)</span></h3>
+        <ul class="static-agent-list">
+        <li class="static-agent" id="static-chief-of-staff">
+          <h4>chief-of-staff <span class="tag tag-director">Director</span></h4>
+          <p>Director of 00 Cabinet and the ecosystem's router - reads an incoming request, picks the orchestration pattern per constitution section 4 (Solo/Single agent/Parallel fan-out/Board/Loop/Pipeline/Human gate), names the division, Director, and members, sequences the work and the artifact handoffs, enforces cost posture per section 5, and assembles the final answer for James. Use at the start of any task whose owning division or pattern is not already obvious, whenever a task spans multiple divisions or projects, or whenever a board/pipeline is being considered and needs a legality check against section 4's hard rule.</p>
+          <p class="static-meta"><strong>Model:</strong> no fixed model &middot; <strong>Tools:</strong> Read, Glob, Grep, Write</p>
+          <p class="static-edges"><strong>Hands work to:</strong> architect, controller, cto, educator, market-researcher, product-manager, product-strategist, sales-engineer, security-auditor, supabase-rls-auditor, trust-safety, user-researcher</p>
+          <p class="static-edges"><strong>Receives work from:</strong> controller</p>
+        </li>
+        <li class="static-agent" id="static-controller">
+          <h4>controller</h4>
+          <p>Finance and operations guardian for the portfolio. Use for cost tracking (subscriptions, domains, API and model-token spend), monthly burn digests, budget checks before new spend, and token-economy enforcement in workflows. Flags waste; never spends — purchases and payments are James-only.</p>
+          <p class="static-meta"><strong>Model:</strong> no fixed model &middot; <strong>Tools:</strong> Read, Glob, Grep, Bash, WebFetch, WebSearch</p>
+          <p class="static-edges"><strong>Hands work to:</strong> chief-of-staff, pricing-strategist</p>
+          <p class="static-edges"><strong>Receives work from:</strong> chief-of-staff</p>
+        </li>
+        <li class="static-agent" id="static-counsel">
+          <h4>counsel</h4>
+          <p>Legal-adjacent issue spotter for products and campaigns. Use before public launches, new markets, campaigns, or integrations - reviews ToS/privacy pages, licensing hygiene (fonts, music, code, tools), platform policies, and data-protection basics. Issue-spotting only; it says when a real lawyer is needed and never gives legal advice.</p>
+          <p class="static-meta"><strong>Model:</strong> no fixed model &middot; <strong>Tools:</strong> Read, Glob, Grep, WebFetch, WebSearch</p>
+          <p class="static-edges"><strong>Hands work to:</strong> trust-safety</p>
+          <p class="static-edges"><strong>Receives work from:</strong> trust-safety</p>
+        </li>
+        <li class="static-agent" id="static-cto">
+          <h4>cto</h4>
+          <p>Technical strategy advisor. Use for stack decisions, build-vs-buy calls, architecture direction across projects, feasibility checks on new project ideas, and &quot;is this worth building&quot; technical judgment. Advises and decides — does not write code.</p>
+          <p class="static-meta"><strong>Model:</strong> opus &middot; <strong>Tools:</strong> Read, Glob, Grep, WebSearch, WebFetch</p>
+          <p class="static-edges"><strong>Hands work to:</strong> educator, ondevice-ml-engineer, sales-engineer</p>
+          <p class="static-edges"><strong>Receives work from:</strong> chief-of-staff</p>
+        </li>
+        <li class="static-agent" id="static-product-strategist">
+          <h4>product-strategist</h4>
+          <p>Business-side strategist. Use for niche selection, positioning, pricing, monetization models, distribution/launch planning, and honest go/no-go calls on project ideas. Grounds every recommendation in verified 2026 solo-dev base rates.</p>
+          <p class="static-meta"><strong>Model:</strong> opus &middot; <strong>Tools:</strong> Read, Glob, Grep, WebSearch, WebFetch</p>
+          <p class="static-edges"><strong>Hands work to:</strong> ai-engineer, computational-linguist, pricing-strategist, product-manager, user-researcher</p>
+          <p class="static-edges"><strong>Receives work from:</strong> chief-of-staff, competitive-analyst</p>
+        </li>
+        </ul>
+      </div>
+      <div class="static-district">
+        <h3>01 &middot; Intelligence <span class="static-count">(4 citizens)</span></h3>
+        <ul class="static-agent-list">
+        <li class="static-agent" id="static-competitive-analyst">
+          <h4>competitive-analyst</h4>
+          <p>Deep teardowns of specific named rivals (feature matrices, pricing including the checkout path, positioning, sore points, predicted next moves), maintained as a living per-project competitor file. Use when a named competitor needs a teardown, before a pricing or positioning decision, after a rival ships/raises/repricing, or on a quarterly refresh cadence, not for open-ended &quot;who else is out there&quot; market sweeps.</p>
+          <p class="static-meta"><strong>Model:</strong> sonnet &middot; <strong>Tools:</strong> Read, Glob, Grep, Write, Edit, WebFetch, WebSearch</p>
+          <p class="static-edges"><strong>Hands work to:</strong> pricing-strategist, product-strategist</p>
+          <p class="static-edges"><strong>Receives work from:</strong> market-researcher</p>
+        </li>
+        <li class="static-agent" id="static-market-researcher">
+          <h4>market-researcher <span class="tag tag-director">Director</span></h4>
+          <p>Deep web research on markets, niches, competitors, trends, and communities. Use for competitive landscapes, demand validation, trend scouting, and &quot;what already exists&quot; sweeps before building anything. Returns cited evidence, not summaries of vibes.</p>
+          <p class="static-meta"><strong>Model:</strong> sonnet &middot; <strong>Tools:</strong> Read, Glob, Grep, WebSearch, WebFetch</p>
+          <p class="static-edges"><strong>Hands work to:</strong> competitive-analyst, computational-linguist, pricing-strategist</p>
+          <p class="static-edges"><strong>Receives work from:</strong> chief-of-staff</p>
+        </li>
+        <li class="static-agent" id="static-metrics-analyst">
+          <h4>metrics-analyst</h4>
+          <p>Product and growth measurement specialist. Use to design privacy-lean instrumentation, read the numbers, and write &quot;what the data says&quot; briefs that feed boards and the outcomes ledger. Owns metrics definitions, funnel analysis, and experiment scorekeeping. Nothing ships a hypothesis without a pre-registered success metric.</p>
+          <p class="static-meta"><strong>Model:</strong> no fixed model &middot; <strong>Tools:</strong> Read, Glob, Grep, Bash, WebFetch, WebSearch</p>
+          <p class="static-edges"><strong>Hands work to:</strong> growth-engineer, incident-commander, pricing-strategist, ux-researcher</p>
+          <p class="static-edges"><strong>Receives work from:</strong> performance-engineer</p>
+        </li>
+        <li class="static-agent" id="static-user-researcher">
+          <h4>user-researcher</h4>
+          <p>Qualitative human-research specialist — who the target users actually are and what job they hire the product for. Use before writing a Brief or Spec for a new feature/segment, when a persona or pricing tier needs grounding, or when copy/creative needs real audience language instead of founder language. Produces JTBD synthesis, segment definitions, interview scripts, and a sourced verbatim quote bank. Nearest neighbour: market-researcher (markets, competitors, trends — this agent works one layer down, on the individual human and their situation).</p>
+          <p class="static-meta"><strong>Model:</strong> sonnet &middot; <strong>Tools:</strong> Read, Glob, Grep, WebFetch, WebSearch</p>
+          <p class="static-edges"><strong>Hands work to:</strong> pricing-strategist, product-manager</p>
+          <p class="static-edges"><strong>Receives work from:</strong> chief-of-staff, product-manager, product-strategist</p>
+        </li>
+        </ul>
+      </div>
+      <div class="static-district">
+        <h3>02 &middot; Product <span class="static-count">(3 citizens)</span></h3>
+        <ul class="static-agent-list">
+        <li class="static-agent" id="static-pricing-strategist">
+          <h4>pricing-strategist</h4>
+          <p>Owns the actual numbers and packaging — tier design, price points, willingness-to-pay by market/segment, trial and founding-offer mechanics, payment-rail fit, churn economics. Use whenever a price is set or changed, a new tier is proposed, a trial/discount/founding offer is designed, or conversion looks off and the fix might be the price rather than the funnel. Distinct from product-strategist, which picks the monetization model (subscription vs one-time vs marketplace take) — this agent prices what that model already chose.</p>
+          <p class="static-meta"><strong>Model:</strong> no fixed model &middot; <strong>Tools:</strong> Read, Glob, Grep, Bash, WebFetch, WebSearch</p>
+          <p class="static-edges"><strong>Hands work to:</strong> architect, copywriter</p>
+          <p class="static-edges"><strong>Receives work from:</strong> competitive-analyst, controller, market-researcher, metrics-analyst, product-strategist, user-researcher</p>
+        </li>
+        <li class="static-agent" id="static-product-manager">
+          <h4>product-manager <span class="tag tag-director">Director</span></h4>
+          <p>Turns an approved brief or feature ask into a buildable spec — acceptance criteria, edge cases, scope cuts, and sequencing. Use whenever a feature/change needs to be defined before engineering touches it, when the backlog needs reordering, or when &quot;build X&quot; arrives without a written spec. Owns WHAT gets built next and in what order; does not decide positioning/pricing (product-strategist) or technical data model/API shape (architect).</p>
+          <p class="static-meta"><strong>Model:</strong> no fixed model &middot; <strong>Tools:</strong> Read, Glob, Grep</p>
+          <p class="static-edges"><strong>Hands work to:</strong> architect, creative-director, localization-specialist, qa-engineer, ui-designer, user-researcher, ux-researcher</p>
+          <p class="static-edges"><strong>Receives work from:</strong> chief-of-staff, product-strategist, user-researcher, ux-researcher</p>
+        </li>
+        <li class="static-agent" id="static-ux-researcher">
+          <h4>ux-researcher</h4>
+          <p>Usability and information-architecture auditor — flow friction, first-run experience, task success, mental-model breaks. Use before shipping any new or changed flow (onboarding, swipe deck, paywall/quota gates, profile editor, chat) and whenever a funnel step underperforms — audits whether real users can actually complete the task, backed by reproduction and drop-off data, not opinion.</p>
+          <p class="static-meta"><strong>Model:</strong> no fixed model &middot; <strong>Tools:</strong> Read, Glob, Grep, Bash, WebFetch, WebSearch</p>
+          <p class="static-edges"><strong>Hands work to:</strong> architect, copywriter, product-manager, qa-engineer, ui-designer</p>
+          <p class="static-edges"><strong>Receives work from:</strong> architect, metrics-analyst, product-manager, ui-designer</p>
+        </li>
+        </ul>
+      </div>
+      <div class="static-district">
+        <h3>03 &middot; Engineering <span class="static-count">(15 citizens)</span></h3>
+        <ul class="static-agent-list">
+        <li class="static-agent" id="static-accessibility-engineer">
+          <h4>accessibility-engineer</h4>
+          <p>WCAG 2.2 AA conformance auditor for keyboard flows, screen-reader behavior, contrast, motion sensitivity, and mobile touch targets. Use before any public launch or after any change to gesture-based interaction, modals/sheets, forms, or animation — audits the flow and returns SC-referenced findings with exact fixes. Owns usability by everyone; does not own aesthetics.</p>
+          <p class="static-meta"><strong>Model:</strong> no fixed model &middot; <strong>Tools:</strong> Read, Glob, Grep, Bash</p>
+          <p class="static-edges"><strong>Hands work to:</strong> code-reviewer, qa-engineer</p>
+          <p class="static-edges"><strong>Receives work from:</strong> architect, ui-designer</p>
+        </li>
+        <li class="static-agent" id="static-ai-engineer">
+          <h4>ai-engineer</h4>
+          <p>LLM and agent systems specialist — prompt architecture, tool/function-calling design, evals, RAG shape, model routing and cost, failure-mode guardrails. Use when designing or reviewing anything that calls an LLM in production — new agent/tool definitions, system prompts, RAG pipelines, model selection, eval suites — or when a Claude/GPT-shaped feature misbehaves (hallucination, over-refusal, latency or cost blowup, malformed tool calls).</p>
+          <p class="static-meta"><strong>Model:</strong> opus &middot; <strong>Tools:</strong> Read, Glob, Grep, Bash, WebFetch, WebSearch</p>
+          <p class="static-edges"><strong>Hands work to:</strong> qa-engineer</p>
+          <p class="static-edges"><strong>Receives work from:</strong> architect, product-strategist, seo-specialist</p>
+        </li>
+        <li class="static-agent" id="static-api-designer">
+          <h4>api-designer</h4>
+          <p>API contract designer — route shape, request/response schemas, error taxonomy, versioning, idempotency, pagination. Use after architect's system design is approved and before any route gets implemented, or when auditing an existing API surface for contract drift (inconsistent error shapes, missing idempotency, offset pagination that won't scale). Produces the route table client and server code against; does not write implementation.</p>
+          <p class="static-meta"><strong>Model:</strong> no fixed model &middot; <strong>Tools:</strong> Read, Glob, Grep, WebFetch</p>
+          <p class="static-edges"><strong>Hands work to:</strong> code-reviewer, technical-writer</p>
+          <p class="static-edges"><strong>Receives work from:</strong> architect, trust-safety</p>
+        </li>
+        <li class="static-agent" id="static-architect">
+          <h4>architect <span class="tag tag-director">Director</span></h4>
+          <p>System designer. Use to turn an approved idea or feature into an implementation plan — data model, module boundaries, API shape, failure handling, migration path. Produces specs the main session codes against; does not write application code.</p>
+          <p class="static-meta"><strong>Model:</strong> opus &middot; <strong>Tools:</strong> Read, Glob, Grep, WebFetch</p>
+          <p class="static-edges"><strong>Hands work to:</strong> accessibility-engineer, ai-engineer, api-designer, data-engineer, devops, educator, localization-specialist, ondevice-ml-engineer, performance-engineer, qa-engineer, refactor-specialist, sales-engineer, technical-writer, ui-designer, ux-researcher</p>
+          <p class="static-edges"><strong>Receives work from:</strong> chief-of-staff, incident-commander, pricing-strategist, product-manager, seo-specialist, trust-safety, ux-researcher</p>
+        </li>
+        <li class="static-agent" id="static-code-reviewer">
+          <h4>code-reviewer</h4>
+          <p>Adversarial review gate. Use before merging, shipping, or calling any non-trivial change done — reviews diffs for correctness, hidden failure modes, security-adjacent bugs, and slop. Tries to break the change, then reports verified findings only.</p>
+          <p class="static-meta"><strong>Model:</strong> opus &middot; <strong>Tools:</strong> Read, Glob, Grep, Bash</p>
+          <p class="static-edges"><strong>Hands work to:</strong> refactor-specialist</p>
+          <p class="static-edges"><strong>Receives work from:</strong> accessibility-engineer, api-designer, debugger, performance-engineer, refactor-specialist, supabase-rls-auditor</p>
+        </li>
+        <li class="static-agent" id="static-computational-linguist">
+          <h4>computational-linguist</h4>
+          <p>Language-science reviewer for anything that segments, labels, transcribes, translates, or scores text and speech — construct validity (is the thing being measured real), the unit of analysis, tokenization and script handling, annotation schemes, and whether a metric (BLEU / chrF / WER / F1 / perplexity / readability) actually supports the sentence printed on the page. Use before committing to an NLP-shaped product concept, when a feature outputs a linguistic score or label, when text handling must survive non-English scripts or code-switching (including Taglish), or when a demo's language numbers have to survive a specialist opening the source. Produces a Linguistic Spec and a construct-validity Verdict; writes no model code, no prompts, and no user-facing copy.</p>
+          <p class="static-meta"><strong>Model:</strong> sonnet &middot; <strong>Tools:</strong> Read, Glob, Grep, Bash, WebFetch, WebSearch</p>
+          <p class="static-edges"><strong>Hands work to:</strong> ondevice-ml-engineer</p>
+          <p class="static-edges"><strong>Receives work from:</strong> market-researcher, product-strategist</p>
+        </li>
+        <li class="static-agent" id="static-data-engineer">
+          <h4>data-engineer</h4>
+          <p>Schema, migration, and query specialist for D1/SQLite across James's projects. Use when designing a new table, writing a migration that touches live data, reviewing a slow or expensive query, planning a backfill, or auditing data integrity (orphaned rows, drift between a denormalized column and its source). Owns the shape of data and how it changes safely; does not own system or API boundaries.</p>
+          <p class="static-meta"><strong>Model:</strong> sonnet &middot; <strong>Tools:</strong> Read, Glob, Grep, Bash, Write, Edit</p>
+          <p class="static-edges"><strong>Hands work to:</strong> devops</p>
+          <p class="static-edges"><strong>Receives work from:</strong> architect</p>
+        </li>
+        <li class="static-agent" id="static-debugger">
+          <h4>debugger</h4>
+          <p>Root-cause investigator for defects that survived the obvious fix attempt. Use when a bug is intermittent, non-reproducible on first try, &quot;worked yesterday&quot;, prod-only, or has already resisted one fix attempt — reproduces it, bisects to the introducing change, eliminates hypotheses with evidence, and names the exact mechanism at file:line. Does not ship speculative patches.</p>
+          <p class="static-meta"><strong>Model:</strong> sonnet &middot; <strong>Tools:</strong> Read, Glob, Grep, Bash, Write, Edit</p>
+          <p class="static-edges"><strong>Hands work to:</strong> code-reviewer</p>
+          <p class="static-edges"><strong>Receives work from:</strong> qa-engineer</p>
+        </li>
+        <li class="static-agent" id="static-devops">
+          <h4>devops</h4>
+          <p>Deployment and operations specialist for the Cloudflare stack. Use for wrangler config, CI/CD, migrations on live data, monitoring/alerting, incident diagnosis, and free-tier cost/limit management across projects.</p>
+          <p class="static-meta"><strong>Model:</strong> sonnet &middot; <strong>Tools:</strong> Read, Glob, Grep, Bash, Write, Edit</p>
+          <p class="static-edges"><strong>Hands work to:</strong> incident-commander, performance-engineer</p>
+          <p class="static-edges"><strong>Receives work from:</strong> architect, data-engineer, incident-commander</p>
+        </li>
+        <li class="static-agent" id="static-ondevice-ml-engineer">
+          <h4>ondevice-ml-engineer</h4>
+          <p>Browser-native / on-device model specialist — picks the model artifact and quantization, chooses the runtime backend (WebGPU / WASM / WebNN), and proves the size-latency-quality tradeoff on real hardware. Use whenever a feature runs a model on the visitor's own machine (transformers.js, ONNX Runtime Web, MediaPipe, WebGPU compute, WebAudio/WebCodecs feeding a model): before committing to a model, when choosing quantization or backend, when a demo OOMs, stutters, or downloads too much, or when a page claims &quot;runs locally, nothing leaves your device&quot; and that claim has to survive someone opening the Network tab. Produces a Model Card and an Inference Budget; writes no application code and does not cover hosted-API LLM work.</p>
+          <p class="static-meta"><strong>Model:</strong> sonnet &middot; <strong>Tools:</strong> Read, Glob, Grep, Bash, WebFetch, WebSearch</p>
+          <p class="static-edges"><strong>Receives work from:</strong> architect, computational-linguist, cto</p>
+        </li>
+        <li class="static-agent" id="static-performance-engineer">
+          <h4>performance-engineer</h4>
+          <p>Web and edge performance specialist covering Core Web Vitals (LCP/INP/CLS), JS bundle weight, D1 query cost, and Workers CPU/render budgets. Use before any public launch, after a change adds client JS/images/fonts or a new D1 query on a hot path (deck, swipe, chat), or when a page/route feels slow. Produces a Perf Budget spec and a scored Vitals report with file:line fixes; never rewrites code itself.</p>
+          <p class="static-meta"><strong>Model:</strong> sonnet &middot; <strong>Tools:</strong> Read, Glob, Grep, Bash, WebFetch</p>
+          <p class="static-edges"><strong>Hands work to:</strong> code-reviewer, metrics-analyst</p>
+          <p class="static-edges"><strong>Receives work from:</strong> architect, devops</p>
+        </li>
+        <li class="static-agent" id="static-qa-engineer">
+          <h4>qa-engineer</h4>
+          <p>Test strategist and author. Use to design test plans, write the tests that matter for a feature, audit coverage gaps, and verify behavior end-to-end before release. Focuses tests where breakage is likely and expensive, not on coverage numbers.</p>
+          <p class="static-meta"><strong>Model:</strong> sonnet &middot; <strong>Tools:</strong> Read, Glob, Grep, Bash, Write, Edit</p>
+          <p class="static-edges"><strong>Hands work to:</strong> debugger</p>
+          <p class="static-edges"><strong>Receives work from:</strong> accessibility-engineer, ai-engineer, architect, interaction-designer, product-manager, ux-researcher</p>
+        </li>
+        <li class="static-agent" id="static-refactor-specialist">
+          <h4>refactor-specialist</h4>
+          <p>Structural repair of existing, working code without changing observable behaviour — seams, duplication, dead code, complexity, safe incremental migration paths. Use when code works but is hard to extend or read, before layering a new feature onto a tangled module, after code-reviewer/qa-engineer flag decay, or when architect specs a target design that current code must migrate toward. Nearest neighbour: architect designs new structure; refactor-specialist moves existing code toward it without breaking it.</p>
+          <p class="static-meta"><strong>Model:</strong> sonnet &middot; <strong>Tools:</strong> Read, Glob, Grep, Bash, Write, Edit</p>
+          <p class="static-edges"><strong>Hands work to:</strong> code-reviewer</p>
+          <p class="static-edges"><strong>Receives work from:</strong> architect, code-reviewer</p>
+        </li>
+        <li class="static-agent" id="static-security-auditor">
+          <h4>security-auditor</h4>
+          <p>Defensive security reviewer. Use before any public launch, after auth/payment/upload changes, and periodically on live projects — audits for OWASP-class vulnerabilities, secret leakage, and abuse economics. Defensive posture only.</p>
+          <p class="static-meta"><strong>Model:</strong> opus &middot; <strong>Tools:</strong> Read, Glob, Grep, Bash</p>
+          <p class="static-edges"><strong>Hands work to:</strong> trust-safety</p>
+          <p class="static-edges"><strong>Receives work from:</strong> chief-of-staff</p>
+        </li>
+        <li class="static-agent" id="static-supabase-rls-auditor">
+          <h4>supabase-rls-auditor</h4>
+          <p>Supabase/Postgres RLS and authorization judgment for a Next.js + Supabase codebase. Use inside the supabase-security-review skill after recon has run (N2 rank, N3 claim) to turn a static scan into ranked candidates and one falsifiable, probe-backed claim. Produces CANDIDATES.md, CLAIM.md, and FINDING.md. Nearest neighbour: security-auditor, which covers the Cloudflare/D1 stack with a whole-app OWASP checklist and a ship/no-ship verdict, not tenant-isolation reasoning over Postgres RLS policies.</p>
+          <p class="static-meta"><strong>Model:</strong> opus &middot; <strong>Tools:</strong> Read, Glob, Grep, Bash</p>
+          <p class="static-edges"><strong>Hands work to:</strong> code-reviewer</p>
+          <p class="static-edges"><strong>Receives work from:</strong> chief-of-staff</p>
+        </li>
+        </ul>
+      </div>
+      <div class="static-district">
+        <h3>04 &middot; Design &amp; Story <span class="static-count">(5 citizens)</span></h3>
+        <ul class="static-agent-list">
+        <li class="static-agent" id="static-copywriter">
+          <h4>copywriter</h4>
+          <p>Voice and copy specialist. Use for launch essays, READMEs, landing pages, product naming, App/store listings, and build-in-public posts. Writes in James's voice with receipts — never marketing slop.</p>
+          <p class="static-meta"><strong>Model:</strong> opus &middot; <strong>Tools:</strong> Read, Glob, Grep, WebFetch</p>
+          <p class="static-edges"><strong>Hands work to:</strong> localization-specialist</p>
+          <p class="static-edges"><strong>Receives work from:</strong> content-strategist, localization-specialist, pricing-strategist, ux-researcher</p>
+        </li>
+        <li class="static-agent" id="static-creative-director">
+          <h4>creative-director <span class="tag tag-director">Director</span></h4>
+          <p>Film-grade creative director for promos, ads, and brand motion. Use BEFORE any promotional video, campaign asset, or motion piece is built, and again as the review gate on rendered frames. Produces the treatment (story concept, emotional arc), the storyboard (shot list with composition, copy, safe zones), and shot-by-shot critique of renders. Strategizes for the target audience's attention, not for feature lists.</p>
+          <p class="static-meta"><strong>Model:</strong> no fixed model &middot; <strong>Tools:</strong> Read, Glob, Grep, WebFetch, WebSearch</p>
+          <p class="static-edges"><strong>Hands work to:</strong> localization-specialist, sound-designer, ui-designer</p>
+          <p class="static-edges"><strong>Receives work from:</strong> growth-engineer, product-manager, ui-designer</p>
+        </li>
+        <li class="static-agent" id="static-interaction-designer">
+          <h4>interaction-designer</h4>
+          <p>Micro-interaction and motion designer for what happens when a user touches the product — transitions, gesture feedback (swipe/drag physics), loading and empty states, optimistic UI, haptics/sound pairing, and reduced-motion fallbacks; use before building any new gesture, animated state change, or loading/empty state, and as the review gate on rendered interactions, distinct from ui-designer's static system and creative-director's promo-film motion.</p>
+          <p class="static-meta"><strong>Model:</strong> no fixed model &middot; <strong>Tools:</strong> Read, Glob, Grep, WebFetch, WebSearch</p>
+          <p class="static-edges"><strong>Hands work to:</strong> qa-engineer</p>
+          <p class="static-edges"><strong>Receives work from:</strong> ui-designer</p>
+        </li>
+        <li class="static-agent" id="static-sound-designer">
+          <h4>sound-designer</h4>
+          <p>Audio DIRECTOR for promos, product videos, and brand motion — narration, music, and sound design as one storytelling system. Use whenever a video needs sound. Casts and scripts voiceover (neural TTS incl. edge-tts en-PH voices), produces the frame-accurate cue sheet, synthesis recipes for restrained SFX, music direction, and the mix spec. Reviews rendered audio for timing, balance, annoyance, and mute-first integrity.</p>
+          <p class="static-meta"><strong>Model:</strong> no fixed model &middot; <strong>Tools:</strong> Read, Glob, Grep, Bash, WebFetch, WebSearch</p>
+          <p class="static-edges"><strong>Receives work from:</strong> creative-director</p>
+        </li>
+        <li class="static-agent" id="static-ui-designer">
+          <h4>ui-designer</h4>
+          <p>Visual interface systems specialist — layout, type scale, spacing rhythm, component states, density, and responsive behaviour across phone/tablet/desktop. Use whenever a screen or component needs to be laid out, restyled, made responsive, or brought into line with the project's design system, e.g. &quot;design the profile editor layout&quot;, &quot;this card is inconsistent with the deck&quot;, &quot;make the admin table work on tablet&quot;, or &quot;audit spacing on the chat screen&quot;.</p>
+          <p class="static-meta"><strong>Model:</strong> no fixed model &middot; <strong>Tools:</strong> Read, Glob, Grep, Edit, Write, Bash, WebFetch</p>
+          <p class="static-edges"><strong>Hands work to:</strong> accessibility-engineer, creative-director, interaction-designer, ux-researcher</p>
+          <p class="static-edges"><strong>Receives work from:</strong> architect, creative-director, product-manager, trust-safety, ux-researcher</p>
+        </li>
+        </ul>
+      </div>
+      <div class="static-district">
+        <h3>05 &middot; Growth &amp; Revenue <span class="static-count">(4 citizens)</span></h3>
+        <ul class="static-agent-list">
+        <li class="static-agent" id="static-content-strategist">
+          <h4>content-strategist</h4>
+          <p>Content architecture specialist. Use to decide WHICH content pieces should exist, in what order, and why — topic pillars per audience segment, an editorial calendar keyed to real ship events, format-per-channel choices, and repurposing chains. Use before a content sprint, when growth-engineer flags a channel gap, or when a project ships something worth turning into more than one asset. Distinct from copywriter (writes the words) and growth-engineer (owns the growth goal and channel experiments).</p>
+          <p class="static-meta"><strong>Model:</strong> no fixed model &middot; <strong>Tools:</strong> Read, Glob, Grep, WebFetch, WebSearch</p>
+          <p class="static-edges"><strong>Hands work to:</strong> copywriter</p>
+          <p class="static-edges"><strong>Receives work from:</strong> growth-engineer</p>
+        </li>
+        <li class="static-agent" id="static-growth-engineer">
+          <h4>growth-engineer <span class="tag tag-director">Director</span></h4>
+          <p>Growth specialist for compounding distribution after launch day. Use for SEO and content strategy, referral-loop tuning, channel experiments, and activation/retention funnels. Every experiment ships with a pre-registered metric in the outcomes ledger; reads the metrics-analyst's numbers before proposing anything.</p>
+          <p class="static-meta"><strong>Model:</strong> no fixed model &middot; <strong>Tools:</strong> Read, Glob, Grep, Bash, WebFetch, WebSearch</p>
+          <p class="static-edges"><strong>Hands work to:</strong> content-strategist, creative-director, sales-engineer, seo-specialist</p>
+          <p class="static-edges"><strong>Receives work from:</strong> metrics-analyst</p>
+        </li>
+        <li class="static-agent" id="static-sales-engineer">
+          <h4>sales-engineer</h4>
+          <p>Turns proven capability into priced, signable client work — scoping calls, statements of work, project pricing, demo narratives, and objection handling for technical buyers evaluating agentic-systems or promo-video engagements. Use when a client ask needs a real proposal, a scope-and-price conversation, an SOW draft, or prep before a sales/demo call; not for ongoing subscription pricing of James's own products.</p>
+          <p class="static-meta"><strong>Model:</strong> no fixed model &middot; <strong>Tools:</strong> Read, Glob, Grep, WebFetch, WebSearch, Write</p>
+          <p class="static-edges"><strong>Receives work from:</strong> architect, chief-of-staff, cto, growth-engineer</p>
+        </li>
+        <li class="static-agent" id="static-seo-specialist">
+          <h4>seo-specialist</h4>
+          <p>Technical/on-page SEO specialist for organic discovery — search intent research, metadata and schema.org, internal linking, and indexability audits on edge-rendered apps (Next.js App Router on Cloudflare Workers via OpenNext). Use before any public launch or new public page, when a route's indexability or metadata is in doubt, when someone proposes programmatic pages, or when organic traffic/rankings need diagnosing. Nearest neighbour: content-strategist owns WHAT to say; this role owns HOW it gets found and crawled.</p>
+          <p class="static-meta"><strong>Model:</strong> no fixed model &middot; <strong>Tools:</strong> Read, Glob, Grep, Bash, WebFetch, WebSearch</p>
+          <p class="static-edges"><strong>Hands work to:</strong> ai-engineer, architect</p>
+          <p class="static-edges"><strong>Receives work from:</strong> growth-engineer</p>
+        </li>
+        </ul>
+      </div>
+      <div class="static-district">
+        <h3>06 &middot; Trust &amp; Operations <span class="static-count">(4 citizens)</span></h3>
+        <ul class="static-agent-list">
+        <li class="static-agent" id="static-incident-commander">
+          <h4>incident-commander</h4>
+          <p>Runs live incidents end to end for a solo-operator stack — detects and triages severity, decides rollback vs hotfix vs monitor, gates any user-facing comms through James, and closes every incident with a blameless postmortem that produces a durable fix ticket. Use the moment something is actually broken or leaking data in production (errors spiking, a deploy misbehaving, a loophole rule violated, a migration half-applied) — never for pre-launch review, that is devops/security-auditor's job.</p>
+          <p class="static-meta"><strong>Model:</strong> no fixed model &middot; <strong>Tools:</strong> Read, Glob, Grep, Bash, WebFetch</p>
+          <p class="static-edges"><strong>Hands work to:</strong> architect, devops</p>
+          <p class="static-edges"><strong>Receives work from:</strong> devops, metrics-analyst</p>
+        </li>
+        <li class="static-agent" id="static-localization-specialist">
+          <h4>localization-specialist</h4>
+          <p>Filipino/SEA market-fit reviewer for copy, UX flows, and product mechanics — use before any public-facing Filipino-side copy ships, when a feature touches payments/notifications/timing, or when a campaign targets PH/SEA users; verifies Taglish register, cultural fit, mobile-data and CGNAT realities, GCash-native money language, and BSP/DTI/PH-DPA compliance touchpoints. Nearest neighbour: copywriter owns brand voice everywhere; this agent owns whether that voice actually lands for a Filipino reader on a phone in Manila.</p>
+          <p class="static-meta"><strong>Model:</strong> no fixed model &middot; <strong>Tools:</strong> Read, Glob, Grep, WebFetch, WebSearch</p>
+          <p class="static-edges"><strong>Hands work to:</strong> copywriter</p>
+          <p class="static-edges"><strong>Receives work from:</strong> architect, copywriter, creative-director, product-manager</p>
+        </li>
+        <li class="static-agent" id="static-support-community">
+          <h4>support-community</h4>
+          <p>Support and community specialist for live products. Use to draft user replies, triage reports and moderation queues (e.g. Klik's admin queue), turn recurring complaints into product briefs, and keep community tone human. Drafts only — James sends anything outward-facing.</p>
+          <p class="static-meta"><strong>Model:</strong> no fixed model &middot; <strong>Tools:</strong> Read, Glob, Grep, Bash, WebFetch, WebSearch</p>
+          <p class="static-edges"><strong>Hands work to:</strong> trust-safety</p>
+          <p class="static-edges"><strong>Receives work from:</strong> trust-safety</p>
+        </li>
+        <li class="static-agent" id="static-trust-safety">
+          <h4>trust-safety <span class="tag tag-director">Director</span></h4>
+          <p>Director of platform integrity for abuse, fraud, and user safety - scam pattern taxonomy, moderation policy, report triage rubrics, ban/appeal design, safety UX copy, and abuse-economics reasoning; use before shipping any report/block/verification/messaging feature, when designing anti-scam message screening, when a real abuse report or incident needs classifying, or when ban/appeal/safety copy needs a rubric instead of a gut call.</p>
+          <p class="static-meta"><strong>Model:</strong> no fixed model &middot; <strong>Tools:</strong> Read, Glob, Grep, Bash, WebFetch, WebSearch, Write</p>
+          <p class="static-edges"><strong>Hands work to:</strong> api-designer, architect, counsel, support-community, ui-designer</p>
+          <p class="static-edges"><strong>Receives work from:</strong> chief-of-staff, counsel, security-auditor, support-community</p>
+        </li>
+        </ul>
+      </div>
+      <div class="static-district">
+        <h3>07 &middot; Knowledge &amp; Craft <span class="static-count">(3 citizens)</span></h3>
+        <ul class="static-agent-list">
+        <li class="static-agent" id="static-educator">
+          <h4>educator</h4>
+          <p>Teaches James a new domain fast when a specific project needs it — prerequisite-honest curriculum sequencing, worked examples grounded in his actual stack (not training data), and spaced checkpoints. Use when a build is blocked on understanding, not just execution — &quot;teach me X before I build Y&quot;, a stack has diverged from training data (e.g. this Next.js), or a new domain (agents SDK, Durable Objects, a legal/market concept) must become load-bearing knowledge, not a one-off answer.</p>
+          <p class="static-meta"><strong>Model:</strong> no fixed model &middot; <strong>Tools:</strong> Read, Glob, Grep, Bash, WebFetch, WebSearch</p>
+          <p class="static-edges"><strong>Receives work from:</strong> architect, chief-of-staff, cto</p>
+        </li>
+        <li class="static-agent" id="static-knowledge-librarian">
+          <h4>knowledge-librarian <span class="tag tag-warn">Unreachable</span></h4>
+          <p>Memory-layer curator for the FOUR world vaults (Personal, Freelance, Lift, General - registry at ~/.claude/WORLDS.md) and agent/skill files — taxonomy, retrieval paths, deduplication, decay detection, world-routing compliance, and routing lessons to the exact agent that must hold them. Use after retro/save/boardroom sessions produce Lesson artifacts, during the weekly ecosystem-groomer sweep, when a vault search takes more than two hops, or when James asks &quot;where did we decide X&quot; and the answer is not found in under a minute.</p>
+          <p class="static-meta"><strong>Model:</strong> no fixed model &middot; <strong>Tools:</strong> Read, Glob, Grep, Bash, Write, Edit</p>
+          <p class="static-edges static-edges-none"><strong>Wiring:</strong> named by no one, upstream or downstream.</p>
+        </li>
+        <li class="static-agent" id="static-technical-writer">
+          <h4>technical-writer</h4>
+          <p>Documentation that survives — READMEs, runbooks, API reference docs, onboarding guides, changelogs, and the session-handoff format (docs/PROGRESS.md). Use after a feature ships, before a session ends, or when existing docs no longer match the code. Optimized for a future reader with zero context: next-session James, a new contributor, or a client. Nearest neighbour: copywriter persuades a public audience; technical-writer explains precisely to a working one.</p>
+          <p class="static-meta"><strong>Model:</strong> no fixed model &middot; <strong>Tools:</strong> Read, Glob, Grep, Bash, Write, Edit</p>
+          <p class="static-edges"><strong>Receives work from:</strong> api-designer, architect</p>
+        </li>
+        </ul>
+      </div>
+      <div class="static-district static-district-flagged">
+        <h3>No division declared <span class="static-count">(1 citizen)</span></h3>
+        <p class="static-note">Not listed under any division in ECOSYSTEM.md's organization section.</p>
+        <ul class="static-agent-list">
+        <li class="static-agent" id="static-mentor">
+          <h4>mentor <span class="tag tag-warn">Unreachable</span></h4>
+          <p>James's personal adaptive tutor for the AI Solutions Architect Track - long-horizon, self-paced, conversation-first learning toward systems/cloud/AI architecture and certification. Use for /learn sessions, any &quot;teach me / explain / I don't get X&quot; moment tied to the curriculum, or when James wants to talk through a concept out loud. Distinct from educator (which unblocks a specific project fast); mentor owns James's multi-year capability growth and adapts continuously to his learner state.</p>
+          <p class="static-meta"><strong>Model:</strong> no fixed model &middot; <strong>Tools:</strong> Read, Glob, Grep, Bash, Write, Edit</p>
+          <p class="static-edges static-edges-none"><strong>Wiring:</strong> named by no one, upstream or downstream.</p>
+        </li>
+        </ul>
+      </div>
+      <div class="static-district">
+        <h3>System utilities <span class="static-count">(1 utility)</span></h3>
+        <p class="static-note">Ship with Claude Code, sit in no division, and the constitution exempts them from the admission standard and the reciprocity rule.</p>
+        <ul class="static-agent-list">
+        <li class="static-agent" id="static-Explore">
+          <h4>Explore</h4>
+          <p>Read-only search agent for broad fan-out searches — when answering means sweeping many files, directories, or naming conventions and only the conclusion is needed, not the file dumps. Reads excerpts rather than whole files; locates code, doesn't review it. Specify search breadth (&quot;medium&quot; or &quot;very thorough&quot;).</p>
+          <p class="static-meta"><strong>Model:</strong> haiku &middot; <strong>Tools:</strong> Read, Glob, Grep, Bash</p>
+          <p class="static-edges static-edges-none"><strong>Wiring:</strong> named by no one, upstream or downstream.</p>
+        </li>
+        </ul>
+      </div>
+    </section>
+
+    <section aria-labelledby="skills-heading">
+      <h2 id="skills-heading">The archive &mdash; skills</h2>
+      <p>51 procedures the citizens draw on. Skills are not citizens: they carry no division, no Director, and no wiring of their own. A handful of the descriptions below read as a bare <code>&gt;</code> character; that is a real limitation of the parser that produced <code>ecosystem.json</code> (it does not follow YAML's multi-line block-scalar syntax), not something rewritten here to look tidier. See the README's Limitations section.</p>
+      <div id="skills-search-box" hidden>
+        <div class="field">
+          <label for="skills-q">Search skills</label>
+          <input type="search" id="skills-q" autocomplete="off">
+        </div>
+        <p id="skills-filter-summary" role="status" aria-live="polite"></p>
+      </div>
+      <ul id="skills-list" class="static-skill-list">
+        <li class="static-skill"><strong>a11y-audit</strong> &mdash; Accessibility conformance pass on a LIVE interface (not just source) - keyboard traversal, focus order and visibility, screen-reader semantics, contrast against real rendered pixels, motion sensitivity, and mobile touch targets. Invokes accessibility-engineer; produces a ranked, WCAG-SC-referenced defect list with the exact fix per item. Use before any public launch, after any change to gesture-based interaction/modals/sheets/forms/animation, or when James asks for an &quot;a11y pass&quot; or &quot;WCAG check&quot;.</li>
+        <li class="static-skill"><strong>agent-forge</strong> &mdash; Admit or revise a member of the ecosystem (agent, skill, or tool) against the constitution's admission standard. Use when James wants a new persona/procedure/capability added, when a capability gap is found mid-task, or when the ecosystem-groomer's digest proposes a new member rather than an edit. THE meta-procedure every future addition must go through — never hand-write a file into ~/.claude/agents or ~/.claude/skills without it.</li>
+        <li class="static-skill"><strong>agents-sdk</strong> &mdash; Build AI agents on Cloudflare Workers using the Agents SDK. Load when creating stateful agents, durable workflows, real-time WebSocket apps, scheduled tasks, MCP servers, chat applications, voice agents, or browser automation. Covers Agent class, state management, callable RPC, Workflows, durable execution, queues, retries, observability, and React hooks. Biases towards retrieval from Cloudflare docs over pre-trained knowledge.</li>
+        <li class="static-skill"><strong>boardroom</strong> &mdash; Autonomous board-of-directors iteration for any deliverable. Use when a task should reach best-possible quality without James in the loop until the end - the work is produced, critiqued by a specialist board, revised, and re-judged for multiple rounds, then presented once with the board's minutes. James verifies and comments; the comment triggers the next cycle. Mirrors real-world review boards.</li>
+        <li class="static-skill"><strong>brand-identity</strong> &mdash; Design a logo, mark, or full brand identity from first principles and ship it as code. Use whenever a project, product, or person needs a logo, wordmark, favicon, brand system, or visual identity refresh — including &quot;come up with a logo&quot;, &quot;design a mark&quot;, &quot;our branding looks generic&quot;, or naming-plus-identity work. Produces concept-led directions rendered as regenerable SVG plus a contact sheet for review, never a single unexplained image.</li>
+        <li class="static-skill"><strong>cloudflare</strong> &mdash; Comprehensive Cloudflare platform skill covering Workers, Pages, storage (KV, D1, R2), AI (Workers AI, Vectorize, Agents SDK), feature flags (Flagship), networking (Tunnel, Spectrum), security (WAF, DDoS), and infrastructure-as-code (Terraform, Pulumi). Use for any Cloudflare development task. Biases towards retrieval from Cloudflare docs over pre-trained knowledge.</li>
+        <li class="static-skill"><strong>cloudflare-email-service</strong> &mdash; Send and receive transactional emails with Cloudflare Email Service (Email Sending + Email Routing). Use when building email sending (Workers binding or REST API), email routing, Agents SDK email handling, or integrating email into any app — Workers, Node.js, Python, Go, etc. Also use for email deliverability, SPF/DKIM/DMARC, wrangler email setup, MCP email tools, or when a coding agent needs to send emails. Even for simple requests like &quot;add email to my Worker&quot; — this skill has critical config details.</li>
+        <li class="static-skill"><strong>cloudflare-one</strong> &mdash; Guides Cloudflare One Zero Trust and SASE work across Access, Gateway, WARP, Tunnel, Cloudflare WAN, DLP, CASB, device posture, and identity. Use when designing, configuring, troubleshooting, or reviewing Cloudflare One deployments. Retrieval-first: use current Cloudflare docs/API schemas instead of embedded product docs.</li>
+        <li class="static-skill"><strong>cloudflare-one-migrations</strong> &mdash; Plans migrations from Zscaler ZIA/ZPA, Palo Alto, legacy VPN, SWG, or SASE stacks to Cloudflare One. Use for migration assessments, policy mapping, rollout plans, and parity/gap analysis.</li>
+        <li class="static-skill"><strong>data-model</strong> &mdash; Design or evolve a schema safely on a live Cloudflare D1 database — entity/access-pattern modeling, index planning against real query paths, migration authoring with post-apply verification, backfill sequencing, and rollback thinking. Use whenever a table is added or changed on a project with real user data, not while still prototyping. Invokes architect and data-engineer.</li>
+        <li class="static-skill"><strong>debug-loop</strong> &mdash; Systematic root-cause procedure for defects that survived the obvious fix — reproduce, bisect, eliminate hypotheses with falsifying evidence, apply the minimal verified fix, pin it with a regression test, and record the lesson. Use when a bug is intermittent, prod-only, &quot;worked yesterday&quot;, or has already resisted one fix attempt.</li>
+        <li class="static-skill"><strong>deep-research</strong> &mdash; Structured research that produces decision-grade evidence, not a summary — question framing, multi-angle source sweep, source quality grading, contradiction surfacing, and a Research Brief with citations and explicit confidence levels. Use before any market entry, pricing, positioning, build-vs-buy, or &quot;is this validated&quot; decision, or when James asks to &quot;research&quot;, &quot;validate&quot;, &quot;look into whether&quot;, or &quot;what does the evidence say about&quot; something. Invokes market-researcher and competitive-analyst.</li>
+        <li class="static-skill"><strong>degradation-ladder</strong> &mdash; Make a browser-native inference page tell the truth on every machine — enumerate capability tiers (WebGPU hardware adapter / WebGPU baseline / WASM threads / WASM single / no-inference), define what each tier actually runs, what the visitor sees, and what the page says, then gate it so a silent quality drop can never be presented as the real thing. Use before shipping any page whose behaviour depends on the visitor's hardware, before publishing a &quot;nothing leaves your device&quot; or &quot;runs locally&quot; claim, or when a demo breaks on a machine without WebGPU. Produces a Capability Ladder and a CI truthfulness gate.</li>
+        <li class="static-skill"><strong>durable-objects</strong> &mdash; Create and review Cloudflare Durable Objects. Use when building stateful coordination (chat rooms, multiplayer games, booking systems), implementing RPC methods, SQLite storage, alarms, WebSockets, or reviewing DO code for best practices. Covers Workers integration, wrangler config, and testing with Vitest. Biases towards retrieval from Cloudflare docs over pre-trained knowledge.</li>
+        <li class="static-skill"><strong>ecosystem-groomer</strong> &mdash; The self-improvement flywheel. Run weekly (manually via /ecosystem-groomer or on a schedule) to sweep recent lessons, outcomes, and agent performance, then propose concrete agent/skill edits through a mini-board and present James one approvable digest. This is how the ecosystem improves continuously without being asked.</li>
+        <li class="static-skill"><strong>eval-suite</strong> &mdash; Design and run evaluations for LLM/agent features shipped to users — task set construction, rubric or programmatic scoring, regression baselines, cost/latency tracking, and failure taxonomy. Use when a prompt, tool schema, model, or RAG shape changes on a live LLM-backed feature, before any such feature first ships, or on a recurring cadence to catch silent quality/cost drift. Invokes ai-engineer.</li>
+        <li class="static-skill"><strong>hub</strong> &mdash; One-command orientation across the whole ecosystem — active bets, open gates, task state, recent pipeline output, and pending decisions. Use at session start, after time away, or whenever the question is &quot;where were we and what needs me&quot;.</li>
+        <li class="static-skill"><strong>idea</strong> &mdash; &gt;</li>
+        <li class="static-skill"><strong>inbox</strong> &mdash; Works the personal-project task queue — GitHub issues labeled claude-task on allowlisted personal repos, filed from any device. Lists the queue, picks up tasks, works them into PRs, and hands finished work back with needs-james for review. Use via /inbox, &quot;/inbox work &lt;issue&gt;&quot;, or &quot;check my inbox&quot;.</li>
+        <li class="static-skill"><strong>launch</strong> &mdash; Distribution playbook for shipping a project publicly. Use when a project is ready to launch or needs a launch plan — pre-flight checks, channel sequence, launch assets, and post-launch loop, tuned to 2026 evidence.</li>
+        <li class="static-skill"><strong>learn</strong> &mdash; Run a guided ~30-minute build-first lesson from the AI Solutions Architect Track. Use when James says /learn, &quot;teach me&quot;, &quot;continue my course&quot;, names a lesson id (F1.1, S3.3, A4.2), or names a topic from the curriculum. Designed for a learner with deep practical exposure but no formal coding or CS background - hands-on artifacts, Socratic dialogue, spaced recall, progress that survives shutdowns.</li>
+        <li class="static-skill"><strong>localize</strong> &mdash; Adapt a product surface or campaign for the Filipino market and diaspora — register choice (English/Taglish/Filipino), cultural specificity, payment and connectivity realities, timezone/holiday awareness, and a locked glossary of what never translates (safety terms, brand vocabulary). Use before any PH-facing copy ships, when a feature touches payments/notifications/timing, or when a campaign targets PH/SEA.</li>
+        <li class="static-skill"><strong>model-bakeoff</strong> &mdash; Pick which model artifact ships to the visitor's browser, and prove the choice on real hardware — candidate matrix (model x quantization x backend), license gate before measurement, cold vs. warm latency, peak memory, download bytes, and quality on the slice the demo actually shows. Use before committing to any on-device model (transformers.js, ONNX Runtime Web, MediaPipe, WebNN), when swapping quantization or backend, or when a demo OOMs, stutters, or downloads more than its budget. Produces a Model Card and an Inference Budget. Invokes ondevice-ml-engineer; NOT for hosted-API LLM features (that is eval-suite).</li>
+        <li class="static-skill"><strong>new-guild</strong> &mdash; Forges a new field ecosystem (guild) for any tech or business field — research pass, director agent, specialist bench, curated skill library — following the construction standard. Use when entering a new field (&quot;build the game guild&quot;, &quot;I need a legal-ops guild&quot;) or when the Field Map queues the next wave.</li>
+        <li class="static-skill"><strong>new-project</strong> &mdash; Bootstrap a new project the ecosystem way. Use when starting any new project or repo — runs the strategy gate, then scaffolds the standard structure, CLAUDE.md, stack defaults, and the linked Obsidian vault note.</li>
+        <li class="static-skill"><strong>new-world</strong> &mdash; Scaffold a new isolated &quot;world&quot; (employment/business identity) on this machine - root folder, boundary CLAUDE.md, vault with private repo and autosync, git identity, scheduled tasks, registry entries. Use when James takes a new job, employer, or business line that needs full separation (like Lift or Freelance). A new freelance CLIENT is a folder in the Freelance world, NOT a new world.</li>
+        <li class="static-skill"><strong>note</strong> &mdash; &gt;</li>
+        <li class="static-skill"><strong>offline-pwa</strong> &mdash; Offline-first installable web app as an ordered, gated procedure — manifest and icon family, the service-worker strategy table (Workbox injectManifest, revision-hashed precache, registerType 'prompt' update chip, content kept OUT of the precache and swapped atomically after a hash check), the IndexedDB event-sourced local model with a one-line conflict rule and navigator.storage.persist(), iOS Safari install and eviction limits verified at run time, privacy by encrypting the content bundle instead of an auth proxy, the Playwright setOffline(true) e2e and byte budgets as CI assertions, and pwa-audit as the deterministic gate. Use when a project must install to a phone or desktop from a URL and work with no signal, when a deployed PWA serves stale content or breaks offline, when deciding how a private offline app is protected, or before calling any installable surface done. Not for native/store apps (mobile-guild) or server-side caching (cloudflare skills).</li>
+        <li class="static-skill"><strong>openclaw</strong> &mdash; &gt;</li>
+        <li class="static-skill"><strong>pitch</strong> &mdash; Turns a client lead into a signable proposal draft — discovery questions, scoped deliverables with explicit exclusions, tiered pricing, portfolio-grounded proof, and a follow-up cadence. Use when a client conversation needs a real proposal, before a scoping/demo call, or when James says &quot;draft a pitch/proposal for &lt;client&gt;&quot;. Invokes sales-engineer and pricing-strategist. Drafts only — always stops at James for sending.</li>
+        <li class="static-skill"><strong>postmortem</strong> &mdash; Blameless incident review for a resolved production incident (outage, data exposure, bad deploy, security event) - reconstructs an evidence-cited timeline, names multiple contributing factors and the detection gap, and converts findings into owned action items that land in agent doctrine or the backlog same day. Use when James says &quot;postmortem&quot;, &quot;what went wrong&quot;, or a live product (Klik, future products) just had an incident that is now mitigated.</li>
+        <li class="static-skill"><strong>promo-studio</strong> &mdash; High-end programmatic video and marketing-material studio. Use when a project needs promo videos, launch assets, social banners, personalized/interactive video, or any motion design. Builds everything as code (Remotion) from the project's real design system, never generic AI-generated footage.</li>
+        <li class="static-skill"><strong>pulse</strong> &mdash; Runs the PULSE recency radar — three scanner agents sweep the last ~2 weeks of AI/agentic, dev-ecosystem, and market signals, prioritized into a digest with concrete so-what actions, saved to the vault. Use on request (/pulse) or on schedule to keep the ecosystem current.</li>
+        <li class="static-skill"><strong>quality-gate</strong> &mdash; &gt;</li>
+        <li class="static-skill"><strong>reach-kit</strong> &mdash; Per-project reach kit — the gated distribution deliverable a showcase project ships once it is live. Assembles and verifies, in order, the receipts (every headline number traced to a committed artifact), the one-click-try URL (200 with a content assertion), the OG image (fetched from the live URL, exactly 1200x630, PNG/JPEG, under 1 MB), the demo clip (60 s cap, muted-legible, creative-director gate), the DRAFT-WRITEUP in BATCH-2 format, and then a social-ops post draft. Use when a project is deployed and needs its reach assets, when a writeup is staged but nothing else exists, or before any post that references a project. James posts; this never publishes.</li>
+        <li class="static-skill"><strong>retro</strong> &mdash; Self-improvement engine for the agent ecosystem. Run after finishing a milestone, shipping something, or any session with real lessons — distills learnings into memory and the OWNING WORLD'S vault (Personal / Freelance / Lift; agentic-craft lessons to the General Vault - route per ~/.claude/WORLDS.md), and proposes concrete ecosystem upgrades.</li>
+        <li class="static-skill"><strong>sandbox-sdk</strong> &mdash; Build sandboxed applications for secure code execution. Load when building AI code execution, code interpreters, CI/CD systems, interactive dev environments, or executing untrusted code. Covers Sandbox SDK lifecycle, commands, files, code interpreter, and preview URLs. Biases towards retrieval from Cloudflare docs over pre-trained knowledge.</li>
+        <li class="static-skill"><strong>save</strong> &mdash; Checkpoints the session's durable knowledge into all three memory layers — Claude's auto-memory, the project folder docs, and the OWNING WORLD'S vault (Personal / Freelance / Lift / General; route per ~/.claude/WORLDS.md) — and performs vault maintenance. Use on request (/save), before ending a significant session, or after decisions worth keeping.</li>
+        <li class="static-skill"><strong>scout</strong> &mdash; Runs the SCOUT idea pipeline — multi-agent opportunity scan (four hunting angles, strategist scoring) producing a ranked shortlist saved to the vault. Use on request (/scout, optionally with a focus like &quot;/scout chrome extensions&quot;), or on schedule. Research and rank only; James picks what gets built.</li>
+        <li class="static-skill"><strong>seal</strong> &mdash; &gt;</li>
+        <li class="static-skill"><strong>ship-it</strong> &mdash; The release protocol for taking a change on a live Cloudflare product to production — pre-flight checks, remote migration verification, secret presence, staged deploy, post-deploy E2E against real production, test-data purge, and outcomes-ledger pre-registration with rollback triggers. Use whenever code is about to go live on a shipped product (Klik or any other deployed project), not while still building the feature.</li>
+        <li class="static-skill"><strong>social-ops</strong> &mdash; Per-project social media operations — generates platform-adapted post drafts from real project milestones, reply drafts, and researched prospect lists with personalized outreach drafts, all landing in a review queue James approves and sends himself. Use via /social-ops &lt;project&gt; or when a project ships something worth posting.</li>
+        <li class="static-skill"><strong>spec-it</strong> &mdash; Turns a raw idea or feature request into a buildable Spec — acceptance criteria, edge cases, data model implications, and an explicit scope cut — by running product-manager, ux-researcher, architect and data-engineer in sequence. Use when &quot;build X&quot; arrives with no written spec, when a backlog item needs acceptance criteria before engineering touches it, or when a feature will change the data model and needs a safe migration path decided before code is written.</li>
+        <li class="static-skill"><strong>supabase-security-review</strong> &mdash; Attended, verifier-gated review pipeline for a Supabase (Postgres RLS + PostgREST + GoTrue) + Next.js codebase, from preflight to a client-grade technical review (and optional minimal patch) inside a fixed time box, with three human gates. Use when a client engagement under a contractor agreement scopes a review of Supabase data access, auth/session handling, RLS coverage, or server-side authorization.</li>
+        <li class="static-skill"><strong>sync-config</strong> &mdash; &gt;</li>
+        <li class="static-skill"><strong>taste</strong> &mdash; Anti-slop constitution for design, UI, copy, and naming. Load before designing any interface, writing public-facing text, naming anything, or making aesthetic choices — enforces decision-driven, non-generic output.</li>
+        <li class="static-skill"><strong>teardown</strong> &mdash; Deep teardown of a named competitor or reference product — signup-to-value walkthrough, feature/pricing matrix, positioning read, technical inference, and 2-3 ranked exploitable weaknesses — invoking competitive-analyst and landing in a dated per-project living competitor file. Use when a named rival or reference product needs a full teardown before a build, pricing, or positioning decision, or on a quarterly refresh cadence.</li>
+        <li class="static-skill"><strong>turnstile-spin</strong> &mdash; Set up Cloudflare Turnstile end-to-end in a project. Scan the codebase, create the widget via the Cloudflare API, embed it on the right forms, wire canonical server-side siteverify in the customer's existing backend, validate, and persist the skill. Load this when a user asks to add Turnstile, set up CAPTCHA, protect a form from bots, or fix a Turnstile integration. Mirrors developers.cloudflare.com/turnstile/spin.</li>
+        <li class="static-skill"><strong>web-perf</strong> &mdash; Analyzes web performance using Chrome DevTools MCP. Measures Core Web Vitals (LCP, INP, CLS) and supplementary metrics (FCP, TBT, Speed Index), identifies render-blocking resources, network dependency chains, layout shifts, caching issues, and accessibility gaps. Use when asked to audit, profile, debug, or optimize page load performance, Lighthouse scores, or site speed. Biases towards retrieval from current documentation over pre-trained knowledge.</li>
+        <li class="static-skill"><strong>workers-best-practices</strong> &mdash; Reviews and authors Cloudflare Workers code against production best practices. Load when writing new Workers, reviewing Worker code, configuring wrangler.jsonc, or checking for common Workers anti-patterns (streaming, floating promises, global state, secrets, bindings, observability). Biases towards retrieval from Cloudflare docs over pre-trained knowledge.</li>
+        <li class="static-skill"><strong>wrangler</strong> &mdash; Cloudflare Workers CLI for deploying, developing, and managing Workers, KV, R2, D1, Vectorize, Hyperdrive, Workers AI, Containers, Queues, Workflows, Pipelines, and Secrets Store. Load before running wrangler commands to ensure correct syntax and best practices. Biases towards retrieval from Cloudflare docs over pre-trained knowledge.</li>
+      </ul>
+    </section>
+
+    <aside class="citizen-panel" id="citizen-panel" aria-labelledby="panel-heading" hidden>
+      <button type="button" id="panel-close" aria-label="Close citizen panel">&times;</button>
+      <h2 id="panel-heading" tabindex="-1">&mdash;</h2>
+      <p class="panel-division" id="panel-division">&mdash;</p>
+      <p id="panel-desc">&mdash;</p>
+      <dl class="panel-meta">
+        <div><dt>Model</dt><dd id="panel-model">&mdash;</dd></div>
+        <div><dt>Director</dt><dd id="panel-director">&mdash;</dd></div>
+        <div><dt>Unreachable</dt><dd id="panel-unreachable">&mdash;</dd></div>
+      </dl>
+      <h3>Tools</h3>
+      <ul class="panel-list" id="panel-tools"></ul>
+      <h3>Hands work to (downstream)</h3>
+      <ul class="panel-list panel-links" id="panel-downstream"></ul>
+      <h3>Receives work from (upstream)</h3>
+      <ul class="panel-list panel-links" id="panel-upstream"></ul>
+    </aside>
+
+  </main>
+
+  <footer class="site-footer">
+    <p>Polis renders James Lorenz Santos's agent ecosystem as a place you can walk around. Every number on this page comes from <code>ecosystem.json</code>, generated by <code>bin/snapshot.mjs</code> reading the real agent and skill files off disk.</p>
+    <p>Generated <time datetime="2026-09-05T17:36:44.332Z">2026-09-05</time>. Charter bodies are never published; members whose id or description names a real client or employer are withheld and counted, not shown.</p>
+    <p><a href="https://agentjames.vercel.app/" rel="noopener">agentjames.vercel.app</a></p>
+  </footer>
+</div>
+
+<script type="module" src="./app.mjs"></script>
+</body>
+</html>

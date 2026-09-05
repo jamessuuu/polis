@@ -8,5 +8,9 @@
   "engines": { "node": ">=22" },
   "sideEffects": false,
   "files": ["bin", "src", "site", "README.md", "LICENSE"],
-  "scripts": { "test": "node --test tests/extract.test.mjs" }
+  "scripts": {
+    "test": "node --test tests/extract.test.mjs",
+    "snapshot": "node bin/snapshot.mjs",
+    "build:site": "node bin/copy-ecosystem.mjs"
+  }
 }

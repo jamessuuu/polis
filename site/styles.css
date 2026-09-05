@@ -1,0 +1,699 @@
+/*
+ * Polis — styles.
+ *
+ * Palette is picked and verified for WCAG AA, not assumed: every text/bg and
+ * fill/bg pair below was run through the relative-luminance contrast formula
+ * (see the project notes) before being used here. Light mode reads like a
+ * paper city-planning map (muted ink); dark mode reads like the same city at
+ * night (the same hues, lifted to full saturation, like lit windows).
+ *
+ * Typography is three purposeful system-font roles, no webfonts:
+ *   --font-display  civic serif, for headings (the "plaque" register)
+ *   --font-body     system sans, for prose
+ *   --font-mono     system mono, for citizen IDs, tools, models, numbers
+ */
+
+:root {
+  --font-display: ui-serif, Georgia, "Iowan Old Style", "Palatino Linotype", "Times New Roman", serif;
+  --font-body: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: ui-monospace, "Cascadia Code", "Consolas", "SF Mono", Menlo, "Liberation Mono", monospace;
+
+  --bg: #f6f1e6;
+  --bg-elevated: #fffdf8;
+  --ink: #201d17;
+  --ink-muted: #4b463c;
+  --border-subtle: #c9c0aa;
+  --border-strong: #6b6455;
+  --focus: #10306b;
+  --accent: #0d4d55;
+  --warn: #8a2f12;
+  --warn-bg: #f3e2d8;
+
+  --div-00: #8a6d1d;
+  --div-01: #0072b2;
+  --div-02: #d55e00;
+  --div-03: #00946c;
+  --div-04: #c86ea0;
+  --div-05: #b87f00;
+  --div-06: #1c93d7;
+  --div-07: #978e0c;
+
+  --radius: 6px;
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #14181d;
+    --bg-elevated: #1d232b;
+    --ink: #eef1f4;
+    --ink-muted: #b7c0c9;
+    --border-subtle: #333c46;
+    --border-strong: #6b7684;
+    --focus: #ffd166;
+    --accent: #7fd8e2;
+    --warn: #ff8a5b;
+    --warn-bg: #3a2018;
+
+    --div-00: #e8c565;
+    --div-01: #0072b2;
+    --div-02: #d55e00;
+    --div-03: #009e73;
+    --div-04: #cc79a7;
+    --div-05: #e69f00;
+    --div-06: #56b4e9;
+    --div-07: #f0e442;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #14181d;
+  --bg-elevated: #1d232b;
+  --ink: #eef1f4;
+  --ink-muted: #b7c0c9;
+  --border-subtle: #333c46;
+  --border-strong: #6b7684;
+  --focus: #ffd166;
+  --accent: #7fd8e2;
+  --warn: #ff8a5b;
+  --warn-bg: #3a2018;
+
+  --div-00: #e8c565;
+  --div-01: #0072b2;
+  --div-02: #d55e00;
+  --div-03: #009e73;
+  --div-04: #cc79a7;
+  --div-05: #e69f00;
+  --div-06: #56b4e9;
+  --div-07: #f0e442;
+}
+
+* { box-sizing: border-box; }
+
+html {
+  background: var(--bg);
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.55;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--ink);
+}
+
+h1 { font-size: 2.2rem; margin: 0 0 0.2em; }
+h2 { font-size: 1.5rem; margin: 0 0 0.6em; border-bottom: 1px solid var(--border-subtle); padding-bottom: 0.35em; }
+h3 { font-size: 1.15rem; margin: 1.4em 0 0.4em; }
+h4 { font-size: 1rem; margin: 1em 0 0.3em; }
+
+p { margin: 0 0 0.8em; }
+
+a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 0.15em; }
+a:hover { text-decoration-thickness: 2px; }
+
+code {
+  font-family: var(--font-mono);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: 3px;
+  padding: 0.05em 0.35em;
+  font-size: 0.9em;
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: absolute;
+  left: 0.5rem;
+  top: -3rem;
+  background: var(--bg-elevated);
+  color: var(--ink);
+  border: 2px solid var(--focus);
+  padding: 0.5rem 0.9rem;
+  border-radius: var(--radius);
+  z-index: 100;
+  transition: top 0.15s ease;
+}
+.skip-link:focus {
+  top: 0.5rem;
+}
+
+/* Focus visibility: one consistent, high-contrast treatment everywhere. */
+:focus {
+  outline: none;
+}
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+svg :focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+}
+
+/* ---------- layout shell ---------- */
+
+.page {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 1.5rem 1.25rem 3rem;
+}
+
+header.site-header {
+  padding: 1.5rem 0 1rem;
+  border-bottom: 3px double var(--border-strong);
+  margin-bottom: 1.75rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+}
+
+.site-header .titles {
+  max-width: 60ch;
+}
+
+.tagline {
+  color: var(--ink-muted);
+  font-size: 1.02rem;
+  margin: 0;
+}
+
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.theme-toggle {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+}
+
+main section, main aside {
+  margin-bottom: 2.75rem;
+}
+
+/* ---------- buttons / inputs ---------- */
+
+button, select, input[type="search"], input[type="text"] {
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  color: var(--ink);
+  background: var(--bg-elevated);
+  border: 1.5px solid var(--border-strong);
+  border-radius: var(--radius);
+  padding: 0.45rem 0.7rem;
+}
+
+button {
+  cursor: pointer;
+  font-weight: 600;
+}
+button:hover {
+  background: var(--bg);
+}
+
+.link-button {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+  cursor: pointer;
+}
+
+/* ---------- status board ---------- */
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: 0.75rem;
+  margin: 0 0 1.5rem;
+}
+.stats-grid > div {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius);
+  padding: 0.7rem 0.85rem;
+}
+.stats-grid dt {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-muted);
+  margin: 0 0 0.15em;
+}
+.stats-grid dd {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 1.7rem;
+  font-weight: 600;
+}
+
+.finding {
+  border: 1.5px solid var(--border-strong);
+  border-left-width: 6px;
+  border-radius: var(--radius);
+  background: var(--bg-elevated);
+  padding: 0.9rem 1.1rem;
+  margin-bottom: 1rem;
+}
+.finding h3 {
+  margin-top: 0;
+  font-size: 1.05rem;
+}
+.finding-warn {
+  border-left-color: var(--warn);
+  background: var(--warn-bg);
+}
+.finding-warn h3 {
+  color: var(--warn);
+}
+.finding ul {
+  margin: 0.4em 0 0;
+  padding-left: 1.1em;
+}
+.finding li { margin-bottom: 0.25em; }
+
+.jump-to-citizen {
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--warn);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.tag {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  padding: 0.12em 0.45em;
+  border-radius: 3px;
+  border: 1px solid currentColor;
+  vertical-align: 0.1em;
+}
+.tag-director {
+  color: var(--div-00);
+}
+.tag-warn {
+  color: var(--warn);
+  background: var(--warn-bg);
+}
+
+/* ---------- filters ---------- */
+
+#filters-section .field-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 1.25rem;
+  align-items: end;
+  margin-bottom: 0.75rem;
+}
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+.field label {
+  font-size: 0.8rem;
+  color: var(--ink-muted);
+}
+.field-checkbox {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.45rem;
+}
+.field-checkbox label { font-size: 0.95rem; color: var(--ink); }
+
+#filter-summary {
+  font-family: var(--font-mono);
+  font-size: 0.88rem;
+  color: var(--ink-muted);
+  margin: 0.4rem 0 0;
+}
+
+/* ---------- the map ---------- */
+
+.map-scroll {
+  overflow-x: auto;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius);
+  background: var(--bg-elevated);
+}
+
+#city-map {
+  display: block;
+  width: 100%;
+  height: auto;
+  min-width: 640px;
+}
+
+.district-blob {
+  fill-opacity: 0.10;
+  stroke-opacity: 0.55;
+  stroke-width: 1.5;
+}
+.district-blob.holding-area {
+  fill: var(--ink-muted);
+  stroke: var(--border-strong);
+  fill-opacity: 0.06;
+  stroke-dasharray: 5 4;
+}
+.district-label-bg {
+  fill: var(--bg-elevated);
+  opacity: 0.88;
+}
+.district-label {
+  font-family: var(--font-display);
+  font-size: 15px;
+  fill: var(--ink);
+}
+.district-sub {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  fill: var(--ink-muted);
+}
+
+/* Per-division colour, applied to district blobs and citizen fills alike.
+   Light-mode values are darkened variants of the same hue (measured >=3:1
+   against the paper background); dark-mode values are the full-saturation
+   originals (measured >=3:1 against the night background) — see styles.css
+   custom properties above and the project notes for the numbers. */
+.district-blob.div-00, .node-dot.div-00, .node-ring-director.div-00 { fill: var(--div-00); stroke: var(--div-00); }
+.district-blob.div-01, .node-dot.div-01, .node-ring-director.div-01 { fill: var(--div-01); stroke: var(--div-01); }
+.district-blob.div-02, .node-dot.div-02, .node-ring-director.div-02 { fill: var(--div-02); stroke: var(--div-02); }
+.district-blob.div-03, .node-dot.div-03, .node-ring-director.div-03 { fill: var(--div-03); stroke: var(--div-03); }
+.district-blob.div-04, .node-dot.div-04, .node-ring-director.div-04 { fill: var(--div-04); stroke: var(--div-04); }
+.district-blob.div-05, .node-dot.div-05, .node-ring-director.div-05 { fill: var(--div-05); stroke: var(--div-05); }
+.district-blob.div-06, .node-dot.div-06, .node-ring-director.div-06 { fill: var(--div-06); stroke: var(--div-06); }
+.district-blob.div-07, .node-dot.div-07, .node-ring-director.div-07 { fill: var(--div-07); stroke: var(--div-07); }
+.node-ring-director { fill: none; }
+.node-dot.unassigned-fill { fill: var(--ink-muted); }
+
+.legend .swatch.div-00 { background: var(--div-00); }
+.legend .swatch.div-01 { background: var(--div-01); }
+.legend .swatch.div-02 { background: var(--div-02); }
+.legend .swatch.div-03 { background: var(--div-03); }
+.legend .swatch.div-04 { background: var(--div-04); }
+.legend .swatch.div-05 { background: var(--div-05); }
+.legend .swatch.div-06 { background: var(--div-06); }
+.legend .swatch.div-07 { background: var(--div-07); }
+.legend .swatch.unassigned, .legend .swatch.system { background: var(--ink-muted); }
+
+.edge {
+  stroke: var(--border-strong);
+  stroke-width: 1;
+  opacity: 0.22;
+  fill: none;
+}
+.edge.highlight {
+  stroke: var(--accent);
+  stroke-width: 2.2;
+  opacity: 0.95;
+}
+.edge.dimmed {
+  opacity: 0.06;
+}
+
+.node-dot {
+  stroke: var(--bg-elevated);
+  stroke-width: 1.5;
+}
+.node-ring-director {
+  fill: none;
+  stroke-width: 1.5;
+}
+.node-ring-unreachable {
+  fill: none;
+  stroke: var(--warn);
+  stroke-width: 2;
+  stroke-dasharray: 2 2;
+}
+.node-label-bg {
+  fill: var(--bg-elevated);
+  opacity: 0;
+  pointer-events: none;
+}
+.node-label {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  fill: var(--ink);
+  opacity: 0;
+  pointer-events: none;
+}
+/* Directors are the city's landmark buildings: always named. Everyone else's
+   name appears only when it or a direct neighbour is hovered/focused/open. */
+.citizen.director .node-label,
+.citizen.director .node-label-bg,
+.citizen.active .node-label,
+.citizen.active .node-label-bg,
+.citizen.neighbor .node-label,
+.citizen.neighbor .node-label-bg {
+  opacity: 1;
+}
+
+.citizen[data-system="true"] .node-dot {
+  fill: var(--ink-muted);
+}
+.citizen-shape-square {
+  stroke: var(--bg-elevated);
+  stroke-width: 1.5;
+}
+.citizen.unassigned .node-dot {
+  stroke-dasharray: 2 2;
+}
+
+.citizen {
+  cursor: pointer;
+}
+.citizen.dimmed {
+  opacity: 0.16;
+}
+.citizen.neighbor .node-dot,
+.citizen.active .node-dot {
+  stroke: var(--ink);
+  stroke-width: 2;
+}
+.citizen.hidden-by-filter {
+  display: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .edge, .citizen, .node-dot { transition: opacity 0.15s ease, stroke-width 0.15s ease; }
+}
+
+.map-hint {
+  font-size: 0.88rem;
+  color: var(--ink-muted);
+}
+
+/* ---------- district legend ---------- */
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.1rem;
+  list-style: none;
+  padding: 0;
+  margin: 0.75rem 0 0;
+  font-size: 0.85rem;
+}
+.legend li { display: flex; align-items: center; gap: 0.4em; }
+.legend .swatch {
+  width: 0.85em; height: 0.85em;
+  border-radius: 50%;
+  border: 1px solid var(--border-strong);
+  flex: none;
+}
+
+/* ---------- roster (static + interactive) ---------- */
+
+.static-district, .roster-district {
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 0.5rem;
+}
+.static-district-flagged {
+  border-left: 4px solid var(--warn);
+  padding-left: 0.9rem;
+}
+.static-count, .roster-count {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: var(--ink-muted);
+}
+.static-note {
+  color: var(--ink-muted);
+  font-size: 0.9rem;
+}
+
+.static-agent-list, .roster-agent-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1rem;
+  display: grid;
+  gap: 0.6rem;
+}
+.static-agent, .roster-agent {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius);
+  padding: 0.75rem 0.95rem;
+}
+.static-agent h4 { margin-top: 0; }
+
+.roster-agent-button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius);
+  padding: 0.6rem 0.85rem;
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  color: var(--ink);
+}
+.roster-agent-button:hover {
+  border-color: var(--border-strong);
+}
+.roster-agent-button .rab-desc {
+  display: block;
+  font-family: var(--font-body);
+  font-weight: 400;
+  color: var(--ink-muted);
+  font-size: 0.85rem;
+  margin-top: 0.25em;
+  white-space: normal;
+}
+.roster-agent-button.selected {
+  border-color: var(--focus);
+  border-width: 2px;
+}
+
+.static-meta, .static-edges {
+  font-size: 0.87rem;
+  color: var(--ink-muted);
+  margin: 0.25em 0;
+}
+.static-meta strong, .static-edges strong { color: var(--ink); font-weight: 600; }
+.static-edges-none { font-style: italic; }
+
+.static-skill {
+  margin-bottom: 0.5em;
+}
+#skills-list, .static-skill-list {
+  padding-left: 1.2em;
+}
+
+/* ---------- citizen panel ---------- */
+
+.citizen-panel {
+  position: relative;
+  background: var(--bg-elevated);
+  border: 2px solid var(--border-strong);
+  border-radius: var(--radius);
+  padding: 1.1rem 1.25rem 1.4rem;
+  max-width: 46rem;
+}
+.citizen-panel[hidden] { display: none; }
+
+#panel-close {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  width: 2.1rem;
+  height: 2.1rem;
+  line-height: 1;
+  font-size: 1.1rem;
+  border-radius: 50%;
+}
+
+.panel-division {
+  font-family: var(--font-mono);
+  color: var(--ink-muted);
+  margin-top: -0.3rem;
+}
+.panel-meta {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.2rem 0.8rem;
+  font-family: var(--font-mono);
+  font-size: 0.92rem;
+  margin: 0.6rem 0 1rem;
+}
+.panel-meta dt { color: var(--ink-muted); }
+.panel-meta dd { margin: 0; }
+
+.panel-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 0.9rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+.panel-list li {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  background: var(--bg);
+  border: 1px solid var(--border-subtle);
+  border-radius: 3px;
+  padding: 0.15rem 0.5rem;
+}
+.panel-list.panel-links li a {
+  color: var(--ink);
+}
+.panel-empty {
+  color: var(--ink-muted);
+  font-style: italic;
+  font-size: 0.9rem;
+}
+
+/* ---------- footer ---------- */
+
+footer.site-footer {
+  border-top: 3px double var(--border-strong);
+  margin-top: 3rem;
+  padding-top: 1.25rem;
+  font-size: 0.9rem;
+  color: var(--ink-muted);
+}
+footer.site-footer p { margin: 0 0 0.5em; }
+
+/* ---------- responsive ---------- */
+
+@media (max-width: 560px) {
+  h1 { font-size: 1.7rem; }
+  .stats-grid dd { font-size: 1.35rem; }
+  .page { padding: 1rem 0.85rem 2.5rem; }
+}
