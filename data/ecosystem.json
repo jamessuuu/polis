@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-05T18:11:30.194Z",
+  "generatedAt": "2026-09-05T19:57:24.861Z",
   "scope": "personal",
   "divisions": [
     {
@@ -35,6 +35,14 @@
       "name": "Knowledge & Craft"
     }
   ],
+  "guilds": [
+    "agentic-guild",
+    "automation-guild",
+    "backend-guild",
+    "design-guild",
+    "game-guild",
+    "growth-guild"
+  ],
   "agents": [
     {
       "id": "accessibility-engineer",
@@ -47,6 +55,7 @@
       ],
       "model": null,
       "division": "03 Engineering",
+      "guild": null,
       "director": false,
       "system": false
     },
@@ -63,6 +72,7 @@
       ],
       "model": "opus",
       "division": "03 Engineering",
+      "guild": null,
       "director": false,
       "system": false
     },
@@ -77,6 +87,7 @@
       ],
       "model": null,
       "division": "03 Engineering",
+      "guild": null,
       "director": false,
       "system": false
     },
@@ -91,6 +102,7 @@
       ],
       "model": "opus",
       "division": "03 Engineering",
+      "guild": null,
       "director": true,
       "system": false
     },
@@ -105,6 +117,7 @@
       ],
       "model": null,
       "division": "00 Cabinet",
+      "guild": null,
       "director": true,
       "system": false
     },
@@ -119,6 +132,7 @@
       ],
       "model": "opus",
       "division": "03 Engineering",
+      "guild": null,
       "director": false,
       "system": false
     },
@@ -136,6 +150,7 @@
       ],
       "model": "sonnet",
       "division": "01 Intelligence",
+      "guild": null,
       "director": false,
       "system": false
     },
@@ -152,6 +167,7 @@
       ],
       "model": "sonnet",
       "division": "03 Engineering",
+      "guild": null,
       "director": false,
       "system": false
     },
@@ -167,6 +183,7 @@
       ],
       "model": null,
       "division": "05 Growth & Revenue",
+      "guild": null,
       "director": false,
       "system": false
     },
@@ -183,6 +200,7 @@
       ],
       "model": null,
       "division": "00 Cabinet",
+      "guild": null,
       "director": false,
       "system": false
     },
@@ -197,6 +215,7 @@
       ],
       "model": "opus",
       "division": "04 Design & Story",
+      "guild": null,
       "director": false,
       "system": false
     },
@@ -212,6 +231,7 @@
       ],
       "model": null,
       "division": "00 Cabinet",
+      "guild": null,
       "director": false,
       "system": false
     },
@@ -227,6 +247,7 @@
       ],
       "model": null,
       "division": "04 Design & Story",
+      "guild": null,
       "director": true,
       "system": false
     },
@@ -242,6 +263,7 @@
       ],
       "model": "opus",
       "division": "00 Cabinet",
+      "guild": null,
       "director": false,
       "system": false
     },
@@ -258,6 +280,7 @@
       ],
       "model": "sonnet",
       "division": "03 Engineering",
+      "guild": null,
       "director": false,
       "system": false
     },
@@ -274,6 +297,7 @@
       ],
       "model": "sonnet",
       "division": "03 Engineering",
+      "guild": null,
       "director": false,
       "system": false
     },
@@ -290,6 +314,7 @@
       ],
       "model": "sonnet",
       "division": "03 Engineering",
+      "guild": null,
       "director": false,
       "system": false
     },
@@ -306,6 +331,7 @@
       ],
       "model": null,
       "division": "07 Knowledge & Craft",
+      "guild": null,
       "director": false,
       "system": false
     },
@@ -320,6 +346,7 @@
       ],
       "model": "haiku",
       "division": null,
+      "guild": null,
       "director": false,
       "system": true
     },
@@ -336,6 +363,7 @@
       ],
       "model": null,
       "division": "05 Growth & Revenue",
+      "guild": null,
       "director": true,
       "system": false
     },
@@ -351,6 +379,7 @@
       ],
       "model": null,
       "division": "06 Trust & Operations",
+      "guild": null,
       "director": false,
       "system": false
     },
@@ -366,6 +395,7 @@
       ],
       "model": null,
       "division": "04 Design & Story",
+      "guild": null,
       "director": false,
       "system": false
     },
@@ -382,6 +412,7 @@
       ],
       "model": null,
       "division": "07 Knowledge & Craft",
+      "guild": null,
       "director": false,
       "system": false
     },
@@ -397,6 +428,7 @@
       ],
       "model": null,
       "division": "06 Trust & Operations",
+      "guild": null,
       "director": false,
       "system": false
     },
@@ -412,6 +444,7 @@
       ],
       "model": "sonnet",
       "division": "01 Intelligence",
+      "guild": null,
       "director": true,
       "system": false
     },
@@ -428,6 +461,7 @@
       ],
       "model": null,
       "division": null,
+      "guild": null,
       "director": false,
       "system": false
     },
@@ -444,6 +478,7 @@
       ],
       "model": null,
       "division": "01 Intelligence",
+      "guild": null,
       "director": false,
       "system": false
     },
@@ -460,6 +495,7 @@
       ],
       "model": "sonnet",
       "division": "03 Engineering",
+      "guild": null,
       "director": false,
       "system": false
     },
@@ -475,6 +511,7 @@
       ],
       "model": "sonnet",
       "division": "03 Engineering",
+      "guild": null,
       "director": false,
       "system": false
     },
@@ -491,6 +528,7 @@
       ],
       "model": null,
       "division": "02 Product",
+      "guild": null,
       "director": false,
       "system": false
     },
@@ -504,6 +542,7 @@
       ],
       "model": null,
       "division": "02 Product",
+      "guild": null,
       "director": true,
       "system": false
     },
@@ -519,6 +558,7 @@
       ],
       "model": "opus",
       "division": "00 Cabinet",
+      "guild": null,
       "director": false,
       "system": false
     },
@@ -535,6 +575,7 @@
       ],
       "model": "sonnet",
       "division": "03 Engineering",
+      "guild": null,
       "director": false,
       "system": false
     },
@@ -551,6 +592,7 @@
       ],
       "model": "sonnet",
       "division": "03 Engineering",
+      "guild": null,
       "director": false,
       "system": false
     },
@@ -567,6 +609,7 @@
       ],
       "model": null,
       "division": "05 Growth & Revenue",
+      "guild": null,
       "director": false,
       "system": false
     },
@@ -581,6 +624,7 @@
       ],
       "model": "opus",
       "division": "03 Engineering",
+      "guild": null,
       "director": false,
       "system": false
     },
@@ -597,6 +641,7 @@
       ],
       "model": null,
       "division": "05 Growth & Revenue",
+      "guild": null,
       "director": false,
       "system": false
     },
@@ -613,6 +658,7 @@
       ],
       "model": null,
       "division": "04 Design & Story",
+      "guild": null,
       "director": false,
       "system": false
     },
@@ -627,6 +673,7 @@
       ],
       "model": "opus",
       "division": "03 Engineering",
+      "guild": null,
       "director": false,
       "system": false
     },
@@ -643,6 +690,7 @@
       ],
       "model": null,
       "division": "06 Trust & Operations",
+      "guild": null,
       "director": false,
       "system": false
     },
@@ -659,6 +707,7 @@
       ],
       "model": null,
       "division": "07 Knowledge & Craft",
+      "guild": null,
       "director": false,
       "system": false
     },
@@ -676,6 +725,7 @@
       ],
       "model": null,
       "division": "06 Trust & Operations",
+      "guild": null,
       "director": true,
       "system": false
     },
@@ -693,6 +743,7 @@
       ],
       "model": null,
       "division": "04 Design & Story",
+      "guild": null,
       "director": false,
       "system": false
     },
@@ -708,6 +759,7 @@
       ],
       "model": "sonnet",
       "division": "01 Intelligence",
+      "guild": null,
       "director": false,
       "system": false
     },
@@ -724,6 +776,237 @@
       ],
       "model": null,
       "division": "02 Product",
+      "guild": null,
+      "director": false,
+      "system": false
+    },
+    {
+      "id": "agentic-director",
+      "description": "Field director for AI and agent engineering. Use for agent-system architecture decisions, MCP-vs-skill-vs-hook design calls, eval strategy for any agentic capability, context-engineering reviews, and judging whether an agentic design is real or theater. Directs and judges — implementation happens in the main session.",
+      "tools": [
+        "Read",
+        "Glob",
+        "Grep",
+        "WebFetch"
+      ],
+      "model": "opus",
+      "division": null,
+      "guild": "agentic-guild",
+      "director": false,
+      "system": false
+    },
+    {
+      "id": "eval-engineer",
+      "description": "Evaluation specialist. Use to author and run evals for skills, agents, and agentic products — scenario suites, baselines, judge prompts, regression runs on model releases — and to interpret results honestly. Owns the eval harness (guilds/evals) and the evals-before-claims house rule.",
+      "tools": [
+        "Read",
+        "Glob",
+        "Grep",
+        "Bash",
+        "Write",
+        "Edit"
+      ],
+      "model": "sonnet",
+      "division": null,
+      "guild": "agentic-guild",
+      "director": false,
+      "system": false
+    },
+    {
+      "id": "mcp-engineer",
+      "description": "MCP server implementation specialist. Use to design and build MCP servers — tool/resource surfaces, stateless Workers-hosted architecture, OAuth flows, version negotiation, Connectors compatibility — and to review existing servers for spec compliance and security. The hands for what the agentic-director green-lights.",
+      "tools": [
+        "Read",
+        "Glob",
+        "Grep",
+        "Bash",
+        "Write",
+        "Edit",
+        "WebFetch"
+      ],
+      "model": "sonnet",
+      "division": null,
+      "guild": "agentic-guild",
+      "director": false,
+      "system": false
+    },
+    {
+      "id": "automation-engineer",
+      "description": "Automation delivery specialist. Use to design, build, and verify client-grade automations — n8n workflows, GoHighLevel systems (incl. Voice AI configuration), Make/Zapier when they fit, and n8n↔GHL custom API integrations — plus the monitoring-retainer operations that keep them alive. Verification against real installs is mandatory before anything is called done.",
+      "tools": [
+        "Read",
+        "Glob",
+        "Grep",
+        "Bash",
+        "Write",
+        "Edit",
+        "WebFetch"
+      ],
+      "model": "sonnet",
+      "division": null,
+      "guild": "automation-guild",
+      "director": false,
+      "system": false
+    },
+    {
+      "id": "backend-director",
+      "description": "Field director for backend and platform engineering. Use for API design arbitration, data-model reviews, query/schema performance judgment, reliability decisions (idempotency, retries, consistency), and platform-fit calls beyond the Cloudflare defaults. Directs and judges — implementation happens in the main session.",
+      "tools": [
+        "Read",
+        "Glob",
+        "Grep",
+        "WebFetch"
+      ],
+      "model": "opus",
+      "division": null,
+      "guild": "backend-guild",
+      "director": false,
+      "system": false
+    },
+    {
+      "id": "creative-dev",
+      "description": "Creative-technology advisor for WebGL/Three.js/R3F, canvas, shaders, and heavy animation. Use to judge whether fancy tech earns its place, pick the lightest technique that achieves an effect, set performance budgets, and design fallbacks. Advises and prototypes approaches — production code happens in the main session.",
+      "tools": [
+        "Read",
+        "Glob",
+        "Grep",
+        "WebFetch",
+        "Bash"
+      ],
+      "model": "sonnet",
+      "division": null,
+      "guild": "design-guild",
+      "director": false,
+      "system": false
+    },
+    {
+      "id": "design-director",
+      "description": "Field director for frontend and design. Use to set the design direction for a project or feature, arbitrate visual/UX decisions, define a project's design DNA, plan interface work across specialists, and judge whether shipped UI meets the bar. Directs and judges — implementation happens in the main session.",
+      "tools": [
+        "Read",
+        "Glob",
+        "Grep",
+        "WebFetch"
+      ],
+      "model": "opus",
+      "division": null,
+      "guild": "design-guild",
+      "director": false,
+      "system": false
+    },
+    {
+      "id": "design-reviewer",
+      "description": "Visual QA gate. Use after UI changes and before shipping any user-facing surface — renders the actual pages (Playwright/browser), screenshots them across viewports and states, and grades the result against the project's design DNA. Judges rendered output, not source code.",
+      "tools": [
+        "Read",
+        "Glob",
+        "Grep",
+        "Bash"
+      ],
+      "model": "sonnet",
+      "division": null,
+      "guild": "design-guild",
+      "director": false,
+      "system": false
+    },
+    {
+      "id": "design-strategist",
+      "description": "The pre-visual layer of design. Use BEFORE any design direction or UI work — defines who the design serves, what it must accomplish, the audience's actual context and sophistication, competitive positioning, and the conversion/comprehension goals that visual decisions must then serve. Strategy first; aesthetics never lead.",
+      "tools": [
+        "Read",
+        "Glob",
+        "Grep",
+        "WebSearch",
+        "WebFetch"
+      ],
+      "model": "opus",
+      "division": null,
+      "guild": "design-guild",
+      "director": false,
+      "system": false
+    },
+    {
+      "id": "game-designer",
+      "description": "Systems and mechanics designer for games. Use to define a game's core loop and verbs, design progression/economy/difficulty curves, diagnose why a prototype is boring, judge whether a level's space earns itself (the Level Verdict), and turn a vague game idea into a one-page design with an explicit cut list. Designs what the player DOES; does not write engine code or set store/business strategy.",
+      "tools": [
+        "Read",
+        "Glob",
+        "Grep",
+        "WebFetch",
+        "WebSearch"
+      ],
+      "model": "sonnet",
+      "division": null,
+      "guild": "game-guild",
+      "director": false,
+      "system": false
+    },
+    {
+      "id": "game-director",
+      "description": "Field director for game development. Use to choose the engine and rung for a game project, decide what gets built versus bought versus tooled, arbitrate scope against a real finish line, sequence the capability ladder from browser games through an engine and a store release and onward, run the hands-on protocol where James writes the gameplay and agents verify it, and judge whether a build is ready to leave the workshop. Directs and judges — implementation happens in the main session, and gameplay is James's.",
+      "tools": [
+        "Read",
+        "Glob",
+        "Grep",
+        "Bash",
+        "WebFetch",
+        "WebSearch"
+      ],
+      "model": "opus",
+      "division": null,
+      "guild": "game-guild",
+      "director": false,
+      "system": false
+    },
+    {
+      "id": "playtest-engineer",
+      "description": "Closed-loop build verifier for games. Use after any gameplay change and before any release — runs the actual build (headless or windowed), drives it with scripted input, captures state and frame timings at named checkpoints, and reports crashes, soft-locks, unreachable content, and feel regressions with evidence. Judges the running game, never the source code; reports BLOCKED when it cannot run the build.",
+      "tools": [
+        "Read",
+        "Glob",
+        "Grep",
+        "Bash",
+        "Write",
+        "Edit"
+      ],
+      "model": "sonnet",
+      "division": null,
+      "guild": "game-guild",
+      "director": false,
+      "system": false
+    },
+    {
+      "id": "aeo-specialist",
+      "description": "AI-search visibility executor. Use to run AEO/GEO audits per the house runbook (tracked-prompt share-of-voice testing, entity/schema work, source-layer mapping), implement the fixes, and produce the monthly share-of-voice reports that justify retainers. The hands for the audit method the growth-director sells.",
+      "tools": [
+        "Read",
+        "Glob",
+        "Grep",
+        "Bash",
+        "Write",
+        "Edit",
+        "WebFetch",
+        "WebSearch"
+      ],
+      "model": "sonnet",
+      "division": null,
+      "guild": "growth-guild",
+      "director": false,
+      "system": false
+    },
+    {
+      "id": "growth-director",
+      "description": "Field director for marketing and growth. Use to plan distribution for a launch, sequence growth experiments, arbitrate SEO/content/pricing strategy, and judge marketing plans against evidence and budget reality. Directs and judges — assets get produced by the copywriter and main session.",
+      "tools": [
+        "Read",
+        "Glob",
+        "Grep",
+        "WebSearch",
+        "WebFetch"
+      ],
+      "model": "opus",
+      "division": null,
+      "guild": "growth-guild",
       "director": false,
       "system": false
     }
@@ -1253,222 +1536,501 @@
       "from": "ux-researcher",
       "to": "ui-designer",
       "kind": "downstream"
+    },
+    {
+      "from": "ui-designer",
+      "to": "design-reviewer",
+      "kind": "upstream"
+    },
+    {
+      "from": "creative-dev",
+      "to": "design-reviewer",
+      "kind": "upstream"
+    },
+    {
+      "from": "design-director",
+      "to": "design-reviewer",
+      "kind": "upstream"
+    },
+    {
+      "from": "design-reviewer",
+      "to": "design-director",
+      "kind": "downstream"
+    },
+    {
+      "from": "game-director",
+      "to": "game-designer",
+      "kind": "upstream"
+    },
+    {
+      "from": "game-director",
+      "to": "playtest-engineer",
+      "kind": "upstream"
+    },
+    {
+      "from": "playtest-engineer",
+      "to": "game-designer",
+      "kind": "downstream"
+    },
+    {
+      "from": "playtest-engineer",
+      "to": "game-director",
+      "kind": "downstream"
     }
   ],
   "skills": [
     {
       "id": "a11y-audit",
-      "description": "Accessibility conformance pass on a LIVE interface (not just source) - keyboard traversal, focus order and visibility, screen-reader semantics, contrast against real rendered pixels, motion sensitivity, and mobile touch targets. Invokes accessibility-engineer; produces a ranked, WCAG-SC-referenced defect list with the exact fix per item. Use before any public launch, after any change to gesture-based interaction/modals/sheets/forms/animation, or when James asks for an \"a11y pass\" or \"WCAG check\"."
+      "description": "Accessibility conformance pass on a LIVE interface (not just source) - keyboard traversal, focus order and visibility, screen-reader semantics, contrast against real rendered pixels, motion sensitivity, and mobile touch targets. Invokes accessibility-engineer; produces a ranked, WCAG-SC-referenced defect list with the exact fix per item. Use before any public launch, after any change to gesture-based interaction/modals/sheets/forms/animation, or when James asks for an \"a11y pass\" or \"WCAG check\".",
+      "guild": null
     },
     {
       "id": "agent-forge",
-      "description": "Admit or revise a member of the ecosystem (agent, skill, or tool) against the constitution's admission standard. Use when James wants a new persona/procedure/capability added, when a capability gap is found mid-task, or when the ecosystem-groomer's digest proposes a new member rather than an edit. THE meta-procedure every future addition must go through — never hand-write a file into ~/.claude/agents or ~/.claude/skills without it."
+      "description": "Admit or revise a member of the ecosystem (agent, skill, or tool) against the constitution's admission standard. Use when James wants a new persona/procedure/capability added, when a capability gap is found mid-task, or when the ecosystem-groomer's digest proposes a new member rather than an edit. THE meta-procedure every future addition must go through — never hand-write a file into ~/.claude/agents or ~/.claude/skills without it.",
+      "guild": null
     },
     {
       "id": "agents-sdk",
-      "description": "Build AI agents on Cloudflare Workers using the Agents SDK. Load when creating stateful agents, durable workflows, real-time WebSocket apps, scheduled tasks, MCP servers, chat applications, voice agents, or browser automation. Covers Agent class, state management, callable RPC, Workflows, durable execution, queues, retries, observability, and React hooks. Biases towards retrieval from Cloudflare docs over pre-trained knowledge."
+      "description": "Build AI agents on Cloudflare Workers using the Agents SDK. Load when creating stateful agents, durable workflows, real-time WebSocket apps, scheduled tasks, MCP servers, chat applications, voice agents, or browser automation. Covers Agent class, state management, callable RPC, Workflows, durable execution, queues, retries, observability, and React hooks. Biases towards retrieval from Cloudflare docs over pre-trained knowledge.",
+      "guild": null
     },
     {
       "id": "boardroom",
-      "description": "Autonomous board-of-directors iteration for any deliverable. Use when a task should reach best-possible quality without James in the loop until the end - the work is produced, critiqued by a specialist board, revised, and re-judged for multiple rounds, then presented once with the board's minutes. James verifies and comments; the comment triggers the next cycle. Mirrors real-world review boards."
+      "description": "Autonomous board-of-directors iteration for any deliverable. Use when a task should reach best-possible quality without James in the loop until the end - the work is produced, critiqued by a specialist board, revised, and re-judged for multiple rounds, then presented once with the board's minutes. James verifies and comments; the comment triggers the next cycle. Mirrors real-world review boards.",
+      "guild": null
     },
     {
       "id": "brand-identity",
-      "description": "Design a logo, mark, or full brand identity from first principles and ship it as code. Use whenever a project, product, or person needs a logo, wordmark, favicon, brand system, or visual identity refresh — including \"come up with a logo\", \"design a mark\", \"our branding looks generic\", or naming-plus-identity work. Produces concept-led directions rendered as regenerable SVG plus a contact sheet for review, never a single unexplained image."
+      "description": "Design a logo, mark, or full brand identity from first principles and ship it as code. Use whenever a project, product, or person needs a logo, wordmark, favicon, brand system, or visual identity refresh — including \"come up with a logo\", \"design a mark\", \"our branding looks generic\", or naming-plus-identity work. Produces concept-led directions rendered as regenerable SVG plus a contact sheet for review, never a single unexplained image.",
+      "guild": null
     },
     {
       "id": "cloudflare",
-      "description": "Comprehensive Cloudflare platform skill covering Workers, Pages, storage (KV, D1, R2), AI (Workers AI, Vectorize, Agents SDK), feature flags (Flagship), networking (Tunnel, Spectrum), security (WAF, DDoS), and infrastructure-as-code (Terraform, Pulumi). Use for any Cloudflare development task. Biases towards retrieval from Cloudflare docs over pre-trained knowledge."
+      "description": "Comprehensive Cloudflare platform skill covering Workers, Pages, storage (KV, D1, R2), AI (Workers AI, Vectorize, Agents SDK), feature flags (Flagship), networking (Tunnel, Spectrum), security (WAF, DDoS), and infrastructure-as-code (Terraform, Pulumi). Use for any Cloudflare development task. Biases towards retrieval from Cloudflare docs over pre-trained knowledge.",
+      "guild": null
     },
     {
       "id": "cloudflare-email-service",
-      "description": "Send and receive transactional emails with Cloudflare Email Service (Email Sending + Email Routing). Use when building email sending (Workers binding or REST API), email routing, Agents SDK email handling, or integrating email into any app — Workers, Node.js, Python, Go, etc. Also use for email deliverability, SPF/DKIM/DMARC, wrangler email setup, MCP email tools, or when a coding agent needs to send emails. Even for simple requests like \"add email to my Worker\" — this skill has critical config details."
+      "description": "Send and receive transactional emails with Cloudflare Email Service (Email Sending + Email Routing). Use when building email sending (Workers binding or REST API), email routing, Agents SDK email handling, or integrating email into any app — Workers, Node.js, Python, Go, etc. Also use for email deliverability, SPF/DKIM/DMARC, wrangler email setup, MCP email tools, or when a coding agent needs to send emails. Even for simple requests like \"add email to my Worker\" — this skill has critical config details.",
+      "guild": null
     },
     {
       "id": "cloudflare-one",
-      "description": "Guides Cloudflare One Zero Trust and SASE work across Access, Gateway, WARP, Tunnel, Cloudflare WAN, DLP, CASB, device posture, and identity. Use when designing, configuring, troubleshooting, or reviewing Cloudflare One deployments. Retrieval-first: use current Cloudflare docs/API schemas instead of embedded product docs."
+      "description": "Guides Cloudflare One Zero Trust and SASE work across Access, Gateway, WARP, Tunnel, Cloudflare WAN, DLP, CASB, device posture, and identity. Use when designing, configuring, troubleshooting, or reviewing Cloudflare One deployments. Retrieval-first: use current Cloudflare docs/API schemas instead of embedded product docs.",
+      "guild": null
     },
     {
       "id": "cloudflare-one-migrations",
-      "description": "Plans migrations from Zscaler ZIA/ZPA, Palo Alto, legacy VPN, SWG, or SASE stacks to Cloudflare One. Use for migration assessments, policy mapping, rollout plans, and parity/gap analysis."
+      "description": "Plans migrations from Zscaler ZIA/ZPA, Palo Alto, legacy VPN, SWG, or SASE stacks to Cloudflare One. Use for migration assessments, policy mapping, rollout plans, and parity/gap analysis.",
+      "guild": null
     },
     {
       "id": "data-model",
-      "description": "Design or evolve a schema safely on a live Cloudflare D1 database — entity/access-pattern modeling, index planning against real query paths, migration authoring with post-apply verification, backfill sequencing, and rollback thinking. Use whenever a table is added or changed on a project with real user data, not while still prototyping. Invokes architect and data-engineer."
+      "description": "Design or evolve a schema safely on a live Cloudflare D1 database — entity/access-pattern modeling, index planning against real query paths, migration authoring with post-apply verification, backfill sequencing, and rollback thinking. Use whenever a table is added or changed on a project with real user data, not while still prototyping. Invokes architect and data-engineer.",
+      "guild": null
     },
     {
       "id": "debug-loop",
-      "description": "Systematic root-cause procedure for defects that survived the obvious fix — reproduce, bisect, eliminate hypotheses with falsifying evidence, apply the minimal verified fix, pin it with a regression test, and record the lesson. Use when a bug is intermittent, prod-only, \"worked yesterday\", or has already resisted one fix attempt."
+      "description": "Systematic root-cause procedure for defects that survived the obvious fix — reproduce, bisect, eliminate hypotheses with falsifying evidence, apply the minimal verified fix, pin it with a regression test, and record the lesson. Use when a bug is intermittent, prod-only, \"worked yesterday\", or has already resisted one fix attempt.",
+      "guild": null
     },
     {
       "id": "deep-research",
-      "description": "Structured research that produces decision-grade evidence, not a summary — question framing, multi-angle source sweep, source quality grading, contradiction surfacing, and a Research Brief with citations and explicit confidence levels. Use before any market entry, pricing, positioning, build-vs-buy, or \"is this validated\" decision, or when James asks to \"research\", \"validate\", \"look into whether\", or \"what does the evidence say about\" something. Invokes market-researcher and competitive-analyst."
+      "description": "Structured research that produces decision-grade evidence, not a summary — question framing, multi-angle source sweep, source quality grading, contradiction surfacing, and a Research Brief with citations and explicit confidence levels. Use before any market entry, pricing, positioning, build-vs-buy, or \"is this validated\" decision, or when James asks to \"research\", \"validate\", \"look into whether\", or \"what does the evidence say about\" something. Invokes market-researcher and competitive-analyst.",
+      "guild": null
     },
     {
       "id": "degradation-ladder",
-      "description": "Make a browser-native inference page tell the truth on every machine — enumerate capability tiers (WebGPU hardware adapter / WebGPU baseline / WASM threads / WASM single / no-inference), define what each tier actually runs, what the visitor sees, and what the page says, then gate it so a silent quality drop can never be presented as the real thing. Use before shipping any page whose behaviour depends on the visitor's hardware, before publishing a \"nothing leaves your device\" or \"runs locally\" claim, or when a demo breaks on a machine without WebGPU. Produces a Capability Ladder and a CI truthfulness gate."
+      "description": "Make a browser-native inference page tell the truth on every machine — enumerate capability tiers (WebGPU hardware adapter / WebGPU baseline / WASM threads / WASM single / no-inference), define what each tier actually runs, what the visitor sees, and what the page says, then gate it so a silent quality drop can never be presented as the real thing. Use before shipping any page whose behaviour depends on the visitor's hardware, before publishing a \"nothing leaves your device\" or \"runs locally\" claim, or when a demo breaks on a machine without WebGPU. Produces a Capability Ladder and a CI truthfulness gate.",
+      "guild": null
     },
     {
       "id": "durable-objects",
-      "description": "Create and review Cloudflare Durable Objects. Use when building stateful coordination (chat rooms, multiplayer games, booking systems), implementing RPC methods, SQLite storage, alarms, WebSockets, or reviewing DO code for best practices. Covers Workers integration, wrangler config, and testing with Vitest. Biases towards retrieval from Cloudflare docs over pre-trained knowledge."
+      "description": "Create and review Cloudflare Durable Objects. Use when building stateful coordination (chat rooms, multiplayer games, booking systems), implementing RPC methods, SQLite storage, alarms, WebSockets, or reviewing DO code for best practices. Covers Workers integration, wrangler config, and testing with Vitest. Biases towards retrieval from Cloudflare docs over pre-trained knowledge.",
+      "guild": null
     },
     {
       "id": "ecosystem-groomer",
-      "description": "The self-improvement flywheel. Run weekly (manually via /ecosystem-groomer or on a schedule) to sweep recent lessons, outcomes, and agent performance, then propose concrete agent/skill edits through a mini-board and present James one approvable digest. This is how the ecosystem improves continuously without being asked."
+      "description": "The self-improvement flywheel. Run weekly (manually via /ecosystem-groomer or on a schedule) to sweep recent lessons, outcomes, and agent performance, then propose concrete agent/skill edits through a mini-board and present James one approvable digest. This is how the ecosystem improves continuously without being asked.",
+      "guild": null
     },
     {
       "id": "eval-suite",
-      "description": "Design and run evaluations for LLM/agent features shipped to users — task set construction, rubric or programmatic scoring, regression baselines, cost/latency tracking, and failure taxonomy. Use when a prompt, tool schema, model, or RAG shape changes on a live LLM-backed feature, before any such feature first ships, or on a recurring cadence to catch silent quality/cost drift. Invokes ai-engineer."
+      "description": "Design and run evaluations for LLM/agent features shipped to users — task set construction, rubric or programmatic scoring, regression baselines, cost/latency tracking, and failure taxonomy. Use when a prompt, tool schema, model, or RAG shape changes on a live LLM-backed feature, before any such feature first ships, or on a recurring cadence to catch silent quality/cost drift. Invokes ai-engineer.",
+      "guild": null
     },
     {
       "id": "hub",
-      "description": "One-command orientation across the whole ecosystem — active bets, open gates, task state, recent pipeline output, and pending decisions. Use at session start, after time away, or whenever the question is \"where were we and what needs me\"."
+      "description": "One-command orientation across the whole ecosystem — active bets, open gates, task state, recent pipeline output, and pending decisions. Use at session start, after time away, or whenever the question is \"where were we and what needs me\".",
+      "guild": null
     },
     {
       "id": "idea",
-      "description": "Personal project Idea Vault. Use when James says /idea, \"I have an idea\", \"add to idea vault\", \"show my ideas\", or \"what ideas do I have\". Captures project ideas, queues personal ones for weekends, routes work ideas to the right world. Distinct from /note (raw capture) and /task (actionable now)."
+      "description": "Personal project Idea Vault. Use when James says /idea, \"I have an idea\", \"add to idea vault\", \"show my ideas\", or \"what ideas do I have\". Captures project ideas, queues personal ones for weekends, routes work ideas to the right world. Distinct from /note (raw capture) and /task (actionable now).",
+      "guild": null
     },
     {
       "id": "inbox",
-      "description": "Works the personal-project task queue — GitHub issues labeled claude-task on allowlisted personal repos, filed from any device. Lists the queue, picks up tasks, works them into PRs, and hands finished work back with needs-james for review. Use via /inbox, \"/inbox work <issue>\", or \"check my inbox\"."
+      "description": "Works the personal-project task queue — GitHub issues labeled claude-task on allowlisted personal repos, filed from any device. Lists the queue, picks up tasks, works them into PRs, and hands finished work back with needs-james for review. Use via /inbox, \"/inbox work <issue>\", or \"check my inbox\".",
+      "guild": null
     },
     {
       "id": "launch",
-      "description": "Distribution playbook for shipping a project publicly. Use when a project is ready to launch or needs a launch plan — pre-flight checks, channel sequence, launch assets, and post-launch loop, tuned to 2026 evidence."
+      "description": "Distribution playbook for shipping a project publicly. Use when a project is ready to launch or needs a launch plan — pre-flight checks, channel sequence, launch assets, and post-launch loop, tuned to 2026 evidence.",
+      "guild": null
     },
     {
       "id": "learn",
-      "description": "Run a guided ~30-minute build-first lesson from the AI Solutions Architect Track. Use when James says /learn, \"teach me\", \"continue my course\", names a lesson id (F1.1, S3.3, A4.2), or names a topic from the curriculum. Designed for a learner with deep practical exposure but no formal coding or CS background - hands-on artifacts, Socratic dialogue, spaced recall, progress that survives shutdowns."
+      "description": "Run a guided ~30-minute build-first lesson from the AI Solutions Architect Track. Use when James says /learn, \"teach me\", \"continue my course\", names a lesson id (F1.1, S3.3, A4.2), or names a topic from the curriculum. Designed for a learner with deep practical exposure but no formal coding or CS background - hands-on artifacts, Socratic dialogue, spaced recall, progress that survives shutdowns.",
+      "guild": null
     },
     {
       "id": "localize",
-      "description": "Adapt a product surface or campaign for the Filipino market and diaspora — register choice (English/Taglish/Filipino), cultural specificity, payment and connectivity realities, timezone/holiday awareness, and a locked glossary of what never translates (safety terms, brand vocabulary). Use before any PH-facing copy ships, when a feature touches payments/notifications/timing, or when a campaign targets PH/SEA."
+      "description": "Adapt a product surface or campaign for the Filipino market and diaspora — register choice (English/Taglish/Filipino), cultural specificity, payment and connectivity realities, timezone/holiday awareness, and a locked glossary of what never translates (safety terms, brand vocabulary). Use before any PH-facing copy ships, when a feature touches payments/notifications/timing, or when a campaign targets PH/SEA.",
+      "guild": null
     },
     {
       "id": "model-bakeoff",
-      "description": "Pick which model artifact ships to the visitor's browser, and prove the choice on real hardware — candidate matrix (model x quantization x backend), license gate before measurement, cold vs. warm latency, peak memory, download bytes, and quality on the slice the demo actually shows. Use before committing to any on-device model (transformers.js, ONNX Runtime Web, MediaPipe, WebNN), when swapping quantization or backend, or when a demo OOMs, stutters, or downloads more than its budget. Produces a Model Card and an Inference Budget. Invokes ondevice-ml-engineer; NOT for hosted-API LLM features (that is eval-suite)."
+      "description": "Pick which model artifact ships to the visitor's browser, and prove the choice on real hardware — candidate matrix (model x quantization x backend), license gate before measurement, cold vs. warm latency, peak memory, download bytes, and quality on the slice the demo actually shows. Use before committing to any on-device model (transformers.js, ONNX Runtime Web, MediaPipe, WebNN), when swapping quantization or backend, or when a demo OOMs, stutters, or downloads more than its budget. Produces a Model Card and an Inference Budget. Invokes ondevice-ml-engineer; NOT for hosted-API LLM features (that is eval-suite).",
+      "guild": null
     },
     {
       "id": "new-guild",
-      "description": "Forges a new field ecosystem (guild) for any tech or business field — research pass, director agent, specialist bench, curated skill library — following the construction standard. Use when entering a new field (\"build the game guild\", \"I need a legal-ops guild\") or when the Field Map queues the next wave."
+      "description": "Forges a new field ecosystem (guild) for any tech or business field — research pass, director agent, specialist bench, curated skill library — following the construction standard. Use when entering a new field (\"build the game guild\", \"I need a legal-ops guild\") or when the Field Map queues the next wave.",
+      "guild": null
     },
     {
       "id": "new-project",
-      "description": "Bootstrap a new project the ecosystem way. Use when starting any new project or repo — runs the strategy gate, then scaffolds the standard structure, CLAUDE.md, stack defaults, and the linked Obsidian vault note."
+      "description": "Bootstrap a new project the ecosystem way. Use when starting any new project or repo — runs the strategy gate, then scaffolds the standard structure, CLAUDE.md, stack defaults, and the linked Obsidian vault note.",
+      "guild": null
     },
     {
       "id": "new-world",
-      "description": "Scaffold a new isolated \"world\" (employment/business identity) on this machine - root folder, boundary CLAUDE.md, vault with private repo and autosync, git identity, scheduled tasks, registry entries. Use when James takes a new job, employer, or business line that needs full separation (like Lift or Freelance). A new freelance CLIENT is a folder in the Freelance world, NOT a new world."
+      "description": "Scaffold a new isolated \"world\" (employment/business identity) on this machine - root folder, boundary CLAUDE.md, vault with private repo and autosync, git identity, scheduled tasks, registry entries. Use when James takes a new job, employer, or business line that needs full separation (like Lift or Freelance). A new freelance CLIENT is a folder in the Freelance world, NOT a new world.",
+      "guild": null
     },
     {
       "id": "note",
-      "description": "Quick note capture into the Personal Vault. Use when James says /note, \"capture this\", \"jot down\", \"remember\", or provides a thought he wants saved without building a full task or idea around it yet. Distinct from /idea (structured project ideas) and /save (session checkpoint)."
+      "description": "Quick note capture into the Personal Vault. Use when James says /note, \"capture this\", \"jot down\", \"remember\", or provides a thought he wants saved without building a full task or idea around it yet. Distinct from /idea (structured project ideas) and /save (session checkpoint).",
+      "guild": null
     },
     {
       "id": "offline-pwa",
-      "description": "Offline-first installable web app as an ordered, gated procedure — manifest and icon family, the service-worker strategy table (Workbox injectManifest, revision-hashed precache, registerType 'prompt' update chip, content kept OUT of the precache and swapped atomically after a hash check), the IndexedDB event-sourced local model with a one-line conflict rule and navigator.storage.persist(), iOS Safari install and eviction limits verified at run time, privacy by encrypting the content bundle instead of an auth proxy, the Playwright setOffline(true) e2e and byte budgets as CI assertions, and pwa-audit as the deterministic gate. Use when a project must install to a phone or desktop from a URL and work with no signal, when a deployed PWA serves stale content or breaks offline, when deciding how a private offline app is protected, or before calling any installable surface done. Not for native/store apps (mobile-guild) or server-side caching (cloudflare skills)."
+      "description": "Offline-first installable web app as an ordered, gated procedure — manifest and icon family, the service-worker strategy table (Workbox injectManifest, revision-hashed precache, registerType 'prompt' update chip, content kept OUT of the precache and swapped atomically after a hash check), the IndexedDB event-sourced local model with a one-line conflict rule and navigator.storage.persist(), iOS Safari install and eviction limits verified at run time, privacy by encrypting the content bundle instead of an auth proxy, the Playwright setOffline(true) e2e and byte budgets as CI assertions, and pwa-audit as the deterministic gate. Use when a project must install to a phone or desktop from a URL and work with no signal, when a deployed PWA serves stale content or breaks offline, when deciding how a private offline app is protected, or before calling any installable surface done. Not for native/store apps (mobile-guild) or server-side caching (cloudflare skills).",
+      "guild": null
     },
     {
       "id": "openclaw",
-      "description": "OpenClaw — mobile control for Claude Code via WhatsApp, Viber, or iPhone app. Use when James wants to send commands to his desktop/laptop Claude Code from his phone, or when designing/building the OpenClaw webhook bridge. Distinct from AgentJames Control (local browser dashboard) — OpenClaw is the REMOTE channel layer."
+      "description": "OpenClaw — mobile control for Claude Code via WhatsApp, Viber, or iPhone app. Use when James wants to send commands to his desktop/laptop Claude Code from his phone, or when designing/building the OpenClaw webhook bridge. Distinct from AgentJames Control (local browser dashboard) — OpenClaw is the REMOTE channel layer.",
+      "guild": null
     },
     {
       "id": "pitch",
-      "description": "Turns a client lead into a signable proposal draft — discovery questions, scoped deliverables with explicit exclusions, tiered pricing, portfolio-grounded proof, and a follow-up cadence. Use when a client conversation needs a real proposal, before a scoping/demo call, or when James says \"draft a pitch/proposal for <client>\". Invokes sales-engineer and pricing-strategist. Drafts only — always stops at James for sending."
+      "description": "Turns a client lead into a signable proposal draft — discovery questions, scoped deliverables with explicit exclusions, tiered pricing, portfolio-grounded proof, and a follow-up cadence. Use when a client conversation needs a real proposal, before a scoping/demo call, or when James says \"draft a pitch/proposal for <client>\". Invokes sales-engineer and pricing-strategist. Drafts only — always stops at James for sending.",
+      "guild": null
     },
     {
       "id": "postmortem",
-      "description": "Blameless incident review for a resolved production incident (outage, data exposure, bad deploy, security event) - reconstructs an evidence-cited timeline, names multiple contributing factors and the detection gap, and converts findings into owned action items that land in agent doctrine or the backlog same day. Use when James says \"postmortem\", \"what went wrong\", or a live product (Klik, future products) just had an incident that is now mitigated."
+      "description": "Blameless incident review for a resolved production incident (outage, data exposure, bad deploy, security event) - reconstructs an evidence-cited timeline, names multiple contributing factors and the detection gap, and converts findings into owned action items that land in agent doctrine or the backlog same day. Use when James says \"postmortem\", \"what went wrong\", or a live product (Klik, future products) just had an incident that is now mitigated.",
+      "guild": null
     },
     {
       "id": "promo-studio",
-      "description": "High-end programmatic video and marketing-material studio. Use when a project needs promo videos, launch assets, social banners, personalized/interactive video, or any motion design. Builds everything as code (Remotion) from the project's real design system, never generic AI-generated footage."
+      "description": "High-end programmatic video and marketing-material studio. Use when a project needs promo videos, launch assets, social banners, personalized/interactive video, or any motion design. Builds everything as code (Remotion) from the project's real design system, never generic AI-generated footage.",
+      "guild": null
     },
     {
       "id": "pulse",
-      "description": "Runs the PULSE recency radar — three scanner agents sweep the last ~2 weeks of AI/agentic, dev-ecosystem, and market signals, prioritized into a digest with concrete so-what actions, saved to the vault. Use on request (/pulse) or on schedule to keep the ecosystem current."
+      "description": "Runs the PULSE recency radar — three scanner agents sweep the last ~2 weeks of AI/agentic, dev-ecosystem, and market signals, prioritized into a digest with concrete so-what actions, saved to the vault. Use on request (/pulse) or on schedule to keep the ecosystem current.",
+      "guild": null
     },
     {
       "id": "reach-kit",
-      "description": "Per-project reach kit — the gated distribution deliverable a showcase project ships once it is live. Assembles and verifies, in order, the receipts (every headline number traced to a committed artifact), the one-click-try URL (200 with a content assertion), the OG image (fetched from the live URL, exactly 1200x630, PNG/JPEG, under 1 MB), the demo clip (60 s cap, muted-legible, creative-director gate), the DRAFT-WRITEUP in BATCH-2 format, and then a social-ops post draft. Use when a project is deployed and needs its reach assets, when a writeup is staged but nothing else exists, or before any post that references a project. James posts; this never publishes."
+      "description": "Per-project reach kit — the gated distribution deliverable a showcase project ships once it is live. Assembles and verifies, in order, the receipts (every headline number traced to a committed artifact), the one-click-try URL (200 with a content assertion), the OG image (fetched from the live URL, exactly 1200x630, PNG/JPEG, under 1 MB), the demo clip (60 s cap, muted-legible, creative-director gate), the DRAFT-WRITEUP in BATCH-2 format, and then a social-ops post draft. Use when a project is deployed and needs its reach assets, when a writeup is staged but nothing else exists, or before any post that references a project. James posts; this never publishes.",
+      "guild": null
     },
     {
       "id": "retro",
-      "description": "Self-improvement engine for the agent ecosystem. Run after finishing a milestone, shipping something, or any session with real lessons — distills learnings into memory and the OWNING WORLD'S vault (Personal / Freelance / Lift; agentic-craft lessons to the General Vault - route per ~/.claude/WORLDS.md), and proposes concrete ecosystem upgrades."
+      "description": "Self-improvement engine for the agent ecosystem. Run after finishing a milestone, shipping something, or any session with real lessons — distills learnings into memory and the OWNING WORLD'S vault (Personal / Freelance / Lift; agentic-craft lessons to the General Vault - route per ~/.claude/WORLDS.md), and proposes concrete ecosystem upgrades.",
+      "guild": null
     },
     {
       "id": "sandbox-sdk",
-      "description": "Build sandboxed applications for secure code execution. Load when building AI code execution, code interpreters, CI/CD systems, interactive dev environments, or executing untrusted code. Covers Sandbox SDK lifecycle, commands, files, code interpreter, and preview URLs. Biases towards retrieval from Cloudflare docs over pre-trained knowledge."
+      "description": "Build sandboxed applications for secure code execution. Load when building AI code execution, code interpreters, CI/CD systems, interactive dev environments, or executing untrusted code. Covers Sandbox SDK lifecycle, commands, files, code interpreter, and preview URLs. Biases towards retrieval from Cloudflare docs over pre-trained knowledge.",
+      "guild": null
     },
     {
       "id": "save",
-      "description": "Checkpoints the session's durable knowledge into all three memory layers — Claude's auto-memory, the project folder docs, and the OWNING WORLD'S vault (Personal / Freelance / Lift / General; route per ~/.claude/WORLDS.md) — and performs vault maintenance. Use on request (/save), before ending a significant session, or after decisions worth keeping."
+      "description": "Checkpoints the session's durable knowledge into all three memory layers — Claude's auto-memory, the project folder docs, and the OWNING WORLD'S vault (Personal / Freelance / Lift / General; route per ~/.claude/WORLDS.md) — and performs vault maintenance. Use on request (/save), before ending a significant session, or after decisions worth keeping.",
+      "guild": null
     },
     {
       "id": "scout",
-      "description": "Runs the SCOUT idea pipeline — multi-agent opportunity scan (four hunting angles, strategist scoring) producing a ranked shortlist saved to the vault. Use on request (/scout, optionally with a focus like \"/scout chrome extensions\"), or on schedule. Research and rank only; James picks what gets built."
+      "description": "Runs the SCOUT idea pipeline — multi-agent opportunity scan (four hunting angles, strategist scoring) producing a ranked shortlist saved to the vault. Use on request (/scout, optionally with a focus like \"/scout chrome extensions\"), or on schedule. Research and rank only; James picks what gets built.",
+      "guild": null
     },
     {
       "id": "seal",
-      "description": "Secret Vault manager. Use when James says /seal, \"get my key for X\", \"store a secret\", \"what keys do I have\", or \"rotate secrets\". Manages per-project and general secrets in ~/.claude/secrets/ (gitignored, local-only). Enforces account isolation: personal keys never leak into Lift work and vice versa."
+      "description": "Secret Vault manager. Use when James says /seal, \"get my key for X\", \"store a secret\", \"what keys do I have\", or \"rotate secrets\". Manages per-project and general secrets in ~/.claude/secrets/ (gitignored, local-only). Enforces account isolation: personal keys never leak into Lift work and vice versa.",
+      "guild": null
     },
     {
       "id": "ship-it",
-      "description": "The release protocol for taking a change on a live Cloudflare product to production — pre-flight checks, remote migration verification, secret presence, staged deploy, post-deploy E2E against real production, test-data purge, and outcomes-ledger pre-registration with rollback triggers. Use whenever code is about to go live on a shipped product (Klik or any other deployed project), not while still building the feature."
+      "description": "The release protocol for taking a change on a live Cloudflare product to production — pre-flight checks, remote migration verification, secret presence, staged deploy, post-deploy E2E against real production, test-data purge, and outcomes-ledger pre-registration with rollback triggers. Use whenever code is about to go live on a shipped product (Klik or any other deployed project), not while still building the feature.",
+      "guild": null
     },
     {
       "id": "social-ops",
-      "description": "Per-project social media operations — generates platform-adapted post drafts from real project milestones, reply drafts, and researched prospect lists with personalized outreach drafts, all landing in a review queue James approves and sends himself. Use via /social-ops <project> or when a project ships something worth posting."
+      "description": "Per-project social media operations — generates platform-adapted post drafts from real project milestones, reply drafts, and researched prospect lists with personalized outreach drafts, all landing in a review queue James approves and sends himself. Use via /social-ops <project> or when a project ships something worth posting.",
+      "guild": null
     },
     {
       "id": "spec-it",
-      "description": "Turns a raw idea or feature request into a buildable Spec — acceptance criteria, edge cases, data model implications, and an explicit scope cut — by running product-manager, ux-researcher, architect and data-engineer in sequence. Use when \"build X\" arrives with no written spec, when a backlog item needs acceptance criteria before engineering touches it, or when a feature will change the data model and needs a safe migration path decided before code is written."
+      "description": "Turns a raw idea or feature request into a buildable Spec — acceptance criteria, edge cases, data model implications, and an explicit scope cut — by running product-manager, ux-researcher, architect and data-engineer in sequence. Use when \"build X\" arrives with no written spec, when a backlog item needs acceptance criteria before engineering touches it, or when a feature will change the data model and needs a safe migration path decided before code is written.",
+      "guild": null
     },
     {
       "id": "supabase-security-review",
-      "description": "Attended, verifier-gated review pipeline for a Supabase (Postgres RLS + PostgREST + GoTrue) + Next.js codebase, from preflight to a client-grade technical review (and optional minimal patch) inside a fixed time box, with three human gates. Use when a client engagement under a contractor agreement scopes a review of Supabase data access, auth/session handling, RLS coverage, or server-side authorization."
+      "description": "Attended, verifier-gated review pipeline for a Supabase (Postgres RLS + PostgREST + GoTrue) + Next.js codebase, from preflight to a client-grade technical review (and optional minimal patch) inside a fixed time box, with three human gates. Use when a client engagement under a contractor agreement scopes a review of Supabase data access, auth/session handling, RLS coverage, or server-side authorization.",
+      "guild": null
     },
     {
       "id": "sync-config",
-      "description": "Ecosystem config sync between devices. Use when James wants to push his Claude Code config to GitHub for the laptop, pull on the laptop, or check sync status. Wrapper for ~/.claude/tools/ecosystem-sync.ps1."
+      "description": "Ecosystem config sync between devices. Use when James wants to push his Claude Code config to GitHub for the laptop, pull on the laptop, or check sync status. Wrapper for ~/.claude/tools/ecosystem-sync.ps1.",
+      "guild": null
     },
     {
       "id": "taste",
-      "description": "Anti-slop constitution for design, UI, copy, and naming. Load before designing any interface, writing public-facing text, naming anything, or making aesthetic choices — enforces decision-driven, non-generic output."
+      "description": "Anti-slop constitution for design, UI, copy, and naming. Load before designing any interface, writing public-facing text, naming anything, or making aesthetic choices — enforces decision-driven, non-generic output.",
+      "guild": null
     },
     {
       "id": "teardown",
-      "description": "Deep teardown of a named competitor or reference product — signup-to-value walkthrough, feature/pricing matrix, positioning read, technical inference, and 2-3 ranked exploitable weaknesses — invoking competitive-analyst and landing in a dated per-project living competitor file. Use when a named rival or reference product needs a full teardown before a build, pricing, or positioning decision, or on a quarterly refresh cadence."
+      "description": "Deep teardown of a named competitor or reference product — signup-to-value walkthrough, feature/pricing matrix, positioning read, technical inference, and 2-3 ranked exploitable weaknesses — invoking competitive-analyst and landing in a dated per-project living competitor file. Use when a named rival or reference product needs a full teardown before a build, pricing, or positioning decision, or on a quarterly refresh cadence.",
+      "guild": null
     },
     {
       "id": "turnstile-spin",
-      "description": "Set up Cloudflare Turnstile end-to-end in a project. Scan the codebase, create the widget via the Cloudflare API, embed it on the right forms, wire canonical server-side siteverify in the customer's existing backend, validate, and persist the skill. Load this when a user asks to add Turnstile, set up CAPTCHA, protect a form from bots, or fix a Turnstile integration. Mirrors developers.cloudflare.com/turnstile/spin."
+      "description": "Set up Cloudflare Turnstile end-to-end in a project. Scan the codebase, create the widget via the Cloudflare API, embed it on the right forms, wire canonical server-side siteverify in the customer's existing backend, validate, and persist the skill. Load this when a user asks to add Turnstile, set up CAPTCHA, protect a form from bots, or fix a Turnstile integration. Mirrors developers.cloudflare.com/turnstile/spin.",
+      "guild": null
     },
     {
       "id": "web-perf",
-      "description": "Analyzes web performance using Chrome DevTools MCP. Measures Core Web Vitals (LCP, INP, CLS) and supplementary metrics (FCP, TBT, Speed Index), identifies render-blocking resources, network dependency chains, layout shifts, caching issues, and accessibility gaps. Use when asked to audit, profile, debug, or optimize page load performance, Lighthouse scores, or site speed. Biases towards retrieval from current documentation over pre-trained knowledge."
+      "description": "Analyzes web performance using Chrome DevTools MCP. Measures Core Web Vitals (LCP, INP, CLS) and supplementary metrics (FCP, TBT, Speed Index), identifies render-blocking resources, network dependency chains, layout shifts, caching issues, and accessibility gaps. Use when asked to audit, profile, debug, or optimize page load performance, Lighthouse scores, or site speed. Biases towards retrieval from current documentation over pre-trained knowledge.",
+      "guild": null
     },
     {
       "id": "workers-best-practices",
-      "description": "Reviews and authors Cloudflare Workers code against production best practices. Load when writing new Workers, reviewing Worker code, configuring wrangler.jsonc, or checking for common Workers anti-patterns (streaming, floating promises, global state, secrets, bindings, observability). Biases towards retrieval from Cloudflare docs over pre-trained knowledge."
+      "description": "Reviews and authors Cloudflare Workers code against production best practices. Load when writing new Workers, reviewing Worker code, configuring wrangler.jsonc, or checking for common Workers anti-patterns (streaming, floating promises, global state, secrets, bindings, observability). Biases towards retrieval from Cloudflare docs over pre-trained knowledge.",
+      "guild": null
     },
     {
       "id": "wrangler",
-      "description": "Cloudflare Workers CLI for deploying, developing, and managing Workers, KV, R2, D1, Vectorize, Hyperdrive, Workers AI, Containers, Queues, Workflows, Pipelines, and Secrets Store. Load before running wrangler commands to ensure correct syntax and best practices. Biases towards retrieval from Cloudflare docs over pre-trained knowledge."
+      "description": "Cloudflare Workers CLI for deploying, developing, and managing Workers, KV, R2, D1, Vectorize, Hyperdrive, Workers AI, Containers, Queues, Workflows, Pipelines, and Secrets Store. Load before running wrangler commands to ensure correct syntax and best practices. Biases towards retrieval from Cloudflare docs over pre-trained knowledge.",
+      "guild": null
+    },
+    {
+      "id": "context-engineering",
+      "description": "Designs and reviews the context economy of agentic systems — what stays resident, what loads on demand, what survives sessions. Use when architecting any multi-agent or long-running system, when a session degrades from context bloat, or when reviewing an agent design for token efficiency.",
+      "guild": "agentic-guild"
+    },
+    {
+      "id": "mcp-builder",
+      "description": "Guide for creating high-quality MCP (Model Context Protocol) servers that enable LLMs to interact with external services through well-designed tools. Use when building MCP servers to integrate external APIs or services, whether in Python (FastMCP) or Node/TypeScript (MCP SDK).",
+      "guild": "agentic-guild"
+    },
+    {
+      "id": "skill-creator",
+      "description": "Create new skills, modify and improve existing skills, and measure skill performance. Use when users want to create a skill from scratch, edit, or optimize an existing skill, run evals to test a skill, benchmark skill performance with variance analysis, or optimize a skill's description for better triggering accuracy.",
+      "guild": "agentic-guild"
+    },
+    {
+      "id": "ghl-delivery",
+      "description": "House standard for GoHighLevel work — the capability map of what can and cannot be automated, the competence path from zero, the delivery and verification protocol, and the differentiation that separates this from configurator labour. Use before quoting, building, or reviewing any GHL engagement.",
+      "guild": "automation-guild"
+    },
+    {
+      "id": "n8n-delivery",
+      "description": "House standard for building and verifying n8n workflows to client grade — authoring conventions, the real-install verification protocol, credential and monitoring patterns, and delivery packaging. Use when building, reviewing, or shipping any n8n workflow.",
+      "guild": "automation-guild"
+    },
+    {
+      "id": "api-conventions",
+      "description": "House API design conventions for HTTP/JSON services — resource shapes, error contracts, idempotency, pagination, versioning, auth patterns. Use when designing or reviewing any API surface, adding endpoints, or defining webhook contracts. Fills a verified gap: no credible community API-design skill exists.",
+      "guild": "backend-guild"
+    },
+    {
+      "id": "supabase-postgres-best-practices",
+      "description": "Postgres performance optimization and best practices from Supabase. Use this skill when writing, reviewing, or optimizing Postgres queries, schema designs, or database configurations.",
+      "guild": "backend-guild"
+    },
+    {
+      "id": "animation-vocabulary",
+      "description": "Reverse-lookup glossary that turns a vague description of a web animation or motion effect into its exact term (\"the bouncy thing when a popover opens\" → Pop in; \"the iOS rubber-band scroll\" → Rubber-banding). Use when the user asks \"what's it called when…\", or describes a motion effect without knowing its name and wants the right word to prompt an AI or designer with. For naming an effect, not designing or building one.",
+      "guild": "design-guild"
+    },
+    {
+      "id": "apple-design",
+      "description": "Apple's approach to interface design and fluid, physical motion, translated for the web. Use when building or reviewing gesture-driven UI, spring animations, drag/swipe/sheet interactions, momentum and interruptible transitions, translucent materials and depth, typography (optical sizing, tracking, leading), reduced-motion, or the design foundations (feedback, spatial consistency, restraint) behind Apple-style interfaces.",
+      "guild": "design-guild"
+    },
+    {
+      "id": "creative-showcase",
+      "description": "Direction playbook for attention-earning creative websites — portfolios, product launches, landing pages that must stand out. Use when a site's job is to showcase skill and get noticed, when planning scroll-driven or 3D/motion-heavy pages, or when a design brief says \"impressive\" and the risk is generic.",
+      "guild": "design-guild"
+    },
+    {
+      "id": "design-dna",
+      "description": "Defines or extracts a project's design DNA — the written design language (intent, tone commitment, type/color/spacing/motion system, signature element, forbidden defaults) with rationale. Use when starting any user-facing surface, when UI decisions feel arbitrary, or to capture the design language of an existing product or reference.",
+      "guild": "design-guild"
+    },
+    {
+      "id": "emil-design-eng",
+      "description": "This skill encodes Emil Kowalski's philosophy on UI polish, component design, animation decisions, and the invisible details that make software feel great.",
+      "guild": "design-guild"
+    },
+    {
+      "id": "find-animation-opportunities",
+      "description": "Search a codebase or UI for places that don't animate but should, and reject everything that shouldn't. Read-only; it proposes motion with exact values, it does not implement it. Use when the user asks \"what could be animated here?\" or wants to \"make this feel more alive\". For fixing existing animations, use improve-animations or review-animations instead.",
+      "guild": "design-guild"
+    },
+    {
+      "id": "improve-animations",
+      "description": "Survey a codebase's animation and motion code as a senior motion advisor, then produce a prioritized audit and self-contained implementation plans for other agents (or cheaper models) to execute. Read-only on source code — it plans improvements, it does not apply them. Use when the user asks to \"improve the animations\", \"audit the motion\", \"make this app feel better\", or wants a roadmap of animation fixes rather than a review of a single diff.",
+      "guild": "design-guild"
+    },
+    {
+      "id": "motion-design",
+      "description": "Applies motion design principles to create emotionally-driven, technically sound animations and transitions. Provides timing, easing, choreography, and Disney animation principles adapted for UI. Use when creating animations, transitions, micro-interactions, loading states, page transitions, scroll-triggered effects, or any motion work. Works with CSS, Framer Motion, GSAP, Lottie, Spring, or any animation system.",
+      "guild": "design-guild"
+    },
+    {
+      "id": "pick-ui-library",
+      "description": "Pick the right library for a given frontend task from a curated, opinionated list — numbers, OTP inputs, charts, command menus, virtualization, drag and drop, toasts, state, styling, and more. Only runs when explicitly invoked; it does not trigger on its own.",
+      "guild": "design-guild"
+    },
+    {
+      "id": "review-animations",
+      "description": "Reviews animation and motion code against a high craft bar derived from Emil Kowalski's design engineering philosophy. Default to flagging; approval is earned.",
+      "guild": "design-guild"
+    },
+    {
+      "id": "ui-ux-pro-max",
+      "description": "UI/UX design intelligence for web and mobile. Searchable local database with 84 styles, 192 color palettes, 74 font pairings, 192 product types, 98 UX guidelines, 104 icon entries, 16 GSAP motion presets, and 25 chart types across 22 stacks (React, Next.js, Vue, Nuxt, Svelte, Astro, SwiftUI, React Native, Flutter, Tailwind, shadcn/ui, Jetpack Compose, Angular, Laravel, JavaFX, WPF, WinUI, Avalonia, Uno Platform, UWP, Three.js, and HTML/CSS). Use when designing, building, or reviewing UI: pages, components, color schemes, typography, layout, accessibility, animation, or data visualization.",
+      "guild": "design-guild"
+    },
+    {
+      "id": "web-design-guidelines",
+      "description": "Review UI code for Web Interface Guidelines compliance. Use when asked to \"review my UI\", \"check accessibility\", \"audit design\", \"review UX\", or \"check my site against best practices\".",
+      "guild": "design-guild"
+    },
+    {
+      "id": "webapp-testing",
+      "description": "Toolkit for interacting with and testing local web applications using Playwright. Supports verifying frontend functionality, debugging UI behavior, capturing browser screenshots, and viewing browser logs.",
+      "guild": "design-guild"
+    },
+    {
+      "id": "game-art-pipeline",
+      "description": "Get a shippable visual identity out of a solo developer who is not an artist — choosing a style that hides weakness, sourcing and license-auditing free/paid assets (CC0, Kenney, itch bundles, engine asset stores), keeping a mixed-source library coherent, sprite/tileset/atlas hygiene, and the AI-asset licensing trap. Use before buying or downloading any art asset, when a build looks like programmer art, when assets from different sources refuse to sit together, when a game needs 3D assets (Blender → glTF → Godot; Blender is not installed here), or when in-engine VFX must stay inside the frame budget and the no-flash setting.",
+      "guild": "game-guild"
+    },
+    {
+      "id": "game-audio",
+      "description": "Interactive and adaptive audio for a Godot 4 game — the event-to-bus map (every verb gets a cue, three player-facing buses), variance and polyphony so repeated cues stay alive, adaptive music layers, a verified loudness target and the master-limiter trap in web exports, synthesized-first assets via the house gen-sfx recipes, and a licence-ledger row per file. Use when a game needs sound on its verbs, when adding music or a settings audio page, when audio keeps playing after a scene change, or before any store or itch build. Distinct from the house sound-designer, which directs audio for promos and video; this is the running game.",
+      "guild": "game-guild"
+    },
+    {
+      "id": "game-feel",
+      "description": "Diagnose and fix why a game prototype feels dead, floaty, or unresponsive — input latency and buffering, coyote time, acceleration curves, hitstop, screenshake, camera lag, audio-visual coincidence, and the frame budget that protects all of it. Use when a mechanic is implemented correctly but feels wrong, before any playtest, or when tuning movement, combat, or any moment-to-moment control.",
+      "guild": "game-guild"
+    },
+    {
+      "id": "game-scoping",
+      "description": "Scope a game to something that actually gets finished and released — the rung it sits on, the vertical slice, the finish-line contract, the cut list, and the capability prerequisites for the next rung. Use before starting any game project, when a project has been \"almost done\" for a month, when scope keeps growing, or when deciding whether a game is ready to move from itch.io to a store release.",
+      "guild": "game-guild"
+    },
+    {
+      "id": "godot-agentic",
+      "description": "Structure and drive a Godot 4 project so an agent can edit, run, and verify it without a human watching — text-scene conventions, node/scene architecture, the measured Godot 4.7.2 CLI invocations (headless runs, --check-only, exports and their exit-code traps), deterministic stepping via gdharness, GUT tests, the MCP bridge landscape, and the hands-on protocol where James types the gameplay and agents own the verification. Use when starting a Godot project, when an agent needs to verify a Godot change autonomously, when running a James session under the hands-on protocol, or when choosing between Godot, Unity, and a browser engine.",
+      "guild": "game-guild"
+    },
+    {
+      "id": "level-design",
+      "description": "Design a level that teaches through space and paces itself — one intent sentence per level, the mechanic script (introduce safely, test, twist, combine), a beat chart of tension and rest with numeric targets, greybox before any art, readability and guidance (landmarks, light, sightlines) instead of text, a scripted completability route for the harness, and the playtest metrics that decide when a level is done. Use when a game has levels, rooms, arenas with geometry, dungeons, or a sequence of spaces; when a level \"feels long\"; or when a playtest shows players lost. Not for a single-screen arena like merkhet — there, game-designer's loop diagnosis comes first and this skill's Level Verdict is usually NOT NOW.",
+      "guild": "game-guild"
+    },
+    {
+      "id": "playtest-protocol",
+      "description": "Run a playtest that produces usable evidence instead of politeness — recruiting, the silent-observation rule, the first-five-minutes test, what to ask before and after (never during), lightweight telemetry, and how to turn observations into a ranked change list without chasing every suggestion. Use before calling any build done, after a vertical slice is playable, on a fixed cadence during production, and as the measured first-run gate (a stranger reaches the core verb within 20 seconds) before a release.",
+      "guild": "game-guild"
+    },
+    {
+      "id": "procgen",
+      "description": "Generate game content as code — seeded determinism, noise and grammar and wave-function-collapse level generation, loot and encounter tables, and the solvability validators that stop a generator shipping unplayable content. Use when a game needs levels, maps, dungeons, items, or encounters produced programmatically, or when a generator produces technically valid but boring or unbeatable output.",
+      "guild": "game-guild"
+    },
+    {
+      "id": "ship-game",
+      "description": "Release a game to players — itch.io publishing, the Steam Direct path (fee, review window, store page, depots, builds, wishlists, age ratings, AI-content disclosure), build and upload automation via butler and steamcmd, launch-day checks, and the post-release patch and review loop. Use when a game is ready to reach players, when setting up a store page, or when planning the release runway months before launch.",
+      "guild": "game-guild"
+    },
+    {
+      "id": "web-game-build",
+      "description": "Build and ship a browser game that holds 60fps on a mid-range phone — engine choice (canvas/Phaser/Three.js/Godot web export), the fixed-timestep game loop, input across touch and keyboard and gamepad, asset and bundle budgets, save state, and the Playwright verification loop plus itch.io and Cloudflare deployment. Use for any game that runs in a browser, including jam entries and engine web exports.",
+      "guild": "game-guild"
+    },
+    {
+      "id": "ai-seo",
+      "description": "When the user wants to optimize content for AI search engines, get cited by LLMs, or appear in AI-generated answers. Also use when the user mentions 'AI SEO,' 'AEO,' 'GEO,' 'LLMO,' 'answer engine optimization,' 'generative engine optimization,' 'LLM optimization,' 'AI Overviews,' 'optimize for ChatGPT,' 'optimize for Perplexity,' 'AI citations,' 'AI visibility,' 'zero-click search,' 'how do I show up in AI answers,' 'LLM mentions,' 'optimize for Claude/Gemini,' 'llms.txt,' 'OKF,' 'Open Knowledge Format,' 'knowledge bundle,' or 'agent-readable site.' Use this whenever someone wants their content to be cited or surfaced by AI assistants and AI search engines. For traditional technical and on-page SEO audits, see seo-audit. For structured data implementation, see schema.",
+      "guild": "growth-guild"
+    },
+    {
+      "id": "cro",
+      "description": "When the user wants to optimize, improve, or increase conversions on any marketing page or form — including homepage, landing pages, pricing pages, feature pages, lead capture forms, or contact forms. Also use when the user says 'CRO,' 'conversion rate optimization,' 'this page isn't converting,' 'improve conversions,' 'why isn't this page working,' 'my landing page sucks,' 'form abandonment,' 'nobody's converting,' 'low conversion rate,' or 'this page needs work.' Use this even if the user just shares a URL and asks for feedback. For signup/registration flows, see signup. For post-signup activation, see onboarding. For popups/modals, see popups.",
+      "guild": "growth-guild"
+    },
+    {
+      "id": "directory-submissions",
+      "description": "When the user wants to submit their product to startup, SaaS, AI, agent, MCP, no-code, or review directories for backlinks, domain rating, and discovery. Also use when the user mentions \"directory submissions,\" \"submit to directories,\" \"backlinks from directories,\" \"list my product,\" \"submit to Product Hunt,\" \"BetaList,\" \"TAAFT,\" \"Futurepedia,\" \"G2 listing,\" \"Capterra listing,\" \"AlternativeTo,\" \"SaaSHub,\" \"AI directories,\" \"MCP registry,\" \"agent directory,\" \"dofollow backlinks,\" \"launch directories,\" or \"directory tracker.\" Use this whenever someone is planning the directory layer of a product launch or an ongoing backlink campaign. For the broader launch moment, see launch. For programmatic SEO pages that should live behind these backlinks, see programmatic-seo. For AI citation optimization, see ai-seo.",
+      "guild": "growth-guild"
+    },
+    {
+      "id": "launch-tactics",
+      "description": "When the user wants to plan a product launch, feature announcement, or release strategy. Also use when the user mentions 'launch,' 'Product Hunt,' 'feature release,' 'announcement,' 'go-to-market,' 'beta launch,' 'early access,' 'waitlist,' 'product update,' 'how do I launch this,' 'launch checklist,' 'GTM plan,' or 'we're about to ship.' Use this whenever someone is preparing to release something publicly. For ongoing marketing after launch, see marketing-ideas. For the offer being launched (bonuses, guarantees, scarcity, naming), see offers.",
+      "guild": "growth-guild"
+    },
+    {
+      "id": "pricing",
+      "description": "When the user wants help with pricing decisions, packaging, or monetization strategy. Also use when the user mentions 'pricing,' 'pricing tiers,' 'freemium,' 'free trial,' 'packaging,' 'price increase,' 'value metric,' 'Van Westendorp,' 'willingness to pay,' 'monetization,' 'how much should I charge,' 'my pricing is wrong,' 'pricing page,' 'annual vs monthly,' 'per seat pricing,' or 'should I offer a free plan.' Use this whenever someone is figuring out what to charge or how to structure their plans. For in-app upgrade screens, see paywalls. For offer construction (bonuses, guarantees, value framing, naming) on services/courses/coaching/high-ticket B2B, see offers.",
+      "guild": "growth-guild"
+    },
+    {
+      "id": "programmatic-seo",
+      "description": "When the user wants to create SEO-driven pages at scale using templates and data. Also use when the user mentions \"programmatic SEO,\" \"template pages,\" \"pages at scale,\" \"directory pages,\" \"location pages,\" \"[keyword] + [city] pages,\" \"comparison pages,\" \"integration pages,\" \"building many pages for SEO,\" \"pSEO,\" \"generate 100 pages,\" \"data-driven pages,\" or \"templated landing pages.\" Use this whenever someone wants to create many similar pages targeting different keywords or locations. For auditing existing SEO issues, see seo-audit. For content strategy planning, see content-strategy.",
+      "guild": "growth-guild"
     }
   ],
   "stats": {
-    "agents": 45,
-    "skills": 50,
+    "agents": 59,
+    "skills": 86,
     "divisions": 8,
-    "edges": 105,
+    "guilds": 6,
+    "edges": 113,
     "directors": 7,
-    "unreachable": 2,
+    "unreachable": 10,
     "withheld": 2
   },
   "unreachable": [
     "knowledge-librarian",
-    "mentor"
+    "mentor",
+    "agentic-director",
+    "eval-engineer",
+    "mcp-engineer",
+    "automation-engineer",
+    "backend-director",
+    "design-strategist",
+    "aeo-specialist",
+    "growth-director"
   ],
   "withheld": [
     {

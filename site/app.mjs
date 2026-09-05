@@ -10,7 +10,8 @@
  * `ecosystem.json`, the same file the static markup was authored from.
  */
 
-import { computeLayout } from './layout.mjs';
+import { computeCity } from './layout.mjs';
+import { renderCity, attachCamera } from './city-view.mjs';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
@@ -141,172 +142,60 @@ async function main() {
   const unreachableSet = new Set(data.unreachable);
   const neighborsOf = (id) => adjacency.get(id) || new Set();
 
-  const layout = computeLayout(data.divisions, data.agents, data.edges);
+  const city = computeCity(
+    data.divisions, data.agents, data.edges, data.skills, data.unreachable, data.guilds,
+  );
 
   const svg = document.getElementById('city-map');
-  const citizenEls = new Map();
-  const edgeLines = [];
   let hoverId = null;
   let selectedId = null;
   let lastFocusedEl = null;
 
-  // ---- district blobs + legend --------------------------------------
+  const { camera, citizenEls, roadEls } = renderCity({
+    svg,
+    data,
+    city,
+    onSelect: (id) => selectCitizen(id),
+  });
 
-  const districtLayer = svgEl('g', { class: 'district-layer' });
+  for (const [id, g] of citizenEls) {
+    g.addEventListener('mouseenter', () => { hoverId = id; refreshHighlight(); });
+    g.addEventListener('mouseleave', () => { hoverId = null; refreshHighlight(); });
+    g.addEventListener('focus', () => { hoverId = id; refreshHighlight(); });
+    g.addEventListener('blur', () => { hoverId = null; refreshHighlight(); });
+  }
+
+  const cam = attachCamera(svg, camera);
+  document.getElementById('map-zoom-in')?.addEventListener('click', () => cam.zoomIn());
+  document.getElementById('map-zoom-out')?.addEventListener('click', () => cam.zoomOut());
+  document.getElementById('map-reset')?.addEventListener('click', () => cam.reset());
+  const roadsToggle = document.getElementById('map-roads');
+  roadsToggle?.addEventListener('change', () => {
+    svg.classList.toggle('roads-on', roadsToggle.checked);
+  });
+
+  // ---- legend -----------------------------------------------------------
+  // Generated from the same plan the map draws, so a precinct can never
+  // appear on one and not the other.
   const legend = document.getElementById('map-legend');
-  for (const d of data.divisions) {
-    const key = `${d.number} ${d.name}`;
-    const shape = layout.districtShapes.get(key);
-    const cls = `div-${d.number}`;
-    if (shape) {
-      districtLayer.appendChild(svgEl('circle', {
-        class: `district-blob ${cls}`, cx: shape.cx, cy: shape.cy, r: shape.r,
-      }));
-      const lx = shape.cx - shape.r + 12;
-      const ly = shape.cy - shape.r + 20;
-      const title = `${d.number} · ${d.name}`;
-      const sub = `${shape.count} ${shape.count === 1 ? 'citizen' : 'citizens'}`;
-      districtLayer.appendChild(svgEl('rect', {
-        class: 'district-label-bg', x: lx - 5, y: ly - 15, width: Math.max(title.length, sub.length) * 7.4 + 10, height: 35, rx: 4,
-      }));
-      const t1 = svgEl('text', { class: 'district-label', x: lx, y: ly });
-      t1.textContent = title;
-      const t2 = svgEl('text', { class: 'district-sub', x: lx, y: ly + 15 });
-      t2.textContent = sub;
-      districtLayer.appendChild(t1);
-      districtLayer.appendChild(t2);
-    }
-    if (legend) {
-      const count = data.agents.filter((a) => a.division === key).length;
+  if (legend) {
+    legend.textContent = '';
+    const swatchFor = (p) => (p.kind === 'district' ? `hue-${p.number}`
+      : p.kind === 'guild' ? 'hue-guild'
+      : p.kind === 'archive' ? 'hue-skill' : 'hue-none');
+    for (const p of city.plots.values()) {
       legend.appendChild(el('li', {}, [
-        el('span', { class: `swatch ${cls}` }),
-        `${d.number} · ${d.name} (${count})`,
+        el('span', { class: `swatch ${swatchFor(p)}` }),
+        `${p.label} (${p.count})`,
       ]));
     }
   }
-  // The two honest exceptions to the eight named districts: citizens with no
-  // division declared, and system utilities exempt from the constitution.
-  // Drawn the same way a district is (centroid + radius over real settled
-  // positions), just with a dashed outline and no fill hue of their own —
-  // there is nothing to invent here, only somewhere true to put them.
-  function drawHoldingArea(members, label, noun = ['citizen', 'citizens']) {
-    if (!members.length) return;
-    let cx = 0, cy = 0;
-    for (const a of members) { const p = layout.positions.get(a.id); cx += p.x; cy += p.y; }
-    cx /= members.length; cy /= members.length;
-    let r = 40;
-    for (const a of members) { const p = layout.positions.get(a.id); r = Math.max(r, Math.hypot(p.x - cx, p.y - cy) + 40); }
-    districtLayer.appendChild(svgEl('circle', { class: 'district-blob holding-area', cx, cy, r }));
-    const lx = cx - r + 12;
-    const ly = cy - r + 20;
-    const sub = `${members.length} ${members.length === 1 ? noun[0] : noun[1]}`;
-    districtLayer.appendChild(svgEl('rect', {
-      class: 'district-label-bg', x: lx - 5, y: ly - 15, width: Math.max(label.length, sub.length) * 7.4 + 10, height: 35, rx: 4,
-    }));
-    const t1 = svgEl('text', { class: 'district-label', x: lx, y: ly });
-    t1.textContent = label;
-    const t2 = svgEl('text', { class: 'district-sub', x: lx, y: ly + 15 });
-    t2.textContent = sub;
-    districtLayer.appendChild(t1);
-    districtLayer.appendChild(t2);
-  }
-  const noDivisionMembersForMap = data.agents.filter((a) => !a.division && !a.system);
-  const systemMembersForMap = data.agents.filter((a) => a.system);
-  drawHoldingArea(noDivisionMembersForMap, 'No division declared');
-  drawHoldingArea(systemMembersForMap, 'System utilities', ['utility', 'utilities']);
-
-  const noDivisionCount = noDivisionMembersForMap.length;
-  const systemCount = systemMembersForMap.length;
-  if (legend) {
-    if (noDivisionCount) legend.appendChild(el('li', {}, [el('span', { class: 'swatch unassigned' }), `No division declared (${noDivisionCount})`]));
-    if (systemCount) legend.appendChild(el('li', {}, [el('span', { class: 'swatch system' }), `System utilities (${systemCount})`]));
-  }
-  svg.appendChild(districtLayer);
-
-  // ---- edges (roads) --------------------------------------------------
-
-  const edgeLayer = svgEl('g', { class: 'edge-layer' });
-  for (const e of data.edges) {
-    const a = layout.positions.get(e.from);
-    const b = layout.positions.get(e.to);
-    if (!a || !b) continue;
-    const line = svgEl('line', {
-      class: 'edge', x1: a.x, y1: a.y, x2: b.x, y2: b.y,
-    });
-    line.dataset.from = e.from;
-    line.dataset.to = e.to;
-    edgeLayer.appendChild(line);
-    edgeLines.push(line);
-  }
-  svg.appendChild(edgeLayer);
-
-  // ---- citizens ---------------------------------------------------------
-
-  function ariaLabelFor(a) {
-    const bits = [a.id];
-    if (a.director) bits.push('Director');
-    bits.push(a.division ? `of ${a.division}` : (a.system ? 'a system utility, no division' : 'no division declared'));
-    if (unreachableSet.has(a.id)) bits.push('unreachable: named by no one upstream or downstream');
-    const d = (downstream.get(a.id) || []).length;
-    const u = (upstream.get(a.id) || []).length;
-    bits.push(`hands work to ${d}, receives work from ${u}`);
-    return bits.join(', ');
-  }
-
-  const citizenLayer = svgEl('g', { class: 'citizen-layer' });
-  for (const a of data.agents) {
-    const p = layout.positions.get(a.id);
-    if (!p) continue;
-    const divNum = a.division ? a.division.split(' ')[0] : null;
-    const classes = ['citizen'];
-    if (divNum) classes.push(`div-${divNum}`);
-    else if (a.system) classes.push('system');
-    else classes.push('unassigned');
-    if (a.director) classes.push('director');
-
-    const wrapper = svgEl('g', {
-      class: classes.join(' '),
-      tabindex: '0',
-      role: 'button',
-      'aria-label': ariaLabelFor(a),
-      transform: `translate(${p.x} ${p.y})`,
-    });
-    wrapper.dataset.id = a.id;
-    wrapper.dataset.system = a.system ? 'true' : 'false';
-
-    const r = a.director ? 10 : 7;
-    if (a.system) {
-      wrapper.appendChild(svgEl('rect', { class: 'node-dot citizen-shape-square', x: -r, y: -r, width: r * 2, height: r * 2 }));
-    } else {
-      wrapper.appendChild(svgEl('circle', { class: `node-dot ${divNum ? `div-${divNum}` : 'unassigned-fill'}`, r }));
-      if (a.director) wrapper.appendChild(svgEl('circle', { class: `node-ring-director div-${divNum}`, r: r + 4 }));
-    }
-    if (unreachableSet.has(a.id)) wrapper.appendChild(svgEl('circle', { class: 'node-ring-unreachable', r: r + 7 }));
-
-    const labelBg = svgEl('rect', { class: 'node-label-bg', x: -(a.id.length * 3.3) - 3, y: -r - 21, width: a.id.length * 6.6 + 6, height: 13, rx: 2 });
-    const label = svgEl('text', { class: 'node-label', x: 0, y: -r - 11, 'text-anchor': 'middle' });
-    label.textContent = a.id;
-    wrapper.appendChild(labelBg);
-    wrapper.appendChild(label);
-
-    wrapper.addEventListener('click', () => selectCitizen(a.id));
-    wrapper.addEventListener('keydown', (ev) => {
-      if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); selectCitizen(a.id); }
-    });
-    wrapper.addEventListener('mouseenter', () => { hoverId = a.id; refreshHighlight(); });
-    wrapper.addEventListener('mouseleave', () => { hoverId = null; refreshHighlight(); });
-    wrapper.addEventListener('focus', () => { hoverId = a.id; refreshHighlight(); });
-    wrapper.addEventListener('blur', () => { hoverId = null; refreshHighlight(); });
-
-    citizenLayer.appendChild(wrapper);
-    citizenEls.set(a.id, wrapper);
-  }
-  svg.appendChild(citizenLayer);
 
   function refreshHighlight() {
     for (const g of citizenEls.values()) g.classList.remove('active', 'neighbor', 'dimmed');
-    for (const line of edgeLines) line.classList.remove('highlight', 'dimmed');
+    for (const r of roadEls) r.classList.remove('highlight', 'dimmed');
     const anchors = [hoverId, selectedId].filter(Boolean);
+    svg.classList.toggle('has-focus', anchors.length > 0);
     if (!anchors.length) return;
     const activeSet = new Set(anchors);
     const neighborSet = new Set();
@@ -316,10 +205,10 @@ async function main() {
       else if (neighborSet.has(id)) g.classList.add('neighbor');
       else g.classList.add('dimmed');
     }
-    for (const line of edgeLines) {
-      const { from, to } = line.dataset;
-      if (activeSet.has(from) || activeSet.has(to)) line.classList.add('highlight');
-      else line.classList.add('dimmed');
+    for (const r of roadEls) {
+      const { from, to } = r.dataset;
+      if (activeSet.has(from) || activeSet.has(to)) r.classList.add('highlight');
+      else r.classList.add('dimmed');
     }
   }
 

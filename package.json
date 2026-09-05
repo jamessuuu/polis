@@ -17,7 +17,7 @@
     "LICENSE"
   ],
   "scripts": {
-    "test": "node --test tests/extract.test.mjs tests/site.test.mjs",
+    "test": "node --test tests/extract.test.mjs tests/site.test.mjs tests/layout.test.mjs",
     "snapshot": "node bin/snapshot.mjs",
     "build:site": "node bin/build-site.mjs"
   }

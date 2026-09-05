@@ -38,6 +38,13 @@
   --div-06: #1c93d7;
   --div-07: #978e0c;
 
+  /* The ground the city stands on. Warm and low-contrast on purpose: it
+     is the one large area on the page and it must not compete with the
+     precinct hues, which are the only thing on the map carrying meaning. */
+  --ground-top: #e6dcc6;
+  --ground-bottom: #d3c6ab;
+  --ground-edge: #b6a888;
+
   --radius: 6px;
   color-scheme: light dark;
 }
@@ -63,6 +70,9 @@
     --div-05: #e69f00;
     --div-06: #56b4e9;
     --div-07: #f0e442;
+  --ground-top: #2b333d;
+  --ground-bottom: #1b2128;
+  --ground-edge: #3c4550;
   }
 }
 
@@ -86,6 +96,9 @@
   --div-05: #e69f00;
   --div-06: #56b4e9;
   --div-07: #f0e442;
+  --ground-top: #2b333d;
+  --ground-bottom: #1b2128;
+  --ground-edge: #3c4550;
 }
 
 * { box-sizing: border-box; }
@@ -381,146 +394,228 @@ button:hover {
   min-width: 640px;
 }
 
-.district-blob {
-  fill-opacity: 0.10;
-  stroke-opacity: 0.55;
-  stroke-width: 1.5;
+/* ---------- the isometric city ----------
+
+   Depth in a flat vector drawing comes from exactly one thing: three faces of
+   the same solid painted three different values, with a consistent light
+   direction. The light here comes from the upper right, so every roof is the
+   base hue, every right wall is a step down, and every left wall is a step
+   down again. That one rule is doing nearly all of the 3D.
+
+   Colour still carries meaning, not decoration: hue = precinct, height =
+   how many other citizens a member exchanges work with, banner = Director,
+   dashed footprint with nothing on it = unreachable. Nothing on this map is
+   drawn that is not in ecosystem.json. */
+
+.ground-plane {
+  stroke: var(--ground-edge);
+  stroke-width: 2;
 }
-.district-blob.holding-area {
-  fill: var(--ink-muted);
+
+.wall-face {
+  fill: var(--ground-edge);
+  fill-opacity: 0.85;
+  stroke: none;
+}
+.wall-cap {
   stroke: var(--border-strong);
-  fill-opacity: 0.06;
-  stroke-dasharray: 5 4;
-}
-.district-label-bg {
-  fill: var(--bg-elevated);
-  opacity: 0.88;
-}
-.district-label {
-  font-family: var(--font-display);
-  font-size: 15px;
-  fill: var(--ink);
-}
-.district-sub {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  fill: var(--ink-muted);
+  stroke-width: 2.5;
+  opacity: 0.85;
 }
 
-/* Per-division colour, applied to district blobs and citizen fills alike.
-   Light-mode values are darkened variants of the same hue (measured >=3:1
-   against the paper background); dark-mode values are the full-saturation
-   originals (measured >=3:1 against the night background) — see styles.css
-   custom properties above and the project notes for the numbers. */
-.district-blob.div-00, .node-dot.div-00, .node-ring-director.div-00 { fill: var(--div-00); stroke: var(--div-00); }
-.district-blob.div-01, .node-dot.div-01, .node-ring-director.div-01 { fill: var(--div-01); stroke: var(--div-01); }
-.district-blob.div-02, .node-dot.div-02, .node-ring-director.div-02 { fill: var(--div-02); stroke: var(--div-02); }
-.district-blob.div-03, .node-dot.div-03, .node-ring-director.div-03 { fill: var(--div-03); stroke: var(--div-03); }
-.district-blob.div-04, .node-dot.div-04, .node-ring-director.div-04 { fill: var(--div-04); stroke: var(--div-04); }
-.district-blob.div-05, .node-dot.div-05, .node-ring-director.div-05 { fill: var(--div-05); stroke: var(--div-05); }
-.district-blob.div-06, .node-dot.div-06, .node-ring-director.div-06 { fill: var(--div-06); stroke: var(--div-06); }
-.district-blob.div-07, .node-dot.div-07, .node-ring-director.div-07 { fill: var(--div-07); stroke: var(--div-07); }
-.node-ring-director { fill: none; }
-.node-dot.unassigned-fill { fill: var(--ink-muted); }
-
-.legend .swatch.div-00 { background: var(--div-00); }
-.legend .swatch.div-01 { background: var(--div-01); }
-.legend .swatch.div-02 { background: var(--div-02); }
-.legend .swatch.div-03 { background: var(--div-03); }
-.legend .swatch.div-04 { background: var(--div-04); }
-.legend .swatch.div-05 { background: var(--div-05); }
-.legend .swatch.div-06 { background: var(--div-06); }
-.legend .swatch.div-07 { background: var(--div-07); }
-.legend .swatch.unassigned, .legend .swatch.system { background: var(--ink-muted); }
-
-.edge {
-  stroke: var(--border-strong);
+.plot-ground {
+  fill-opacity: 0.14;
+  stroke-opacity: 0.5;
+  stroke-width: 1.2;
+}
+.plot-inner {
+  fill: none;
+  stroke-opacity: 0.28;
   stroke-width: 1;
-  opacity: 0.22;
-  fill: none;
+  stroke-dasharray: 3 3;
 }
-.edge.highlight {
-  stroke: var(--accent);
-  stroke-width: 2.2;
-  opacity: 0.95;
+/* Precincts outside the wall are drawn as ground the city does not own. */
+.plot-ground.kind-holding {
+  fill: var(--ink-muted);
+  stroke: var(--border-strong);
+  fill-opacity: 0.05;
+  stroke-dasharray: 6 4;
 }
-.edge.dimmed {
-  opacity: 0.06;
+.plot-ground.kind-guild {
+  fill-opacity: 0.09;
+  stroke-dasharray: 8 3;
 }
 
-.node-dot {
+.plot-label { pointer-events: none; }
+/* Only drawn when a label had to be lifted clear of another one. A hairline
+   is enough — it has one job, which is to answer "this names what?" */
+.label-leader {
+  stroke: var(--hue);
+  stroke-width: 1.4;
+  opacity: 0.5;
+  stroke-dasharray: 4 3;
+}
+.plot-label-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 27px;
+  fill: var(--ink);
+  paint-order: stroke;
   stroke: var(--bg-elevated);
-  stroke-width: 1.5;
+  stroke-width: 6;
+  stroke-linejoin: round;
 }
-.node-ring-director {
+.plot-label-sub {
+  font-family: var(--font-mono);
+  font-size: 18px;
+  fill: var(--ink-muted);
+  paint-order: stroke;
+  stroke: var(--bg-elevated);
+  stroke-width: 5;
+  stroke-linejoin: round;
+}
+
+/* ---- the palette, per precinct ---- */
+
+.hue-00 { --hue: var(--div-00); }
+.hue-01 { --hue: var(--div-01); }
+.hue-02 { --hue: var(--div-02); }
+.hue-03 { --hue: var(--div-03); }
+.hue-04 { --hue: var(--div-04); }
+.hue-05 { --hue: var(--div-05); }
+.hue-06 { --hue: var(--div-06); }
+.hue-07 { --hue: var(--div-07); }
+.hue-guild { --hue: var(--accent); }
+.hue-skill { --hue: var(--ink-muted); }
+.hue-system,
+.hue-none { --hue: var(--ink-muted); }
+
+.plot-ground, .plot-inner { fill: var(--hue); stroke: var(--hue); }
+.plot-label-title { fill: var(--ink); }
+
+.legend .swatch.hue-00 { background: var(--div-00); }
+.legend .swatch.hue-01 { background: var(--div-01); }
+.legend .swatch.hue-02 { background: var(--div-02); }
+.legend .swatch.hue-03 { background: var(--div-03); }
+.legend .swatch.hue-04 { background: var(--div-04); }
+.legend .swatch.hue-05 { background: var(--div-05); }
+.legend .swatch.hue-06 { background: var(--div-06); }
+.legend .swatch.hue-07 { background: var(--div-07); }
+.legend .swatch.hue-guild { background: var(--accent); }
+.legend .swatch.hue-skill,
+.legend .swatch.hue-none { background: var(--ink-muted); }
+
+/* ---- roads ---- */
+
+.road {
   fill: none;
-  stroke-width: 1.5;
+  stroke: var(--border-strong);
+  stroke-width: 1.1;
+  opacity: 0;
+  pointer-events: none;
 }
-.node-ring-unreachable {
+/* All 113 at once is a hairball, so they are off until you ask — by hovering
+   somebody, or by ticking "show all roads". */
+#city-map.roads-on .road { opacity: 0.16; }
+.road.highlight {
+  stroke: var(--accent);
+  stroke-width: 2;
+  opacity: 0.9;
+}
+#city-map.roads-on .road.dimmed { opacity: 0.05; }
+
+/* ---- structures ---- */
+
+.structure { cursor: pointer; }
+.structure.kind-skill { cursor: default; }
+
+.face { stroke: var(--bg-elevated); stroke-width: 0.6; stroke-linejoin: round; }
+.face-top   { fill: var(--hue); }
+/* Two flat multiplies of the roof colour. colour-mix keeps them derived from
+   the hue instead of hand-picked, so adding a precinct needs no new values. */
+.face-right { fill: color-mix(in srgb, var(--hue) 74%, #000); }
+.face-left  { fill: color-mix(in srgb, var(--hue) 52%, #000); }
+
+.structure.kind-skill .face { stroke-width: 0.4; }
+.structure.kind-skill .face-top { fill: color-mix(in srgb, var(--hue) 58%, var(--bg-elevated)); }
+
+/* A citizen nobody names has a foundation and nothing built on it. */
+.structure.is-ruin .face-top {
   fill: none;
   stroke: var(--warn);
+  stroke-width: 1.6;
+  stroke-dasharray: 3 2.5;
+}
+.structure.is-ruin .face-left,
+.structure.is-ruin .face-right { fill-opacity: 0.18; }
+
+.banner-pole { stroke: var(--ink); stroke-width: 1.2; opacity: 0.75; }
+.banner-flag { fill: var(--hue); stroke: var(--ink); stroke-width: 0.7; }
+
+/* ---- citizens ---- */
+
+.fig-shadow { fill: #000; opacity: 0.2; }
+.fig-body { fill: var(--hue); stroke: var(--ink); stroke-width: 0.55; }
+.fig-head { fill: color-mix(in srgb, var(--hue) 45%, #fff); stroke: var(--ink); stroke-width: 0.55; }
+
+/* ---- focus and hover ----
+
+   Transform and opacity only. stroke-width was in here once and it was a bad
+   idea twice over: changing it recomputes every element's stroke geometry, and
+   hovering one citizen touches ~150 elements at once — repeated on every
+   arrow-key move through the keyboard list, not only on mouse hover. */
+
+.structure.dimmed { opacity: 0.2; }
+.structure.active { --lift: -7px; }
+.structure.neighbor { --lift: -3px; }
+.structure.active .face-top { stroke: var(--ink); stroke-width: 1.4; }
+.structure.neighbor .face-top { stroke: var(--ink); stroke-width: 1; }
+.structure { transform: translateY(var(--lift, 0)); }
+
+.structure:focus { outline: none; }
+.structure:focus-visible .face-top {
+  stroke: var(--accent);
   stroke-width: 2;
-  stroke-dasharray: 2 2;
 }
-.node-label-bg {
-  fill: var(--bg-elevated);
-  opacity: 0;
-  pointer-events: none;
-}
-.node-label {
-  font-family: var(--font-mono);
-  font-size: 10.5px;
-  fill: var(--ink);
-  opacity: 0;
-  pointer-events: none;
-}
-/* Directors are the city's landmark buildings: always named. Everyone else's
-   name appears only when it or a direct neighbour is hovered/focused/open. */
-.citizen.director .node-label,
-.citizen.director .node-label-bg,
-.citizen.active .node-label,
-.citizen.active .node-label-bg,
-.citizen.neighbor .node-label,
-.citizen.neighbor .node-label-bg {
-  opacity: 1;
+.structure.hidden-by-filter { display: none; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .structure { transition: opacity 0.15s ease, transform 0.15s ease; }
+  .road { transition: opacity 0.15s ease; }
+  /* A city with nobody moving in it is a diagram of a city. The bob is 2px
+     and staggered so the crowd never pulses in unison. */
+  .figure {
+    animation: fig-bob 3.4s ease-in-out infinite;
+    animation-delay: var(--bob-delay, 0ms);
+  }
+  @keyframes fig-bob {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-1.8px); }
+  }
 }
 
-.citizen[data-system="true"] .node-dot {
-  fill: var(--ink-muted);
-}
-.citizen-shape-square {
-  stroke: var(--bg-elevated);
-  stroke-width: 1.5;
-}
-.citizen.unassigned .node-dot {
-  stroke-dasharray: 2 2;
-}
+#city-map { cursor: grab; touch-action: none; }
+#city-map.grabbing { cursor: grabbing; }
 
-.citizen {
+.map-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.9rem;
+  margin: 0 0 0.6rem;
+  font-size: 0.85rem;
+}
+.map-toolbar button {
+  font: inherit;
+  padding: 0.25rem 0.6rem;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--bg-elevated);
+  color: var(--ink);
   cursor: pointer;
 }
-.citizen.dimmed {
-  opacity: 0.16;
-}
-.citizen.neighbor .node-dot,
-.citizen.active .node-dot {
-  stroke: var(--ink);
-  stroke-width: 2;
-}
-.citizen.hidden-by-filter {
-  display: none;
-}
-
-/* Opacity only. stroke-width was in here too, and it was a bad idea twice over:
-   changing it recomputes each element's stroke geometry, and hovering one
-   citizen touches up to 150 elements at once (105 edges + 45 nodes) — repeated
-   on every arrow-key move through the keyboard list, not just on mouse hover.
-   The width still changes, it just changes instantly; opacity was already
-   carrying the perception, so removing the eased width costs nothing visible
-   and removes the work. */
-@media (prefers-reduced-motion: no-preference) {
-  .edge, .citizen, .node-dot { transition: opacity 0.15s ease; }
-}
+.map-toolbar button:hover { border-color: var(--accent); }
+.map-toolbar label { display: flex; align-items: center; gap: 0.35em; }
 
 .map-hint {
   font-size: 0.88rem;

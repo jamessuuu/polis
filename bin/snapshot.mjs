@@ -35,7 +35,25 @@ const io = {
   listDir: (p) => readdirSync(p),
 };
 
-const snap = extract(io, { root, scope });
+// Guilds are discovered, not listed, so a new one appears on the map without
+// anyone remembering to register it here.
+//
+// `house` is excluded by name and the exclusion is load-bearing: it is a sync
+// mirror of ~/.claude, so reading it would double every core member and
+// inflate every published count. `--guild-root ""` turns discovery off.
+const GUILD_MIRRORS = new Set(['house']);
+const guildRoot = flag('--guild-root', join(homedir(), 'guilds')).replace(/\\/g, '/');
+const guilds = [];
+if (guildRoot && existsSync(guildRoot)) {
+  for (const name of readdirSync(guildRoot)) {
+    if (GUILD_MIRRORS.has(name)) continue;
+    const r = `${guildRoot}/${name}`;
+    if (!existsSync(`${r}/agents`) && !existsSync(`${r}/skills`)) continue;
+    guilds.push({ name, root: r });
+  }
+}
+
+const snap = extract(io, { root, scope, guilds });
 mkdirSync(dirname(out), { recursive: true });
 writeFileSync(out, JSON.stringify(snap, null, 2));
 

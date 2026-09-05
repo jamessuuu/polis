@@ -197,10 +197,28 @@ export function extract(io, opts = {}) {
 
   const withheld = [];
   const agents = [];
-  const files = io.exists(agentsDir) ? io.listDir(agentsDir).filter((f) => f.endsWith('.md')) : [];
+  const seenAgentIds = new Set();
+
+  // The ecosystem is not one directory. ~/.claude holds the constitutional
+  // members; the guilds under ~/guilds hold field specialists that
+  // ECOSYSTEM.md places at routing levels 3-4 and never lists in a division.
+  //
+  // Reading only ~/.claude — which is what this did until 2026-09-06 — under-
+  // reported the ecosystem by 14 agents and 36 skills, about a quarter of it,
+  // while the site claimed to show the whole society. A map that silently
+  // omits a quarter of the territory is worse than no map, because nobody
+  // knows to go looking.
+  //
+  // `guilds/house` is deliberately NOT readable here: it is a sync mirror of
+  // ~/.claude and including it would double every member.
+  const sources = [{ dir: agentsDir, guild: null }];
+  for (const g of opts.guilds ?? []) sources.push({ dir: `${g.root}/agents`, guild: g.name });
+
+  for (const src of sources) {
+  const files = io.exists(src.dir) ? io.listDir(src.dir).filter((f) => f.endsWith('.md')) : [];
 
   for (const file of files) {
-    const raw = io.readFile(`${agentsDir}/${file}`);
+    const raw = io.readFile(`${src.dir}/${file}`);
     const { data, body } = parseFrontmatter(raw);
     const id = data.name || file.replace(/\.md$/, '');
     // Id and description only, deliberately NOT the body.
@@ -221,6 +239,13 @@ export function extract(io, opts = {}) {
       withheld.push({ id, reason: 'id or description names a client or employer' });
       continue;
     }
+    // A guild charter and a core charter can share an id (the mirror case is
+    // guarded against by not reading it, but a genuine collision would still
+    // silently drop one member's edges). First source wins; ~/.claude is
+    // always first, so the constitutional charter is the one that stands.
+    if (seenAgentIds.has(id)) continue;
+    seenAgentIds.add(id);
+
     agents.push({
       id,
       description: data.description || '',
@@ -228,9 +253,11 @@ export function extract(io, opts = {}) {
       tools: (data.tools || '').split(',').map((s) => s.trim()).filter(Boolean),
       model: data.model || null,
       division: divisionOf.get(id) || null,
+      guild: src.guild,
       director: directors.has(id),
       _body: body,
     });
+  }
   }
 
   const knownIds = agents.map((a) => a.id);
@@ -265,24 +292,34 @@ export function extract(io, opts = {}) {
   const unreachable = agents.filter((a) => !a.system && !named.has(a.id)).map((a) => a.id);
 
   const skills = [];
-  if (io.exists(skillsDir)) {
-    for (const name of io.listDir(skillsDir)) {
-      const p = `${skillsDir}/${name}/SKILL.md`;
+  const seenSkillIds = new Set();
+  const skillSources = [{ dir: skillsDir, guild: null }];
+  for (const g of opts.guilds ?? []) skillSources.push({ dir: `${g.root}/skills`, guild: g.name });
+
+  for (const src of skillSources) {
+    if (!io.exists(src.dir)) continue;
+    for (const name of io.listDir(src.dir)) {
+      const p = `${src.dir}/${name}/SKILL.md`;
       if (!io.exists(p)) continue;
-      const { data, body } = parseFrontmatter(io.readFile(p));
+      const { data } = parseFrontmatter(io.readFile(p));
       const id = data.name || name;
       if (scope === 'personal' && looksClientSpecific(id, data.description)) {
         withheld.push({ id, reason: 'id or description names a client or employer' });
         continue;
       }
-      skills.push({ id, description: data.description || '' });
+      if (seenSkillIds.has(id)) continue;
+      seenSkillIds.add(id);
+      skills.push({ id, description: data.description || '', guild: src.guild });
     }
   }
+
+  const guildNames = [...new Set(agents.map((a) => a.guild).filter(Boolean))].sort();
 
   return {
     generatedAt: new Date().toISOString(),
     scope,
     divisions: divisions.map((d) => ({ number: d.number, name: d.name })),
+    guilds: guildNames,
     agents,
     edges: uniqueEdges,
     skills,
@@ -290,6 +327,7 @@ export function extract(io, opts = {}) {
       agents: agents.length,
       skills: skills.length,
       divisions: divisions.length,
+      guilds: guildNames.length,
       edges: uniqueEdges.length,
       directors: agents.filter((a) => a.director).length,
       unreachable: unreachable.length,
