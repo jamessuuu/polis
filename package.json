@@ -1,0 +1,12 @@
+{
+  "name": "polis",
+  "version": "0.0.1",
+  "type": "module",
+  "description": "Read an agent ecosystem off disk and render it as a society you can walk around.",
+  "license": "MIT",
+  "author": "James Lorenz Santos",
+  "engines": { "node": ">=22" },
+  "sideEffects": false,
+  "files": ["bin", "src", "site", "README.md", "LICENSE"],
+  "scripts": { "test": "node --test tests/extract.test.mjs" }
+}
