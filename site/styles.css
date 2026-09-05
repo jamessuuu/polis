@@ -511,8 +511,15 @@ button:hover {
   display: none;
 }
 
+/* Opacity only. stroke-width was in here too, and it was a bad idea twice over:
+   changing it recomputes each element's stroke geometry, and hovering one
+   citizen touches up to 150 elements at once (105 edges + 45 nodes) — repeated
+   on every arrow-key move through the keyboard list, not just on mouse hover.
+   The width still changes, it just changes instantly; opacity was already
+   carrying the perception, so removing the eased width costs nothing visible
+   and removes the work. */
 @media (prefers-reduced-motion: no-preference) {
-  .edge, .citizen, .node-dot { transition: opacity 0.15s ease, stroke-width 0.15s ease; }
+  .edge, .citizen, .node-dot { transition: opacity 0.15s ease; }
 }
 
 .map-hint {
