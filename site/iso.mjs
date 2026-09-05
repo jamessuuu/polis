@@ -140,6 +140,65 @@ export function wallSegment(fromCol, fromRow, toCol, toRow, height) {
 }
 
 /**
+ * The shadow a box casts on the ground.
+ *
+ * Flat-shaded solids read as solid because of two cues, and face shading is
+ * only the first. The second is contact: a shape with no shadow looks pasted
+ * onto the background rather than standing on it.
+ *
+ * The light is fixed at the upper right, so shadows fall to the lower left —
+ * which in this projection is simply "along +row", meaning the shadow stays
+ * on the tile grid instead of cutting across it at an arbitrary angle. That
+ * is not an aesthetic preference, it is what keeps shadows from looking like
+ * they belong to a different scene.
+ *
+ * The returned polygon is the convex hull of the footprint swept along the
+ * light direction: the footprint itself, plus its translated copy, plus the
+ * two edges connecting them.
+ *
+ * @param {number} height pixels of extrusion; taller casts further
+ * @param {number} throwRatio shadow length as a fraction of height
+ */
+export function shadowPolygon(col, row, height, footprint = 0.74, throwRatio = 0.62) {
+  const inset = (1 - footprint) / 2;
+  const c0 = col + inset;
+  const c1 = col + 1 - inset;
+  const r0 = row + inset;
+  const r1 = row + 1 - inset;
+
+  const n = toScreen(c0, r0);
+  const e = toScreen(c1, r0);
+  const s = toScreen(c1, r1);
+  const w = toScreen(c0, r1);
+
+  // One "row" of travel is (-TILE_W/2, +TILE_H/2) in screen space.
+  const steps = (height * throwRatio) / TILE_H;
+  const dx = -steps * (TILE_W / 2);
+  const dy = steps * (TILE_H / 2);
+  const off = (p) => ({ x: p.x + dx, y: p.y + dy });
+
+  return pointsToString([n, e, s, off(s), off(w), off(n)]);
+}
+
+/**
+ * A deterministic small integer for a member, for picking a silhouette
+ * variant without randomness.
+ *
+ * The city is rebuilt into committed HTML, so anything that varies between
+ * runs turns every rebuild into a noisy diff. Variety has to be a pure
+ * function of the member's own id — the same agent gets the same roof
+ * forever, on every machine.
+ */
+export function variantOf(id, buckets) {
+  let h = 2166136261;
+  for (let i = 0; i < id.length; i++) {
+    h ^= id.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return (h >>> 0) % buckets;
+}
+
+/**
  * Screen-space bounding box for a tile-space rectangle, so the caller can
  * compute a viewBox without guessing at the diamond's extents.
  */

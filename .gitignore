@@ -2,3 +2,5 @@ node_modules/
 *.local
 
 .vercel
+.shot-*.png
+.commit-msg.txt

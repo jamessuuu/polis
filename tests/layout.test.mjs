@@ -19,7 +19,7 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { computeCity } from '../site/layout.mjs';
-import { boxFaces, tilePolygon, toScreen, depthOf, screenBounds } from '../site/iso.mjs';
+import { boxFaces, tilePolygon, toScreen, depthOf, screenBounds, shadowPolygon, variantOf } from '../site/iso.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const snap = JSON.parse(readFileSync(join(ROOT, 'data', 'ecosystem.json'), 'utf8'));
@@ -203,4 +203,37 @@ test('screen bounds enclose the whole diamond', () => {
   assert.equal(b.maxX, 128);
   assert.equal(b.minY, 0);
   assert.equal(b.maxY, 128);
+});
+
+test('a shadow is a six-point hull that grows with height and falls down-left', () => {
+  const short = shadowPolygon(0, 0, 10).split(' ').map((p) => p.split(',').map(Number));
+  const tall = shadowPolygon(0, 0, 60).split(' ').map((p) => p.split(',').map(Number));
+  assert.equal(short.length, 6, 'shadow should be the swept hull, six points');
+  assert.equal(tall.length, 6);
+  const spread = (pts) => Math.max(...pts.map((p) => p[0])) - Math.min(...pts.map((p) => p[0]));
+  assert.ok(spread(tall) > spread(short), 'a taller box should cast a longer shadow');
+  // The light is fixed upper-right, so the shadow must extend LEFT and DOWN.
+  const minX = Math.min(...tall.map((p) => p[0]));
+  const maxY = Math.max(...tall.map((p) => p[1]));
+  assert.ok(minX < Math.min(...short.map((p) => p[0])), 'shadow should reach further left');
+  assert.ok(maxY > Math.max(...short.map((p) => p[1])), 'shadow should reach further down');
+});
+
+test('a zero-height box casts a shadow no bigger than its own footprint', () => {
+  const pts = shadowPolygon(0, 0, 0).split(' ').map((p) => p.split(',').map(Number));
+  const spread = Math.max(...pts.map((p) => p[0])) - Math.min(...pts.map((p) => p[0]));
+  assert.ok(spread <= 64.01, `a flat object should not cast a long shadow, got ${spread}`);
+});
+
+test('silhouette variants are stable per id and spread across buckets', () => {
+  assert.equal(variantOf('architect', 4), variantOf('architect', 4));
+  assert.notEqual(variantOf('architect', 4), undefined);
+  for (const id of ['a', 'chief-of-staff', 'ui-designer']) {
+    const v = variantOf(id, 4);
+    assert.ok(Number.isInteger(v) && v >= 0 && v < 4, `${id} produced ${v}`);
+  }
+  // Not a uniformity proof, just a guard against a hash that collapses.
+  const seen = new Set(['architect', 'debugger', 'copywriter', 'devops', 'cto', 'counsel',
+    'mentor', 'controller'].map((id) => variantOf(id, 4)));
+  assert.ok(seen.size > 1, 'every id landed in the same bucket; the hash is not distributing');
 });
