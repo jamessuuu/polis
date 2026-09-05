@@ -117,6 +117,30 @@ const skillsHtml = [
   '      </ul>',
 ].join('\n');
 
+
+// --- findings ---------------------------------------------------------------
+// Hand-authored prose here said "Withheld - 1" while the generated stat card
+// directly above it said 2. Same class of drift as the roster, one layer down,
+// and visible on screen. The panels are generated now.
+const plural = (n, one, many) => (n === 1 ? one : many);
+
+const unreachableHtml = [
+  `        <h3>Unreachable &mdash; ${snap.unreachable.length}</h3>`,
+  `        <p>Nobody hands ${snap.unreachable.length === 1 ? 'this citizen' : `these ${snap.unreachable.length} citizens`} work through the declared wiring: no charter names them UPSTREAM or DOWNSTREAM. The constitution's reciprocity rule calls that a violation, not a curiosity.</p>`,
+  '        <ul>',
+  snap.unreachable.map((id) => {
+    const a = snap.agents.find((x) => x.id === id);
+    const where = a && a.division ? `sits in ${esc(a.division)}` : 'has no division declared';
+    return `          <li><button type="button" class="jump-to-citizen" data-id="${esc(id)}">${esc(id)}</button> &mdash; ${where}.</li>`;
+  }).join('\n'),
+  '        </ul>',
+].join('\n');
+
+const withheldHtml = [
+  `        <h3>Withheld &mdash; ${snap.withheld.length}</h3>`,
+  `        <p>${snap.withheld.length} ${plural(snap.withheld.length, 'member is', 'members are')} not shown here. ${plural(snap.withheld.length, 'Its', 'Their')} id or description names a real client or employer, so ${plural(snap.withheld.length, 'it is', 'they are')} counted honestly and withheld, not published. The ${plural(snap.withheld.length, 'identifier is', 'identifiers are')} left out too, on purpose: the point of withholding is to publish nothing that could identify who ${plural(snap.withheld.length, 'it names', 'they name')}, and that judgment should hold even when an identifier looks harmless.</p>`,
+].join('\n');
+
 const withheldNote = snap.withheld.length
   ? `      <p class="static-meta">${snap.withheld.length} member(s) withheld: ${esc(snap.withheld.map((w) => w.reason).join('; '))}. Their names are not printed.</p>`
   : '';
@@ -134,6 +158,8 @@ let html = readFileSync(INDEX, 'utf8');
 html = replaceRegion(html, /<dl class="stats-grid">/, '</dl>', statsHtml, 'stats grid');
 html = replaceRegion(html, /<section aria-labelledby="static-roster-heading" id="static-roster-section">/, '</section>', rosterHtml, 'static roster');
 html = replaceRegion(html, /<section aria-labelledby="skills-heading">/, '</section>', skillsHtml, 'skills archive');
+html = replaceRegion(html, /<div class="finding finding-warn" id="unreachable-finding">/, '</div>', unreachableHtml, 'unreachable finding');
+html = replaceRegion(html, /<div class="finding" id="withheld-finding">/, '</div>', withheldHtml, 'withheld finding');
 writeFileSync(INDEX, html);
 
 process.stdout.write(
