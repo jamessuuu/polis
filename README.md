@@ -36,9 +36,13 @@ are not.
 - `bin/snapshot.mjs` — CLI that runs the extractor against the real
   `~/.claude` tree and writes `data/ecosystem.json`.
 - `site/` — the static front end. `index.html`, `styles.css`, `layout.mjs`
-  (the map's layout algorithm), `app.mjs` (everything interactive), and
-  `ecosystem.json` (a copy of `data/ecosystem.json`, so the deployed site
-  never depends on anything outside its own folder).
+  (the map's layout algorithm), `app.mjs` (the map and everything
+  interactive on it), `studio.mjs` (the second half of the page: import,
+  library, export), and the data it is built from: `ecosystem.json`,
+  `workforce.json`, `library.json`, `library-free.json`, plus copies of the
+  four modules the studio runs in the browser under `site/lib/` and
+  `site/src/`. Every one of those is written by `npm run build:site`, so the
+  deployed site never depends on anything outside its own folder.
 
 ## The studio: the second half of the page (`lib/`, `api/`, `site/studio.mjs`)
 
