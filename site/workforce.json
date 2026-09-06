@@ -1511,7 +1511,14 @@
     "collaborationPairs": 170,
     "excludedOtherWorlds": 164,
     "rosterSize": 59,
-    "neverDispatched": 33
+    "neverDispatched": 33,
+    "rosterEverDispatched": 26,
+    "dispatchedOutsideRoster": [
+      "claude-code-guide",
+      "fork",
+      "general-purpose",
+      "prompt-engineer"
+    ]
   },
   "dormant": [
     "aeo-specialist",

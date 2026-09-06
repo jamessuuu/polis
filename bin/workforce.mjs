@@ -46,6 +46,25 @@ if (existsSync(snapPath)) {
   w.dormant = dormant;
   w.stats.rosterSize = snap.agents.length;
   w.stats.neverDispatched = dormant.length;
+
+  // agentsEverDispatched counts every distinct agent in the telemetry,
+  // INCLUDING ones that are not roster members -- currently general-purpose,
+  // prompt-engineer, claude-code-guide and fork. neverDispatched counts only
+  // roster members. So the two published numbers invite a reader to add them
+  // (30 + 33 = 63) against a roster of 59, and they do not reconcile.
+  //
+  // They are both correct; they count different populations and nothing said
+  // so. On a project whose one rule is that every number traces to one file,
+  // two true numbers that appear to contradict each other are as damaging as
+  // one wrong one -- a reader who spots it has no way to know which to trust.
+  //
+  // These two derived stats close it: rosterEverDispatched + neverDispatched
+  // == rosterSize, exactly, and dispatchedOutsideRoster names the remainder
+  // instead of leaving it as an unexplained gap.
+  const rosterIds = new Set(snap.agents.map((a) => a.id));
+  const seenIds = w.agents.map((a) => a.id);
+  w.stats.rosterEverDispatched = seenIds.filter((id) => rosterIds.has(id)).length;
+  w.stats.dispatchedOutsideRoster = seenIds.filter((id) => !rosterIds.has(id)).sort();
 }
 
 mkdirSync(dirname(out), { recursive: true });
