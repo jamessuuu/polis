@@ -375,3 +375,22 @@ test('the subject prefix is configurable and defaults sensibly', () => {
   assert.match(mailBody(GOOD, MAIL).subject, /^polis lead: Ada$/);
   assert.match(mailBody(GOOD, { ...MAIL, subjectPrefix: 'lead' }).subject, /^lead: Ada$/);
 });
+
+/**
+ * The route file itself, linked.
+ *
+ * `api/lead.mjs` was the one file in this repo that no test imported, and it
+ * shipped to production with a named import taken from the wrong module
+ * (`templateSkills` lives in lib/library.mjs, not lib/export.mjs). Vercel
+ * built it, routed it, and answered 500 FUNCTION_INVOCATION_FAILED on every
+ * call while `npm test` stayed green.
+ *
+ * An ES module's whole graph is resolved and linked before any of it runs, so
+ * importing the route is enough: a missing or misplaced export fails here,
+ * with the same error the runtime gave, and it costs one import.
+ */
+test('the deployed route links: every import in api/lead.mjs resolves', async () => {
+  const mod = await import('../api/lead.mjs');
+  assert.equal(typeof mod.default, 'function', 'the route exports no handler');
+  assert.equal(mod.config.runtime, 'nodejs');
+});

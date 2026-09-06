@@ -7,14 +7,32 @@
  * `tests/lead.test.mjs`. The split is deliberate: a route that contains
  * judgement is a route whose judgement is only ever exercised by deploying it.
  *
- * DEPLOYMENT SHAPE, and the part that is unverified. polis is a static site
- * (`vercel.json` sets `outputDirectory: "site"` and there is no build step).
- * Vercel builds functions found in a top level `api/` directory for static
- * projects as well as framework ones, which is why this file sits here rather
- * than in `site/`. That has NOT been verified against a real deployment from
- * this session, because deploying is James's call and the machine's deploy
- * guard blocks it. Treat "the function is reachable at /api/lead" as the first
- * thing to check on the first deploy.
+ * DEPLOYMENT SHAPE, now verified against the real deployment. polis is a
+ * static site (`vercel.json` sets `outputDirectory: "site"` and there is no
+ * build step). Vercel DOES build functions found in a top level `api/`
+ * directory for such a project: the production deployment reports one Node
+ * lambda, and `outputDirectory` does not suppress it. Vercel's tracer also
+ * follows the imports out of this directory, so `../lib/*.mjs` and the
+ * `../src/extract.mjs` those pull in are all shipped with the function. No
+ * `functions` block and no `includeFiles` are needed in `vercel.json`.
+ *
+ * That was checked because the first deployment of this file answered 500
+ * FUNCTION_INVOCATION_FAILED on every call, and the runtime log named the
+ * reason: line 30 imported `templateSkills` from `../lib/export.mjs`, which
+ * does not export it. It is `lib/library.mjs` that does. The route was the one
+ * file in the repo no test imported, so `npm test` was green while the
+ * function could not load at all; `tests/lead.test.mjs` now imports it, which
+ * is a link check and would have caught this in one line.
+ *
+ * STILL UNSET AT THE TIME OF WRITING, and both are James's to set in the
+ * Vercel project settings:
+ *   - the four POLIS_LEAD_* mail values, without which this answers 503
+ *     `not-configured` rather than reporting a send that did not happen.
+ *   - POLIS_SITE_URL. Without it the origin check falls back to VERCEL_URL,
+ *     which is the deployment's own unique hostname and not the one a visitor
+ *     is browsing, so a request from the production domain is refused 403
+ *     `origin`. That is fail-closed working as designed, and it is why the
+ *     page reports the refusal rather than swallowing it.
  *
  * The site's Content-Security-Policy already allows this: `connect-src 'self'`
  * permits a same-origin fetch, and `form-action 'none'` means the page must
@@ -26,8 +44,8 @@
 
 import { createHmac, randomBytes } from 'node:crypto';
 import { handleLead, createRateLimiter, sendLeadEmail } from '../lib/lead.mjs';
-import { template, lockedTemplates } from '../lib/library.mjs';
-import { bundleFromTemplate, templateSkills, validateBundle } from '../lib/export.mjs';
+import { template, lockedTemplates, templateSkills } from '../lib/library.mjs';
+import { bundleFromTemplate, validateBundle } from '../lib/export.mjs';
 
 export const config = { runtime: 'nodejs' };
 
