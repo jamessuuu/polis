@@ -276,9 +276,14 @@ test('no em dash reaches the page or the studio module', () => {
   }
 });
 
-test('the footer carries both links, and they are the verified ones', () => {
+test('the footer carries both links, once each, and they are the verified ones', () => {
   const page = html();
-  assert.ok(page.includes('https://agentjames.vercel.app/'), 'no link to agentjames');
+  assert.ok(page.includes('https://agentjames.vercel.app'), 'no link to agentjames');
+  // Once each. The attribution kit block carries both, and a second hand-
+  // authored pair beside it is a footer that has been edited twice by people
+  // who could not see each other's work.
+  assert.equal((page.match(/agentjames.vercel.app/g) || []).length, 1);
+  assert.equal((page.match(/linkedin.com/g) || []).length, 1);
   // Not the vanity handle. `https://www.linkedin.com/in/jameslorenzsantos` and
   // a deliberately fake profile BOTH answer LinkedIn's 999 anti-bot status, so
   // that response is no evidence at all. This one is the address James's own
