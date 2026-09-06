@@ -15,10 +15,11 @@
  * that step. It is deterministic, idempotent, and has no model in the loop.
  */
 
-import { readFileSync, writeFileSync, copyFileSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, copyFileSync, existsSync, mkdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { paletteCSS } from '../site/palette.mjs';
+import { catalog, TEMPLATES, templateEcosystem, templateSkills, verifyClaims } from '../lib/library.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const SNAPSHOT = join(ROOT, 'data', 'ecosystem.json');
@@ -27,6 +28,25 @@ const WORKFORCE = join(ROOT, 'data', 'workforce.json');
 const SITE_WORKFORCE = join(ROOT, 'site', 'workforce.json');
 const PALETTE_CSS = join(ROOT, 'site', 'palette.css');
 const INDEX = join(ROOT, 'site', 'index.html');
+const LIBRARY_JSON = join(ROOT, 'site', 'library.json');
+const LIBRARY_FREE_JSON = join(ROOT, 'site', 'library-free.json');
+
+/**
+ * The four modules the studio runs in the browser, and the one parser they
+ * share.
+ *
+ * They are COPIED, not re-authored. `lib/import.mjs` imports
+ * `../src/extract.mjs`, so the copies keep the same relative shape
+ * (`site/lib/` beside `site/src/`) and the import resolves in the browser
+ * without touching the source. Two copies of a parser is how a page starts
+ * telling a visitor something the tests no longer check.
+ */
+const SHIPPED_MODULES = [
+  ['lib/import.mjs', 'site/lib/import.mjs'],
+  ['lib/export.mjs', 'site/lib/export.mjs'],
+  ['lib/zip.mjs', 'site/lib/zip.mjs'],
+  ['src/extract.mjs', 'site/src/extract.mjs'],
+];
 
 const esc = (s) => String(s ?? '')
   .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -47,6 +67,81 @@ copyFileSync(SNAPSHOT, SITE_JSON);
 
 // Telemetry, when it exists. The map stands still without it, honestly.
 if (existsSync(WORKFORCE)) copyFileSync(WORKFORCE, SITE_WORKFORCE);
+
+// --- the studio's modules --------------------------------------------------
+for (const [from, to] of SHIPPED_MODULES) {
+  const dst = join(ROOT, to);
+  mkdirSync(dirname(dst), { recursive: true });
+  copyFileSync(join(ROOT, from), dst);
+}
+
+// --- the library, split at the gate ----------------------------------------
+//
+// `lib/library.mjs` states where the gate has to live: a page that bundles
+// every template wholesale has a courtesy gate, because the locked bodies are
+// then already in the payload the browser downloaded. So this build writes two
+// different things into one file.
+//
+//   catalog  every template's preview, free and locked. Names, descriptions,
+//            counts and the reason a locked one is worth having. No bodies.
+//   cities   every template drawn in the ecosystem.json shape, free and
+//            locked, so a locked card can still show its city. The shape
+//            carries ids, descriptions and wiring and no charter prose, which
+//            is exactly what a preview may contain.
+// and a second file, `library-free.json`, holds the six free templates in
+// full, bodies included, so the browser can build their bundles with no server
+// in the loop. It is a separate fetch because browsing costs a visitor the
+// previews only; the prose arrives when they ask for a bundle.
+//
+// The two locked templates' charter bodies are in NEITHER file. They are
+// released by api/lead.mjs after a lead is captured, and by nothing else.
+const claimFailures = [];
+for (const t of TEMPLATES) {
+  const verdict = verifyClaims(t);
+  if (!verdict.ok) {
+    for (const f of verdict.failures) claimFailures.push(`${t.id}: ${f.claim} (${f.reason})`);
+  }
+}
+if (claimFailures.length) {
+  throw new Error(`build-site: a template advertises something its charters do not say\n  ${claimFailures.join('\n  ')}`);
+}
+
+const library = {
+  // The snapshot's own timestamp, so a rebuild with no data change writes the
+  // same bytes. A fresh Date() here would churn the file on every build and
+  // teach everyone to ignore the diff.
+  generatedAt: snap.generatedAt,
+  catalog: catalog(),
+  cities: Object.fromEntries(
+    TEMPLATES.map((t) => [t.id, templateEcosystem(t, { now: snap.generatedAt })]),
+  ),
+};
+const libraryFree = {
+  generatedAt: snap.generatedAt,
+  free: Object.fromEntries(
+    TEMPLATES.filter((t) => !t.locked).map((t) => [t.id, {
+      id: t.id,
+      name: t.name,
+      summary: t.summary,
+      agents: t.agents,
+      skills: templateSkills(t),
+    }]),
+  ),
+};
+writeFileSync(LIBRARY_JSON, `${JSON.stringify(library, null, 2)}\n`);
+writeFileSync(LIBRARY_FREE_JSON, `${JSON.stringify(libraryFree, null, 2)}\n`);
+
+// The gate, asserted here as well as in tests/studio.test.mjs, because a build
+// that silently ships a locked body is worse than a build that fails.
+const shipped = readFileSync(LIBRARY_JSON, 'utf8') + readFileSync(LIBRARY_FREE_JSON, 'utf8');
+for (const t of TEMPLATES.filter((x) => x.locked)) {
+  for (const a of t.agents) {
+    const probe = JSON.stringify(String(a.body).split('\n')[0]).slice(1, -1);
+    if (probe && shipped.includes(probe)) {
+      throw new Error(`build-site: locked charter ${t.id}/${a.id} leaked into the shipped library`);
+    }
+  }
+}
 
 // The palette the page ships is the palette the contrast audit measured.
 writeFileSync(PALETTE_CSS, paletteCSS());
@@ -232,8 +327,11 @@ html = replaceRegion(html, /<div class="finding" id="withheld-finding">/, '</div
 html = replaceRegion(html, /<p class="finding finding-strip" id="headline-strip">/, '</p>', stripHtml, 'headline strip');
 writeFileSync(INDEX, html);
 
+const freeCount = TEMPLATES.filter((t) => !t.locked).length;
 process.stdout.write(
   `build-site: ${s.agents} citizens, ${s.skills} skills, ${s.divisions} districts, ${s.edges} roads\n` +
   `            stats and roster regenerated from the snapshot; nothing hand-copied\n` +
-  `            palette.css generated from site/palette.mjs; workforce ${existsSync(WORKFORCE) ? 'copied' : 'absent'}\n`
+  `            palette.css generated from site/palette.mjs; workforce ${existsSync(WORKFORCE) ? 'copied' : 'absent'}\n` +
+  `            library.json: ${TEMPLATES.length} previews and cities; library-free.json: ${freeCount} templates in full\n` +
+  `            ${SHIPPED_MODULES.length} modules copied to site/ for the studio; no parser duplicated\n`
 );

@@ -216,7 +216,7 @@ main section, main aside {
 
 /* ---------- buttons / inputs ---------- */
 
-button, select, input[type="search"], input[type="text"] {
+button, select, input[type="search"], input[type="text"], input[type="email"] {
   font-family: var(--font-body);
   font-size: 1rem;
   color: var(--ink);
@@ -1397,4 +1397,307 @@ footer.site-footer p { margin: 0 0 0.5em; }
     margin-top: var(--space-2);
   }
   .panel-links .link-button { padding: 0.35rem 0.6rem; }
+}
+
+/* ---------- the studio: the second half of the page ----------------------
+
+   Everything above this rule draws one ecosystem. The studio draws whichever
+   one the visitor put on the stage, with the same renderer and the same
+   palette, so there is one city view on this page and not two that have to be
+   kept looking alike.
+
+   It stays inside the 1180px column. Only the hero breaks out full-bleed
+   (LAYOUT-SPEC 1.6); a second full-width band would make the page two heroes
+   and the map above would stop being the subject. */
+
+.studio {
+  border-top: 1px solid var(--border-subtle);
+  padding-top: var(--space-8);
+}
+.studio-lead { color: var(--ink-muted); }
+.studio-nojs {
+  border: 1.5px solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--bg-elevated);
+  padding: 0.9rem 1.1rem;
+}
+
+.studio-tabs {
+  display: flex;
+  gap: var(--space-2);
+  margin-bottom: var(--space-5);
+}
+.studio-tabs button {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  padding: var(--space-2) var(--space-1);
+  color: var(--ink-muted);
+}
+.studio-tabs button[aria-selected="true"] {
+  color: var(--ink);
+  border-bottom-color: var(--accent);
+}
+.studio-tabs button:hover { background: none; color: var(--ink); }
+
+.studio-body { display: grid; gap: var(--space-6); }
+@media (min-width: 1024px) {
+  .studio-body {
+    grid-template-columns: 22rem 1fr;
+    align-items: start;
+  }
+}
+
+/* ---- the rail ---- */
+
+.studio-drop {
+  border: 1.5px dashed var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--bg-elevated);
+  padding: var(--space-5);
+  text-align: center;
+}
+/* The only state change here, and it is a real one: the pointer is over the
+   target and holding something. Colour and border only, no movement. */
+.studio-drop.over { border-color: var(--accent); border-style: solid; }
+.studio-drop-hint { margin: 0 0 var(--space-3); color: var(--ink-muted); max-width: none; }
+.studio-drop-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  justify-content: center;
+}
+.studio-note {
+  font-size: 0.89rem;
+  color: var(--ink-muted);
+  margin: var(--space-3) 0 0;
+  max-width: none;
+}
+.studio-status {
+  font-size: 0.89rem;
+  color: var(--ink);
+  margin: var(--space-3) 0 0;
+  max-width: none;
+  min-height: 1.4em;
+}
+.studio-status:empty { min-height: 0; margin: 0; }
+
+.studio-report { margin-top: var(--space-4); }
+.stats-grid-small { grid-template-columns: repeat(auto-fit, minmax(6.5rem, 1fr)); }
+.stats-grid-small dd { font-size: 1.42rem; }
+
+.studio-skipped, .studio-notes {
+  list-style: none;
+  padding: 0;
+  margin: var(--space-2) 0 0;
+  font-size: 0.89rem;
+  color: var(--ink-muted);
+}
+.studio-skipped li, .studio-notes li { margin-bottom: var(--space-1); }
+.studio-skipped code { word-break: break-all; }
+.studio-notes li { border-left: 2px solid var(--border-subtle); padding-left: var(--space-3); }
+
+#studio-report-detail > summary {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  cursor: pointer;
+  padding: var(--space-2) 0;
+  list-style: none;
+}
+#studio-report-detail > summary::-webkit-details-marker { display: none; }
+#studio-report-detail > summary::before { content: "\25B8"; color: var(--ink-muted); font-size: 0.8em; }
+#studio-report-detail[open] > summary::before { content: "\25BE"; }
+#studio-report-detail > summary h3 { margin: 0; }
+
+/* ---- the template list ---- */
+
+.studio-templates {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: var(--space-2);
+}
+.studio-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  width: 100%;
+  text-align: left;
+  font-weight: 400;
+  padding: 0.7rem 0.85rem;
+  border: 1.5px solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--bg-elevated);
+}
+.studio-card:hover { border-color: var(--accent); background: var(--bg-elevated); }
+.studio-card[aria-pressed="true"] {
+  border-color: var(--accent);
+  border-width: 1.5px;
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+.studio-card-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+.studio-card-niche { color: var(--ink-muted); font-size: 0.89rem; }
+.studio-card-counts { color: var(--ink-muted); font-family: var(--font-mono); font-size: 0.79rem; }
+.tag-free { color: var(--hue-03-text); }
+.tag-locked { color: var(--ink-muted); }
+
+/* ---- the stage ---- */
+
+/* The hero's frame, brought back inside the column and made shorter: this map
+   is a preview beside a list, not the subject of the page. */
+/* [hidden] is a UA rule and .hero-map sets display:flex, so an author
+   declaration beat it and the empty stage frame was painted before anything
+   was put on it. Seen in the first browser pass: a large empty ground plane
+   sitting above the words "Nothing on the stage yet". */
+.hero-map[hidden] { display: none; }
+
+.studio-map {
+  width: auto;
+  margin-left: 0;
+  transform: none;
+  height: min(46vh, 380px);
+  min-height: 280px;
+}
+@media (min-width: 1024px) {
+  .studio-map { height: min(54vh, 460px); min-height: 340px; }
+}
+#studio-map {
+  display: block;
+  flex: 1 1 auto;
+  width: 100%;
+  min-height: 0;
+  cursor: grab;
+  touch-action: none;
+}
+#studio-map.grabbing { cursor: grabbing; }
+#studio-map.lod-1 .fig-detail { display: inline; }
+/* Declared wiring is the finding a template or an import is being read for,
+   so the roads are drawn rather than waiting to be asked for. */
+#studio-map .road { opacity: 0.22; }
+
+/* NOTHING ON THIS MAP MOVES, and that is the honest rendering.
+   The hero map animates because workforce.json says which citizens were
+   dispatched and when. A template has no telemetry and an imported ecosystem
+   has none either, so a bobbing figure or a breathing window here would be
+   motion standing in for data that does not exist. */
+#studio-map * { animation: none !important; }
+
+.studio-stage-title {
+  font-family: var(--font-mono);
+  font-size: 0.84rem;
+  color: var(--ink-muted);
+  margin-right: auto;
+}
+.map-controls { display: inline-flex; gap: 0.3rem; }
+
+.studio-empty {
+  border: 1px dashed var(--border-subtle);
+  border-radius: var(--radius);
+  padding: var(--space-8) var(--space-4);
+  text-align: center;
+  color: var(--ink-muted);
+  max-width: none;
+}
+
+.studio-actions { margin-top: var(--space-4); }
+.studio-summary-text { color: var(--ink); }
+.studio-members {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-size: 0.89rem;
+}
+.studio-members li { margin-bottom: var(--space-2); }
+.studio-members strong { margin-right: var(--space-2); }
+.studio-member-desc { color: var(--ink-muted); }
+.studio-member-skill strong::after {
+  content: " skill";
+  font-family: var(--font-mono);
+  font-size: 0.79rem;
+  color: var(--ink-muted);
+  font-weight: 400;
+}
+.studio-members-detail > summary {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  cursor: pointer;
+  padding: var(--space-2) 0;
+  list-style: none;
+}
+.studio-members-detail > summary::-webkit-details-marker { display: none; }
+.studio-members-detail > summary::before { content: "\25B8"; color: var(--ink-muted); font-size: 0.8em; }
+.studio-members-detail[open] > summary::before { content: "\25BE"; }
+.studio-members-detail > summary h3 { margin: 0; }
+.studio-why {
+  list-style: none;
+  padding: 0;
+  margin: var(--space-3) 0 0;
+  font-size: 0.89rem;
+  color: var(--ink-muted);
+}
+.studio-why li {
+  border-left: 2px solid var(--border-subtle);
+  padding-left: var(--space-3);
+  margin-bottom: var(--space-2);
+}
+
+.studio-download {
+  margin-top: var(--space-4);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.studio-download:hover { background: var(--bg); }
+
+/* ---- the gate ---- */
+
+.studio-gate {
+  margin-top: var(--space-4);
+  border: 1.5px solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--bg-elevated);
+  padding: 0.9rem 1.1rem;
+}
+.studio-gate h3 { margin-top: 0; }
+.studio-gate-fields {
+  display: grid;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+@media (min-width: 600px) {
+  .studio-gate-fields { grid-template-columns: 1fr 1fr; }
+  .studio-gate-fields .field-wide { grid-column: 1 / -1; }
+}
+.studio-gate-fields input { width: 100%; }
+/* The honeypot. Off-screen rather than display:none, because a bot that reads
+   the computed style skips a hidden field and fills a visible one. */
+.studio-hp {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+/* ---- footer ---- */
+
+.footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: baseline;
+}
+.footer-links span { color: var(--ink-muted); }
+
+@media (prefers-reduced-motion: reduce) {
+  #studio-map *, #studio-map { animation: none !important; transition: none !important; }
+  .studio-drop, .studio-card { transition: none !important; }
 }

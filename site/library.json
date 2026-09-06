@@ -1,0 +1,1548 @@
+{
+  "generatedAt": "2026-09-05T20:35:57.122Z",
+  "catalog": [
+    {
+      "id": "solo-developer",
+      "name": "Solo developer",
+      "niche": "One person shipping and maintaining software alone",
+      "summary": "Four members for the loop one person actually runs: decide what is small enough to finish, find out where the change goes, get the diff read by something that did not write it, and check the deployed thing rather than the build log.",
+      "locked": false,
+      "lockedReason": null,
+      "why": [
+        "The expensive mistake for a solo developer is not a bug, it is a half-finished feature that blocks the next three.",
+        "Nobody reviews your code, so the review has to come from somewhere that did not write it.",
+        "A green build is not a working deployment, and the gap between them is where the outages live."
+      ],
+      "counts": {
+        "agents": 4,
+        "skills": 3
+      },
+      "agents": [
+        {
+          "id": "scope-cutter",
+          "description": "Cuts a feature request down to the smallest version that is worth shipping. Use when a request arrives, when a task has been open for more than a week, or when you catch yourself starting a second thing before the first one is done.",
+          "division": "00 Direction",
+          "director": true
+        },
+        {
+          "id": "codebase-guide",
+          "description": "Explains where a change belongs in a codebase you did not write or no longer remember. Use before touching an unfamiliar module, when returning to a project after weeks away, or when a change seems to need edits in five places.",
+          "division": "01 Build",
+          "director": false
+        },
+        {
+          "id": "change-reviewer",
+          "description": "Adversarial review of a diff. Use before merging anything non-trivial, and especially when you wrote it yourself and feel confident about it.",
+          "division": "01 Build",
+          "director": false
+        },
+        {
+          "id": "release-checker",
+          "description": "Verifies a release against the deployed system rather than the build. Use immediately after any deploy, and before telling anyone that something is live.",
+          "division": "02 Ship",
+          "director": false
+        }
+      ],
+      "skills": [
+        {
+          "name": "ship-a-change",
+          "description": "The end to end procedure for taking one change from request to verified deployment as a solo developer: scope it, map it, build it, review it, deploy it, then check the deployment. Use whenever a change is about to start, when a change has stalled halfway, or when something shipped and nobody checked it afterwards."
+        },
+        {
+          "name": "debug-once",
+          "description": "A bisect-first debugging procedure for a defect that survived the obvious fix. Use when a bug is intermittent, only happens in production, worked yesterday, or has already resisted one attempt at a fix, rather than trying a second guess."
+        },
+        {
+          "name": "weekly-sweep",
+          "description": "A thirty minute weekly maintenance pass over a solo project: dependency and security advisories, failing or flaky tests, error logs, disk and quota, and the backlog of things that were deliberately deferred. Use once a week on a live project, or before returning to a project after time away."
+        }
+      ]
+    },
+    {
+      "id": "content-and-marketing",
+      "name": "Content and marketing",
+      "niche": "A small team or one person producing and distributing content",
+      "summary": "Four members that separate the decisions people usually blur: who this is for, what should exist, whether the draft is any good, and where it goes once it is written.",
+      "locked": false,
+      "lockedReason": null,
+      "why": [
+        "Most content stalls because the audience was never named, so every draft is written for everyone and lands on no one.",
+        "Editing and writing are different jobs, and doing both in the same pass produces prose that defends itself.",
+        "A piece with no distribution plan is a piece that gets published and then forgotten within a day."
+      ],
+      "counts": {
+        "agents": 4,
+        "skills": 3
+      },
+      "agents": [
+        {
+          "id": "audience-analyst",
+          "description": "Defines who a piece is for, in enough detail to change sentences. Use before a content plan is written, when a piece is not landing, or whenever the answer to \"who is this for\" is a job title rather than a situation.",
+          "division": "00 Strategy",
+          "director": false
+        },
+        {
+          "id": "content-planner",
+          "description": "Decides which pieces should exist and in what order. Use at the start of a content cycle, when a backlog has grown past what can be produced, or when output is steady but nothing compounds.",
+          "division": "00 Strategy",
+          "director": true
+        },
+        {
+          "id": "editor",
+          "description": "Edits a draft to be shorter, more specific and more honest. Use on any draft before it is published, and particularly on drafts the writer feels good about.",
+          "division": "01 Craft",
+          "director": false
+        },
+        {
+          "id": "distribution-planner",
+          "description": "Decides where a finished piece goes and what each channel gets. Use once a piece has passed editing, and when a channel is being considered for the first time.",
+          "division": "01 Craft",
+          "director": false
+        }
+      ],
+      "skills": [
+        {
+          "name": "draft-and-cut",
+          "description": "A two pass writing procedure that separates producing from judging: write badly and completely in one sitting, then cut on a different day against the audience and the one job. Use for any piece longer than a few paragraphs, and whenever a draft has been rewritten from the top more than twice."
+        },
+        {
+          "name": "repurpose-one-thing",
+          "description": "Turns one substantial piece into the several smaller assets each channel actually rewards, without producing four copies of the same paragraph. Use after a long piece is published, when a channel needs material and nothing new is ready, or when good work is only reaching one audience."
+        },
+        {
+          "name": "launch-post",
+          "description": "Writes the announcement for a thing that just shipped, anchored to what actually changed for the reader rather than to a feature list. Use on the day something ships, and before writing any post that begins with the words introducing or excited."
+        }
+      ]
+    },
+    {
+      "id": "research",
+      "name": "Research",
+      "niche": "Answering a question with evidence good enough to decide on",
+      "summary": "Four members that keep a research pass honest: frame the question so it can be answered, sweep widely, grade what came back, and write a brief that shows its own confidence and its own gaps.",
+      "locked": false,
+      "lockedReason": null,
+      "why": [
+        "Most research fails at the question, not the search: an unanswerable question produces a summary instead of an answer.",
+        "Search returns what agrees with the query, so the contradiction has to be hunted deliberately.",
+        "A brief without stated confidence gets read as certainty, and gets acted on as certainty."
+      ],
+      "counts": {
+        "agents": 4,
+        "skills": 2
+      },
+      "agents": [
+        {
+          "id": "question-framer",
+          "description": "Turns a vague research request into a question that evidence could actually settle. Use before any search begins, and when a research effort has produced a lot of reading and no answer.",
+          "division": "00 Framing",
+          "director": true
+        },
+        {
+          "id": "source-sweeper",
+          "description": "Searches widely and deliberately against a framed question, including for the answer that would be inconvenient. Use once questions are framed, and again when a brief looks suspiciously one sided.",
+          "division": "01 Evidence",
+          "director": false
+        },
+        {
+          "id": "source-grader",
+          "description": "Grades sources for independence, recency, method and interest, and collapses ones that share an origin. Use on every source list before synthesis, especially when several sources agree.",
+          "division": "01 Evidence",
+          "director": false
+        },
+        {
+          "id": "synthesis-writer",
+          "description": "Writes the research brief: the answer, the evidence for it, the evidence against it, and what would change it. Use once sources are graded, and never before.",
+          "division": "01 Evidence",
+          "director": false
+        }
+      ],
+      "skills": [
+        {
+          "name": "evidence-brief",
+          "description": "The full research pass from question to decision-grade brief: frame, sweep, grade, synthesise, with a stopping rule set before the search begins. Use before any decision that depends on facts you do not currently have, and when a previous research attempt produced reading rather than an answer."
+        },
+        {
+          "name": "contradiction-sweep",
+          "description": "A deliberate hunt for the evidence that would overturn a conclusion you already hold, run as a separate pass with its own queries. Use when a brief reads as one sided, before a high cost decision, and whenever every source found so far happens to agree."
+        }
+      ]
+    },
+    {
+      "id": "customer-support",
+      "name": "Customer support",
+      "niche": "A small team answering users and turning tickets into product change",
+      "summary": "Four members for the support loop that most teams only run half of: triage what arrived, draft the reply, notice when the same thing keeps arriving, and write the escalation an engineer can act on.",
+      "locked": false,
+      "lockedReason": null,
+      "why": [
+        "Support that only answers tickets keeps answering the same ticket forever.",
+        "The reply and the diagnosis are different jobs, and mixing them produces replies full of internal reasoning.",
+        "An escalation without a reproduction is a way of moving a problem rather than reporting it."
+      ],
+      "counts": {
+        "agents": 4,
+        "skills": 3
+      },
+      "agents": [
+        {
+          "id": "ticket-triager",
+          "description": "Sorts an incoming support queue by urgency and kind, and decides what is answered, what is escalated and what is a duplicate. Use at the start of a support session and whenever the queue has grown faster than it is being cleared.",
+          "division": "00 Queue",
+          "director": true
+        },
+        {
+          "id": "reply-drafter",
+          "description": "Drafts the reply a user actually receives: their answer, in their words, without internal reasoning or promises nobody authorised. Use for every answerable ticket, and to rewrite a reply that a teammate found too long.",
+          "division": "00 Queue",
+          "director": false
+        },
+        {
+          "id": "pattern-spotter",
+          "description": "Reads a period of tickets as a set and reports the themes, the growth and the ones that should have become product changes. Use weekly, and whenever the same reply is being written for the third time.",
+          "division": "01 Feedback",
+          "director": false
+        },
+        {
+          "id": "escalation-writer",
+          "description": "Turns a support ticket into something an engineer can act on: a reproduction, the affected population and the evidence. Use before sending anything to engineering, and to fix an escalation that came back with a request for more detail.",
+          "division": "01 Feedback",
+          "director": false
+        }
+      ],
+      "skills": [
+        {
+          "name": "answer-a-ticket",
+          "description": "The per-ticket procedure from arrival to sent reply, including the checks that stop a support answer from promising something nobody agreed to. Use on every ticket that is not an escalation, and when onboarding somebody new to a support queue."
+        },
+        {
+          "name": "weekly-theme-report",
+          "description": "A weekly pass that turns a period of tickets into ranked themes with proposed product changes, and tracks whether last period changes actually reduced their theme. Use once a week, at the end of a support cycle, or before a planning meeting that needs evidence rather than anecdote."
+        },
+        {
+          "name": "macro-audit",
+          "description": "An audit of saved replies, macros and canned responses against what is currently true of the product, so that support does not keep sending confidently outdated answers. Use quarterly, after any significant product change, and when a customer quotes a macro back at you that is wrong."
+        }
+      ]
+    },
+    {
+      "id": "data-and-analytics",
+      "name": "Data and analytics",
+      "niche": "Answering business questions with numbers that survive being checked",
+      "summary": "Four members for the part of analytics that goes wrong: turning a vague question into a measurable one, writing the query, checking the result before anyone believes it, and presenting it without overclaiming.",
+      "locked": false,
+      "lockedReason": null,
+      "why": [
+        "The most expensive analytics mistake is a correct query against the wrong definition of the metric.",
+        "A number that nobody checked will be quoted in a meeting within a week and be impossible to retract.",
+        "Charts persuade faster than they inform, so the checking has to happen before the chart exists."
+      ],
+      "counts": {
+        "agents": 4,
+        "skills": 3
+      },
+      "agents": [
+        {
+          "id": "question-shaper",
+          "description": "Turns a business question into a measurable one with a written metric definition, a population and a time window. Use before any query is written, and when two dashboards disagree about the same number.",
+          "division": "00 Question",
+          "director": true
+        },
+        {
+          "id": "query-writer",
+          "description": "Writes the query that implements a written metric definition, and states the assumptions the schema forced. Use once a definition exists, and to review a query somebody else wrote before its output is trusted.",
+          "division": "01 Answer",
+          "director": false
+        },
+        {
+          "id": "result-checker",
+          "description": "Checks a query result before anyone acts on it: magnitude, trend, grain, nulls and a comparison against a number that is already known. Use on every result that will be shown to another person.",
+          "division": "01 Answer",
+          "director": false
+        },
+        {
+          "id": "chart-briefer",
+          "description": "Decides how a checked result should be shown and what the chart must say about its own limits. Use before building any chart or dashboard tile, and when an existing chart is being misread.",
+          "division": "01 Answer",
+          "director": false
+        }
+      ],
+      "skills": [
+        {
+          "name": "answer-with-numbers",
+          "description": "The full pass from a business question to a checked, captioned number: define the metric, write the query, check the result against an anchor, then present it with its limits. Use whenever a number is about to be shown to somebody who will act on it."
+        },
+        {
+          "name": "metric-definition",
+          "description": "Writes or repairs the canonical definition of a metric so that every query and dashboard computes the same thing, including the exclusions and the time zone. Use when two reports disagree, when a metric is used in a target or a bonus, and before a metric appears in a dashboard for the first time."
+        },
+        {
+          "name": "dashboard-review",
+          "description": "A review of an existing dashboard for wrong definitions, stale queries, misleading axes, tiles nobody looks at, and numbers that no longer reconcile with their source. Use quarterly, after a schema change, and when people have started ignoring a dashboard."
+        }
+      ]
+    },
+    {
+      "id": "agency-delivery",
+      "name": "Agency delivery",
+      "niche": "Delivering client projects on scope, with a paper trail",
+      "summary": "Four members for the parts of client work that cost money when they are done informally: writing the scope, keeping the client informed, gating quality before it is seen, and handing over something the client can run.",
+      "locked": false,
+      "lockedReason": null,
+      "why": [
+        "Scope creep is almost never a big argument; it is twelve small yeses nobody wrote down.",
+        "Clients do not become unhappy because of problems, they become unhappy because they heard about a problem late.",
+        "A project that only the agency can operate is a liability that reads as a retainer."
+      ],
+      "counts": {
+        "agents": 4,
+        "skills": 3
+      },
+      "agents": [
+        {
+          "id": "scope-writer",
+          "description": "Writes the scope of work: deliverables, acceptance criteria, exclusions, assumptions and what triggers a change request. Use before any client project starts and before agreeing to any addition mid-project.",
+          "division": "00 Agreement",
+          "director": true
+        },
+        {
+          "id": "client-communicator",
+          "description": "Drafts client-facing updates, bad news and change requests, in the register a client actually reads. Use for weekly updates, the moment something slips, and whenever a request arrives that is outside scope.",
+          "division": "01 Delivery",
+          "director": false
+        },
+        {
+          "id": "qa-gate",
+          "description": "Checks a deliverable against the signed acceptance criteria before the client sees it. Use before every client review, every demo and every handover.",
+          "division": "01 Delivery",
+          "director": false
+        },
+        {
+          "id": "handover-writer",
+          "description": "Writes the handover: what was built, how to run it, what it costs, who to call, and what was deliberately left out. Use at the end of every engagement and whenever a client asks how they would take this in house.",
+          "division": "01 Delivery",
+          "director": false
+        }
+      ],
+      "skills": [
+        {
+          "name": "kickoff",
+          "description": "The procedure for starting a client engagement so that scope, acceptance criteria, client dependencies and the change request trigger all exist in writing before work begins. Use at the start of every engagement, and to rescue a project that started without a written scope."
+        },
+        {
+          "name": "change-request",
+          "description": "Turns an out of scope client request into a written change request with impact on time and cost, without damaging the relationship or quietly absorbing the work. Use the moment a request arrives that is not in the signed scope."
+        },
+        {
+          "name": "handover-pack",
+          "description": "Assembles the end of engagement pack so the client can run, deploy, pay for and repair what was built without the agency. Use at the end of every project, before a final invoice, and when a client asks what happens if they leave."
+        }
+      ]
+    },
+    {
+      "id": "evaluation-and-governance",
+      "name": "Evaluation and governance",
+      "niche": "Teams shipping features that call a model, who need to know when quality moves",
+      "summary": "Four members for the discipline nobody has time for until an incident: build a real task set, write a judge that has been checked against humans, run it as a regression, and gate the release on the result.",
+      "locked": true,
+      "lockedReason": "This is the setup that takes a team from \"the demo looked good\" to a release gate, and it is the one people are willing to talk to somebody about. The six field templates lose nothing by it: none of them had an eval bench and none of them needed one.",
+      "why": [
+        "A prompt change with no eval is a deploy with no test, and model providers change the model underneath you.",
+        "An unvalidated judge model is a confident random number generator that everyone treats as a score.",
+        "Quality regressions in a model-backed feature are silent: nothing throws, nothing pages, users just leave."
+      ],
+      "counts": {
+        "agents": 4,
+        "skills": 3
+      },
+      "agents": [
+        {
+          "id": "eval-designer",
+          "description": "Designs the task set an LLM feature is measured against, weighted towards the failures that actually happen. Use before a model-backed feature first ships, and whenever a prompt, tool schema, model or retrieval shape changes.",
+          "division": "00 Measurement",
+          "director": true
+        },
+        {
+          "id": "judge-author",
+          "description": "Writes and calibrates the scoring for an eval, whether programmatic or a judge model, and measures its agreement with human labels. Use before any judge score is used to make a decision.",
+          "division": "00 Measurement",
+          "director": false
+        },
+        {
+          "id": "regression-runner",
+          "description": "Runs the eval as a repeatable regression and reports movement against a baseline, with cost and latency alongside quality. Use on every prompt, model or retrieval change, and on a schedule to catch provider side drift.",
+          "division": "01 Gate",
+          "director": false
+        },
+        {
+          "id": "release-gatekeeper",
+          "description": "Decides whether an eval result permits a release, against a threshold agreed before the run. Use before shipping any change to a model-backed feature.",
+          "division": "01 Gate",
+          "director": false
+        }
+      ],
+      "skills": [
+        {
+          "name": "build-an-eval-set",
+          "description": "Builds the first real evaluation set for a model-backed feature out of its actual failures, with a taxonomy, a difficulty split and a held-out slice. Use before a model-backed feature first ships, after an incident, and when a team is arguing about quality with no numbers."
+        },
+        {
+          "name": "judge-calibration",
+          "description": "Measures how much a judge model agrees with human labels, and checks it for length and position bias, before any of its scores are used to make a decision. Use when a judge is first written, when the judge model version changes, and when a score is about to gate a release."
+        },
+        {
+          "name": "gate-a-release",
+          "description": "Runs the release gate for a model-backed change: pre-register the threshold, run the bench against a fresh baseline, read quality, cost and latency together, then ship or hold with the number that decided it. Use before every deploy that changes a prompt, a model, a tool schema or a retrieval path."
+        }
+      ]
+    },
+    {
+      "id": "incident-and-reliability",
+      "name": "Incident and reliability",
+      "niche": "Small teams operating something live, without a rota or an on-call budget",
+      "summary": "Four members for the hour when something is broken: read the signal, decide between rollback and forward fix, write the customer message, then convert the incident into a change that stops it recurring.",
+      "locked": true,
+      "lockedReason": "This one is written for a live production system and it is the template people ask questions about, so it sits behind a conversation. Nothing was removed from the free six to make room for it: none of them is an operations template.",
+      "why": [
+        "Most small-team incidents are made worse by diagnosing in front of users instead of rolling back first.",
+        "Silence during an outage costs more trust than the outage does.",
+        "An incident that produces no change to the system will happen again, and next time it will be familiar rather than instructive."
+      ],
+      "counts": {
+        "agents": 4,
+        "skills": 3
+      },
+      "agents": [
+        {
+          "id": "incident-lead",
+          "description": "Runs a live incident: declares it, sets severity, assigns the next action, and keeps a timestamped log. Use the moment something in production is broken, and stand down explicitly when it is not.",
+          "division": "00 Response",
+          "director": true
+        },
+        {
+          "id": "signal-reader",
+          "description": "Reads logs, metrics and error streams to say what changed and when, without theorising about why. Use at the start of an incident and during a weekly reliability sweep.",
+          "division": "00 Response",
+          "director": false
+        },
+        {
+          "id": "rollback-decider",
+          "description": "Makes the mitigation call between rolling back, fixing forward and waiting, with the risk of each stated. Use as soon as an incident has a suspected change window.",
+          "division": "00 Response",
+          "director": false
+        },
+        {
+          "id": "postmortem-writer",
+          "description": "Writes the blameless postmortem: timeline, contributing factors, the detection gap, and action items with owners and dates. Use within a few days of every incident, including the ones that resolved themselves.",
+          "division": "01 Learning",
+          "director": false
+        }
+      ],
+      "skills": [
+        {
+          "name": "run-an-incident",
+          "description": "The live procedure for a small team when production is broken: declare, log, mitigate before diagnosing, communicate, then stand down explicitly. Use the moment something is actually broken in production, not for pre-launch review."
+        },
+        {
+          "name": "blameless-postmortem",
+          "description": "Turns a resolved incident into an evidence-cited timeline, several contributing factors, a detection gap and at most three owned dated action items. Use within a few days of any incident, including near misses and ones that resolved on their own."
+        },
+        {
+          "name": "alert-audit",
+          "description": "An audit of alerting for alerts that never fire, alerts that always fire, and the failures that produce no alert at all, so that a page means something when it arrives. Use quarterly, after any incident that nobody was paged for, and when the team has started muting a channel."
+        }
+      ]
+    }
+  ],
+  "cities": {
+    "solo-developer": {
+      "generatedAt": "2026-09-05T20:35:57.122Z",
+      "scope": "template",
+      "divisions": [
+        {
+          "number": "00",
+          "name": "Direction"
+        },
+        {
+          "number": "01",
+          "name": "Build"
+        },
+        {
+          "number": "02",
+          "name": "Ship"
+        }
+      ],
+      "guilds": [],
+      "agents": [
+        {
+          "id": "scope-cutter",
+          "description": "Cuts a feature request down to the smallest version that is worth shipping. Use when a request arrives, when a task has been open for more than a week, or when you catch yourself starting a second thing before the first one is done.",
+          "tools": [
+            "Read",
+            "Glob",
+            "Grep"
+          ],
+          "model": null,
+          "division": "00 Direction",
+          "guild": null,
+          "director": true,
+          "system": false
+        },
+        {
+          "id": "codebase-guide",
+          "description": "Explains where a change belongs in a codebase you did not write or no longer remember. Use before touching an unfamiliar module, when returning to a project after weeks away, or when a change seems to need edits in five places.",
+          "tools": [
+            "Read",
+            "Glob",
+            "Grep"
+          ],
+          "model": null,
+          "division": "01 Build",
+          "guild": null,
+          "director": false,
+          "system": false
+        },
+        {
+          "id": "change-reviewer",
+          "description": "Adversarial review of a diff. Use before merging anything non-trivial, and especially when you wrote it yourself and feel confident about it.",
+          "tools": [
+            "Read",
+            "Glob",
+            "Grep",
+            "Bash"
+          ],
+          "model": null,
+          "division": "01 Build",
+          "guild": null,
+          "director": false,
+          "system": false
+        },
+        {
+          "id": "release-checker",
+          "description": "Verifies a release against the deployed system rather than the build. Use immediately after any deploy, and before telling anyone that something is live.",
+          "tools": [
+            "Read",
+            "Glob",
+            "Grep",
+            "Bash"
+          ],
+          "model": null,
+          "division": "02 Ship",
+          "guild": null,
+          "director": false,
+          "system": false
+        }
+      ],
+      "edges": [
+        {
+          "from": "codebase-guide",
+          "to": "scope-cutter",
+          "kind": "upstream"
+        },
+        {
+          "from": "scope-cutter",
+          "to": "codebase-guide",
+          "kind": "downstream"
+        },
+        {
+          "from": "scope-cutter",
+          "to": "change-reviewer",
+          "kind": "downstream"
+        },
+        {
+          "from": "codebase-guide",
+          "to": "change-reviewer",
+          "kind": "downstream"
+        },
+        {
+          "from": "change-reviewer",
+          "to": "release-checker",
+          "kind": "downstream"
+        },
+        {
+          "from": "scope-cutter",
+          "to": "release-checker",
+          "kind": "upstream"
+        }
+      ],
+      "skills": [
+        {
+          "id": "ship-a-change",
+          "description": "The end to end procedure for taking one change from request to verified deployment as a solo developer: scope it, map it, build it, review it, deploy it, then check the deployment. Use whenever a change is about to start, when a change has stalled halfway, or when something shipped and nobody checked it afterwards.",
+          "guild": null
+        },
+        {
+          "id": "debug-once",
+          "description": "A bisect-first debugging procedure for a defect that survived the obvious fix. Use when a bug is intermittent, only happens in production, worked yesterday, or has already resisted one attempt at a fix, rather than trying a second guess.",
+          "guild": null
+        },
+        {
+          "id": "weekly-sweep",
+          "description": "A thirty minute weekly maintenance pass over a solo project: dependency and security advisories, failing or flaky tests, error logs, disk and quota, and the backlog of things that were deliberately deferred. Use once a week on a live project, or before returning to a project after time away.",
+          "guild": null
+        }
+      ],
+      "stats": {
+        "agents": 4,
+        "skills": 3,
+        "divisions": 3,
+        "guilds": 0,
+        "edges": 6,
+        "directors": 1,
+        "unreachable": 0,
+        "withheld": 0
+      },
+      "unreachable": [],
+      "withheld": []
+    },
+    "content-and-marketing": {
+      "generatedAt": "2026-09-05T20:35:57.122Z",
+      "scope": "template",
+      "divisions": [
+        {
+          "number": "00",
+          "name": "Strategy"
+        },
+        {
+          "number": "01",
+          "name": "Craft"
+        }
+      ],
+      "guilds": [],
+      "agents": [
+        {
+          "id": "audience-analyst",
+          "description": "Defines who a piece is for, in enough detail to change sentences. Use before a content plan is written, when a piece is not landing, or whenever the answer to \"who is this for\" is a job title rather than a situation.",
+          "tools": [
+            "Read",
+            "Glob",
+            "Grep",
+            "WebSearch",
+            "WebFetch"
+          ],
+          "model": null,
+          "division": "00 Strategy",
+          "guild": null,
+          "director": false,
+          "system": false
+        },
+        {
+          "id": "content-planner",
+          "description": "Decides which pieces should exist and in what order. Use at the start of a content cycle, when a backlog has grown past what can be produced, or when output is steady but nothing compounds.",
+          "tools": [
+            "Read",
+            "Glob",
+            "Grep"
+          ],
+          "model": null,
+          "division": "00 Strategy",
+          "guild": null,
+          "director": true,
+          "system": false
+        },
+        {
+          "id": "editor",
+          "description": "Edits a draft to be shorter, more specific and more honest. Use on any draft before it is published, and particularly on drafts the writer feels good about.",
+          "tools": [
+            "Read",
+            "Glob",
+            "Grep"
+          ],
+          "model": null,
+          "division": "01 Craft",
+          "guild": null,
+          "director": false,
+          "system": false
+        },
+        {
+          "id": "distribution-planner",
+          "description": "Decides where a finished piece goes and what each channel gets. Use once a piece has passed editing, and when a channel is being considered for the first time.",
+          "tools": [
+            "Read",
+            "Glob",
+            "Grep",
+            "WebSearch"
+          ],
+          "model": null,
+          "division": "01 Craft",
+          "guild": null,
+          "director": false,
+          "system": false
+        }
+      ],
+      "edges": [
+        {
+          "from": "audience-analyst",
+          "to": "content-planner",
+          "kind": "downstream"
+        },
+        {
+          "from": "audience-analyst",
+          "to": "editor",
+          "kind": "downstream"
+        },
+        {
+          "from": "distribution-planner",
+          "to": "content-planner",
+          "kind": "upstream"
+        },
+        {
+          "from": "content-planner",
+          "to": "editor",
+          "kind": "downstream"
+        },
+        {
+          "from": "content-planner",
+          "to": "distribution-planner",
+          "kind": "downstream"
+        },
+        {
+          "from": "editor",
+          "to": "distribution-planner",
+          "kind": "downstream"
+        }
+      ],
+      "skills": [
+        {
+          "id": "draft-and-cut",
+          "description": "A two pass writing procedure that separates producing from judging: write badly and completely in one sitting, then cut on a different day against the audience and the one job. Use for any piece longer than a few paragraphs, and whenever a draft has been rewritten from the top more than twice.",
+          "guild": null
+        },
+        {
+          "id": "repurpose-one-thing",
+          "description": "Turns one substantial piece into the several smaller assets each channel actually rewards, without producing four copies of the same paragraph. Use after a long piece is published, when a channel needs material and nothing new is ready, or when good work is only reaching one audience.",
+          "guild": null
+        },
+        {
+          "id": "launch-post",
+          "description": "Writes the announcement for a thing that just shipped, anchored to what actually changed for the reader rather than to a feature list. Use on the day something ships, and before writing any post that begins with the words introducing or excited.",
+          "guild": null
+        }
+      ],
+      "stats": {
+        "agents": 4,
+        "skills": 3,
+        "divisions": 2,
+        "guilds": 0,
+        "edges": 6,
+        "directors": 1,
+        "unreachable": 0,
+        "withheld": 0
+      },
+      "unreachable": [],
+      "withheld": []
+    },
+    "research": {
+      "generatedAt": "2026-09-05T20:35:57.122Z",
+      "scope": "template",
+      "divisions": [
+        {
+          "number": "00",
+          "name": "Framing"
+        },
+        {
+          "number": "01",
+          "name": "Evidence"
+        }
+      ],
+      "guilds": [],
+      "agents": [
+        {
+          "id": "question-framer",
+          "description": "Turns a vague research request into a question that evidence could actually settle. Use before any search begins, and when a research effort has produced a lot of reading and no answer.",
+          "tools": [
+            "Read",
+            "Glob",
+            "Grep"
+          ],
+          "model": null,
+          "division": "00 Framing",
+          "guild": null,
+          "director": true,
+          "system": false
+        },
+        {
+          "id": "source-sweeper",
+          "description": "Searches widely and deliberately against a framed question, including for the answer that would be inconvenient. Use once questions are framed, and again when a brief looks suspiciously one sided.",
+          "tools": [
+            "WebSearch",
+            "WebFetch",
+            "Read",
+            "Grep"
+          ],
+          "model": null,
+          "division": "01 Evidence",
+          "guild": null,
+          "director": false,
+          "system": false
+        },
+        {
+          "id": "source-grader",
+          "description": "Grades sources for independence, recency, method and interest, and collapses ones that share an origin. Use on every source list before synthesis, especially when several sources agree.",
+          "tools": [
+            "Read",
+            "WebFetch",
+            "Grep"
+          ],
+          "model": null,
+          "division": "01 Evidence",
+          "guild": null,
+          "director": false,
+          "system": false
+        },
+        {
+          "id": "synthesis-writer",
+          "description": "Writes the research brief: the answer, the evidence for it, the evidence against it, and what would change it. Use once sources are graded, and never before.",
+          "tools": [
+            "Read",
+            "Grep",
+            "Glob"
+          ],
+          "model": null,
+          "division": "01 Evidence",
+          "guild": null,
+          "director": false,
+          "system": false
+        }
+      ],
+      "edges": [
+        {
+          "from": "question-framer",
+          "to": "source-sweeper",
+          "kind": "downstream"
+        },
+        {
+          "from": "question-framer",
+          "to": "synthesis-writer",
+          "kind": "downstream"
+        },
+        {
+          "from": "source-sweeper",
+          "to": "source-grader",
+          "kind": "downstream"
+        },
+        {
+          "from": "source-sweeper",
+          "to": "synthesis-writer",
+          "kind": "downstream"
+        },
+        {
+          "from": "source-grader",
+          "to": "synthesis-writer",
+          "kind": "downstream"
+        }
+      ],
+      "skills": [
+        {
+          "id": "evidence-brief",
+          "description": "The full research pass from question to decision-grade brief: frame, sweep, grade, synthesise, with a stopping rule set before the search begins. Use before any decision that depends on facts you do not currently have, and when a previous research attempt produced reading rather than an answer.",
+          "guild": null
+        },
+        {
+          "id": "contradiction-sweep",
+          "description": "A deliberate hunt for the evidence that would overturn a conclusion you already hold, run as a separate pass with its own queries. Use when a brief reads as one sided, before a high cost decision, and whenever every source found so far happens to agree.",
+          "guild": null
+        }
+      ],
+      "stats": {
+        "agents": 4,
+        "skills": 2,
+        "divisions": 2,
+        "guilds": 0,
+        "edges": 5,
+        "directors": 1,
+        "unreachable": 0,
+        "withheld": 0
+      },
+      "unreachable": [],
+      "withheld": []
+    },
+    "customer-support": {
+      "generatedAt": "2026-09-05T20:35:57.122Z",
+      "scope": "template",
+      "divisions": [
+        {
+          "number": "00",
+          "name": "Queue"
+        },
+        {
+          "number": "01",
+          "name": "Feedback"
+        }
+      ],
+      "guilds": [],
+      "agents": [
+        {
+          "id": "ticket-triager",
+          "description": "Sorts an incoming support queue by urgency and kind, and decides what is answered, what is escalated and what is a duplicate. Use at the start of a support session and whenever the queue has grown faster than it is being cleared.",
+          "tools": [
+            "Read",
+            "Glob",
+            "Grep"
+          ],
+          "model": null,
+          "division": "00 Queue",
+          "guild": null,
+          "director": true,
+          "system": false
+        },
+        {
+          "id": "reply-drafter",
+          "description": "Drafts the reply a user actually receives: their answer, in their words, without internal reasoning or promises nobody authorised. Use for every answerable ticket, and to rewrite a reply that a teammate found too long.",
+          "tools": [
+            "Read",
+            "Glob",
+            "Grep"
+          ],
+          "model": null,
+          "division": "00 Queue",
+          "guild": null,
+          "director": false,
+          "system": false
+        },
+        {
+          "id": "pattern-spotter",
+          "description": "Reads a period of tickets as a set and reports the themes, the growth and the ones that should have become product changes. Use weekly, and whenever the same reply is being written for the third time.",
+          "tools": [
+            "Read",
+            "Glob",
+            "Grep",
+            "Bash"
+          ],
+          "model": null,
+          "division": "01 Feedback",
+          "guild": null,
+          "director": false,
+          "system": false
+        },
+        {
+          "id": "escalation-writer",
+          "description": "Turns a support ticket into something an engineer can act on: a reproduction, the affected population and the evidence. Use before sending anything to engineering, and to fix an escalation that came back with a request for more detail.",
+          "tools": [
+            "Read",
+            "Glob",
+            "Grep",
+            "Bash"
+          ],
+          "model": null,
+          "division": "01 Feedback",
+          "guild": null,
+          "director": false,
+          "system": false
+        }
+      ],
+      "edges": [
+        {
+          "from": "ticket-triager",
+          "to": "reply-drafter",
+          "kind": "downstream"
+        },
+        {
+          "from": "ticket-triager",
+          "to": "pattern-spotter",
+          "kind": "downstream"
+        },
+        {
+          "from": "ticket-triager",
+          "to": "escalation-writer",
+          "kind": "downstream"
+        },
+        {
+          "from": "reply-drafter",
+          "to": "pattern-spotter",
+          "kind": "downstream"
+        },
+        {
+          "from": "pattern-spotter",
+          "to": "escalation-writer",
+          "kind": "downstream"
+        },
+        {
+          "from": "escalation-writer",
+          "to": "reply-drafter",
+          "kind": "downstream"
+        }
+      ],
+      "skills": [
+        {
+          "id": "answer-a-ticket",
+          "description": "The per-ticket procedure from arrival to sent reply, including the checks that stop a support answer from promising something nobody agreed to. Use on every ticket that is not an escalation, and when onboarding somebody new to a support queue.",
+          "guild": null
+        },
+        {
+          "id": "weekly-theme-report",
+          "description": "A weekly pass that turns a period of tickets into ranked themes with proposed product changes, and tracks whether last period changes actually reduced their theme. Use once a week, at the end of a support cycle, or before a planning meeting that needs evidence rather than anecdote.",
+          "guild": null
+        },
+        {
+          "id": "macro-audit",
+          "description": "An audit of saved replies, macros and canned responses against what is currently true of the product, so that support does not keep sending confidently outdated answers. Use quarterly, after any significant product change, and when a customer quotes a macro back at you that is wrong.",
+          "guild": null
+        }
+      ],
+      "stats": {
+        "agents": 4,
+        "skills": 3,
+        "divisions": 2,
+        "guilds": 0,
+        "edges": 6,
+        "directors": 1,
+        "unreachable": 0,
+        "withheld": 0
+      },
+      "unreachable": [],
+      "withheld": []
+    },
+    "data-and-analytics": {
+      "generatedAt": "2026-09-05T20:35:57.122Z",
+      "scope": "template",
+      "divisions": [
+        {
+          "number": "00",
+          "name": "Question"
+        },
+        {
+          "number": "01",
+          "name": "Answer"
+        }
+      ],
+      "guilds": [],
+      "agents": [
+        {
+          "id": "question-shaper",
+          "description": "Turns a business question into a measurable one with a written metric definition, a population and a time window. Use before any query is written, and when two dashboards disagree about the same number.",
+          "tools": [
+            "Read",
+            "Glob",
+            "Grep"
+          ],
+          "model": null,
+          "division": "00 Question",
+          "guild": null,
+          "director": true,
+          "system": false
+        },
+        {
+          "id": "query-writer",
+          "description": "Writes the query that implements a written metric definition, and states the assumptions the schema forced. Use once a definition exists, and to review a query somebody else wrote before its output is trusted.",
+          "tools": [
+            "Read",
+            "Glob",
+            "Grep",
+            "Bash"
+          ],
+          "model": null,
+          "division": "01 Answer",
+          "guild": null,
+          "director": false,
+          "system": false
+        },
+        {
+          "id": "result-checker",
+          "description": "Checks a query result before anyone acts on it: magnitude, trend, grain, nulls and a comparison against a number that is already known. Use on every result that will be shown to another person.",
+          "tools": [
+            "Read",
+            "Glob",
+            "Grep",
+            "Bash"
+          ],
+          "model": null,
+          "division": "01 Answer",
+          "guild": null,
+          "director": false,
+          "system": false
+        },
+        {
+          "id": "chart-briefer",
+          "description": "Decides how a checked result should be shown and what the chart must say about its own limits. Use before building any chart or dashboard tile, and when an existing chart is being misread.",
+          "tools": [
+            "Read",
+            "Glob",
+            "Grep"
+          ],
+          "model": null,
+          "division": "01 Answer",
+          "guild": null,
+          "director": false,
+          "system": false
+        }
+      ],
+      "edges": [
+        {
+          "from": "question-shaper",
+          "to": "query-writer",
+          "kind": "downstream"
+        },
+        {
+          "from": "question-shaper",
+          "to": "result-checker",
+          "kind": "downstream"
+        },
+        {
+          "from": "question-shaper",
+          "to": "chart-briefer",
+          "kind": "downstream"
+        },
+        {
+          "from": "query-writer",
+          "to": "result-checker",
+          "kind": "downstream"
+        },
+        {
+          "from": "query-writer",
+          "to": "chart-briefer",
+          "kind": "downstream"
+        },
+        {
+          "from": "result-checker",
+          "to": "chart-briefer",
+          "kind": "downstream"
+        }
+      ],
+      "skills": [
+        {
+          "id": "answer-with-numbers",
+          "description": "The full pass from a business question to a checked, captioned number: define the metric, write the query, check the result against an anchor, then present it with its limits. Use whenever a number is about to be shown to somebody who will act on it.",
+          "guild": null
+        },
+        {
+          "id": "metric-definition",
+          "description": "Writes or repairs the canonical definition of a metric so that every query and dashboard computes the same thing, including the exclusions and the time zone. Use when two reports disagree, when a metric is used in a target or a bonus, and before a metric appears in a dashboard for the first time.",
+          "guild": null
+        },
+        {
+          "id": "dashboard-review",
+          "description": "A review of an existing dashboard for wrong definitions, stale queries, misleading axes, tiles nobody looks at, and numbers that no longer reconcile with their source. Use quarterly, after a schema change, and when people have started ignoring a dashboard.",
+          "guild": null
+        }
+      ],
+      "stats": {
+        "agents": 4,
+        "skills": 3,
+        "divisions": 2,
+        "guilds": 0,
+        "edges": 6,
+        "directors": 1,
+        "unreachable": 0,
+        "withheld": 0
+      },
+      "unreachable": [],
+      "withheld": []
+    },
+    "agency-delivery": {
+      "generatedAt": "2026-09-05T20:35:57.122Z",
+      "scope": "template",
+      "divisions": [
+        {
+          "number": "00",
+          "name": "Agreement"
+        },
+        {
+          "number": "01",
+          "name": "Delivery"
+        }
+      ],
+      "guilds": [],
+      "agents": [
+        {
+          "id": "scope-writer",
+          "description": "Writes the scope of work: deliverables, acceptance criteria, exclusions, assumptions and what triggers a change request. Use before any client project starts and before agreeing to any addition mid-project.",
+          "tools": [
+            "Read",
+            "Glob",
+            "Grep"
+          ],
+          "model": null,
+          "division": "00 Agreement",
+          "guild": null,
+          "director": true,
+          "system": false
+        },
+        {
+          "id": "client-communicator",
+          "description": "Drafts client-facing updates, bad news and change requests, in the register a client actually reads. Use for weekly updates, the moment something slips, and whenever a request arrives that is outside scope.",
+          "tools": [
+            "Read",
+            "Glob",
+            "Grep"
+          ],
+          "model": null,
+          "division": "01 Delivery",
+          "guild": null,
+          "director": false,
+          "system": false
+        },
+        {
+          "id": "qa-gate",
+          "description": "Checks a deliverable against the signed acceptance criteria before the client sees it. Use before every client review, every demo and every handover.",
+          "tools": [
+            "Read",
+            "Glob",
+            "Grep",
+            "Bash"
+          ],
+          "model": null,
+          "division": "01 Delivery",
+          "guild": null,
+          "director": false,
+          "system": false
+        },
+        {
+          "id": "handover-writer",
+          "description": "Writes the handover: what was built, how to run it, what it costs, who to call, and what was deliberately left out. Use at the end of every engagement and whenever a client asks how they would take this in house.",
+          "tools": [
+            "Read",
+            "Glob",
+            "Grep",
+            "Bash"
+          ],
+          "model": null,
+          "division": "01 Delivery",
+          "guild": null,
+          "director": false,
+          "system": false
+        }
+      ],
+      "edges": [
+        {
+          "from": "scope-writer",
+          "to": "client-communicator",
+          "kind": "downstream"
+        },
+        {
+          "from": "scope-writer",
+          "to": "qa-gate",
+          "kind": "downstream"
+        },
+        {
+          "from": "scope-writer",
+          "to": "handover-writer",
+          "kind": "downstream"
+        },
+        {
+          "from": "qa-gate",
+          "to": "client-communicator",
+          "kind": "upstream"
+        },
+        {
+          "from": "qa-gate",
+          "to": "handover-writer",
+          "kind": "downstream"
+        }
+      ],
+      "skills": [
+        {
+          "id": "kickoff",
+          "description": "The procedure for starting a client engagement so that scope, acceptance criteria, client dependencies and the change request trigger all exist in writing before work begins. Use at the start of every engagement, and to rescue a project that started without a written scope.",
+          "guild": null
+        },
+        {
+          "id": "change-request",
+          "description": "Turns an out of scope client request into a written change request with impact on time and cost, without damaging the relationship or quietly absorbing the work. Use the moment a request arrives that is not in the signed scope.",
+          "guild": null
+        },
+        {
+          "id": "handover-pack",
+          "description": "Assembles the end of engagement pack so the client can run, deploy, pay for and repair what was built without the agency. Use at the end of every project, before a final invoice, and when a client asks what happens if they leave.",
+          "guild": null
+        }
+      ],
+      "stats": {
+        "agents": 4,
+        "skills": 3,
+        "divisions": 2,
+        "guilds": 0,
+        "edges": 5,
+        "directors": 1,
+        "unreachable": 0,
+        "withheld": 0
+      },
+      "unreachable": [],
+      "withheld": []
+    },
+    "evaluation-and-governance": {
+      "generatedAt": "2026-09-05T20:35:57.122Z",
+      "scope": "template",
+      "divisions": [
+        {
+          "number": "00",
+          "name": "Measurement"
+        },
+        {
+          "number": "01",
+          "name": "Gate"
+        }
+      ],
+      "guilds": [],
+      "agents": [
+        {
+          "id": "eval-designer",
+          "description": "Designs the task set an LLM feature is measured against, weighted towards the failures that actually happen. Use before a model-backed feature first ships, and whenever a prompt, tool schema, model or retrieval shape changes.",
+          "tools": [
+            "Read",
+            "Glob",
+            "Grep",
+            "Bash"
+          ],
+          "model": null,
+          "division": "00 Measurement",
+          "guild": null,
+          "director": true,
+          "system": false
+        },
+        {
+          "id": "judge-author",
+          "description": "Writes and calibrates the scoring for an eval, whether programmatic or a judge model, and measures its agreement with human labels. Use before any judge score is used to make a decision.",
+          "tools": [
+            "Read",
+            "Glob",
+            "Grep",
+            "Bash"
+          ],
+          "model": null,
+          "division": "00 Measurement",
+          "guild": null,
+          "director": false,
+          "system": false
+        },
+        {
+          "id": "regression-runner",
+          "description": "Runs the eval as a repeatable regression and reports movement against a baseline, with cost and latency alongside quality. Use on every prompt, model or retrieval change, and on a schedule to catch provider side drift.",
+          "tools": [
+            "Read",
+            "Glob",
+            "Grep",
+            "Bash"
+          ],
+          "model": null,
+          "division": "01 Gate",
+          "guild": null,
+          "director": false,
+          "system": false
+        },
+        {
+          "id": "release-gatekeeper",
+          "description": "Decides whether an eval result permits a release, against a threshold agreed before the run. Use before shipping any change to a model-backed feature.",
+          "tools": [
+            "Read",
+            "Glob",
+            "Grep"
+          ],
+          "model": null,
+          "division": "01 Gate",
+          "guild": null,
+          "director": false,
+          "system": false
+        }
+      ],
+      "edges": [
+        {
+          "from": "eval-designer",
+          "to": "judge-author",
+          "kind": "downstream"
+        },
+        {
+          "from": "eval-designer",
+          "to": "regression-runner",
+          "kind": "downstream"
+        },
+        {
+          "from": "eval-designer",
+          "to": "release-gatekeeper",
+          "kind": "downstream"
+        },
+        {
+          "from": "judge-author",
+          "to": "regression-runner",
+          "kind": "downstream"
+        },
+        {
+          "from": "judge-author",
+          "to": "release-gatekeeper",
+          "kind": "downstream"
+        },
+        {
+          "from": "regression-runner",
+          "to": "release-gatekeeper",
+          "kind": "downstream"
+        }
+      ],
+      "skills": [
+        {
+          "id": "build-an-eval-set",
+          "description": "Builds the first real evaluation set for a model-backed feature out of its actual failures, with a taxonomy, a difficulty split and a held-out slice. Use before a model-backed feature first ships, after an incident, and when a team is arguing about quality with no numbers.",
+          "guild": null
+        },
+        {
+          "id": "judge-calibration",
+          "description": "Measures how much a judge model agrees with human labels, and checks it for length and position bias, before any of its scores are used to make a decision. Use when a judge is first written, when the judge model version changes, and when a score is about to gate a release.",
+          "guild": null
+        },
+        {
+          "id": "gate-a-release",
+          "description": "Runs the release gate for a model-backed change: pre-register the threshold, run the bench against a fresh baseline, read quality, cost and latency together, then ship or hold with the number that decided it. Use before every deploy that changes a prompt, a model, a tool schema or a retrieval path.",
+          "guild": null
+        }
+      ],
+      "stats": {
+        "agents": 4,
+        "skills": 3,
+        "divisions": 2,
+        "guilds": 0,
+        "edges": 6,
+        "directors": 1,
+        "unreachable": 0,
+        "withheld": 0
+      },
+      "unreachable": [],
+      "withheld": []
+    },
+    "incident-and-reliability": {
+      "generatedAt": "2026-09-05T20:35:57.122Z",
+      "scope": "template",
+      "divisions": [
+        {
+          "number": "00",
+          "name": "Response"
+        },
+        {
+          "number": "01",
+          "name": "Learning"
+        }
+      ],
+      "guilds": [],
+      "agents": [
+        {
+          "id": "incident-lead",
+          "description": "Runs a live incident: declares it, sets severity, assigns the next action, and keeps a timestamped log. Use the moment something in production is broken, and stand down explicitly when it is not.",
+          "tools": [
+            "Read",
+            "Glob",
+            "Grep",
+            "Bash"
+          ],
+          "model": null,
+          "division": "00 Response",
+          "guild": null,
+          "director": true,
+          "system": false
+        },
+        {
+          "id": "signal-reader",
+          "description": "Reads logs, metrics and error streams to say what changed and when, without theorising about why. Use at the start of an incident and during a weekly reliability sweep.",
+          "tools": [
+            "Read",
+            "Glob",
+            "Grep",
+            "Bash"
+          ],
+          "model": null,
+          "division": "00 Response",
+          "guild": null,
+          "director": false,
+          "system": false
+        },
+        {
+          "id": "rollback-decider",
+          "description": "Makes the mitigation call between rolling back, fixing forward and waiting, with the risk of each stated. Use as soon as an incident has a suspected change window.",
+          "tools": [
+            "Read",
+            "Glob",
+            "Grep",
+            "Bash"
+          ],
+          "model": null,
+          "division": "00 Response",
+          "guild": null,
+          "director": false,
+          "system": false
+        },
+        {
+          "id": "postmortem-writer",
+          "description": "Writes the blameless postmortem: timeline, contributing factors, the detection gap, and action items with owners and dates. Use within a few days of every incident, including the ones that resolved themselves.",
+          "tools": [
+            "Read",
+            "Glob",
+            "Grep"
+          ],
+          "model": null,
+          "division": "01 Learning",
+          "guild": null,
+          "director": false,
+          "system": false
+        }
+      ],
+      "edges": [
+        {
+          "from": "signal-reader",
+          "to": "incident-lead",
+          "kind": "upstream"
+        },
+        {
+          "from": "incident-lead",
+          "to": "rollback-decider",
+          "kind": "downstream"
+        },
+        {
+          "from": "incident-lead",
+          "to": "postmortem-writer",
+          "kind": "downstream"
+        },
+        {
+          "from": "incident-lead",
+          "to": "signal-reader",
+          "kind": "upstream"
+        },
+        {
+          "from": "signal-reader",
+          "to": "rollback-decider",
+          "kind": "downstream"
+        },
+        {
+          "from": "signal-reader",
+          "to": "postmortem-writer",
+          "kind": "downstream"
+        },
+        {
+          "from": "rollback-decider",
+          "to": "incident-lead",
+          "kind": "downstream"
+        },
+        {
+          "from": "rollback-decider",
+          "to": "postmortem-writer",
+          "kind": "downstream"
+        }
+      ],
+      "skills": [
+        {
+          "id": "run-an-incident",
+          "description": "The live procedure for a small team when production is broken: declare, log, mitigate before diagnosing, communicate, then stand down explicitly. Use the moment something is actually broken in production, not for pre-launch review.",
+          "guild": null
+        },
+        {
+          "id": "blameless-postmortem",
+          "description": "Turns a resolved incident into an evidence-cited timeline, several contributing factors, a detection gap and at most three owned dated action items. Use within a few days of any incident, including near misses and ones that resolved on their own.",
+          "guild": null
+        },
+        {
+          "id": "alert-audit",
+          "description": "An audit of alerting for alerts that never fire, alerts that always fire, and the failures that produce no alert at all, so that a page means something when it arrives. Use quarterly, after any incident that nobody was paged for, and when the team has started muting a channel.",
+          "guild": null
+        }
+      ],
+      "stats": {
+        "agents": 4,
+        "skills": 3,
+        "divisions": 2,
+        "guilds": 0,
+        "edges": 8,
+        "directors": 1,
+        "unreachable": 0,
+        "withheld": 0
+      },
+      "unreachable": [],
+      "withheld": []
+    }
+  }
+}

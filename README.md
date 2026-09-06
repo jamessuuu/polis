@@ -40,11 +40,21 @@ are not.
   `ecosystem.json` (a copy of `data/ecosystem.json`, so the deployed site
   never depends on anything outside its own folder).
 
-## The library engine (`lib/`, `api/`)
+## The studio: the second half of the page (`lib/`, `api/`, `site/studio.mjs`)
 
-A second half of the project, built to be wired into the page later: read
-somebody *else's* ecosystem, hand them a working one back, and let them take
-a starter set away. None of it is loaded by `site/` yet.
+Below the city, a visitor can put their OWN ecosystem on the same map, browse
+eight starter templates, and download a bundle that works when they unzip it.
+`site/studio.mjs` is the wiring and holds no decisions: the parsing, the
+validation and the zip writing all live in `lib/`, which is where the tests
+are.
+
+The import is local and the page says so in one line beside the control. That
+sentence is checkable: `site/studio.mjs` contains exactly three URLs
+(`./library.json`, `./library-free.json`, `/api/lead`), none of them on the
+import path, `tests/studio.test.mjs` asserts that by reading the source, and a
+Playwright network capture across a real import records zero requests in
+Chromium and WebKit alike, including an import of this machine's whole
+`~/.claude` (41,024 files walked, 4,937 read, 775 charters).
 
 ```
 a visitor's .claude tree, a zip of one, or one pasted file
@@ -93,10 +103,16 @@ npm run snapshot        # re-reads ~/.claude, writes data/ecosystem.json
 npm run build:site      # copies data/ecosystem.json into site/ecosystem.json
 ```
 
-`build:site` only copies the JSON. It does **not** regenerate the static
-roster baked into `index.html` (see Limitations below) — if the numbers
-genuinely change, that markup needs a hand update too, the same way the
-counts in the status board do.
+`build:site` does four things, all of them deterministic: it copies the
+snapshot and the telemetry into `site/`, regenerates the status board and
+the static roster in `index.html` from that snapshot, writes
+`site/palette.css` from `site/palette.mjs`, and builds the studio's
+payload: `site/library.json` (previews and template cities, free and
+locked), `site/library-free.json` (the six free templates in full), and
+copies of `lib/import.mjs`, `lib/export.mjs`, `lib/zip.mjs` and
+`src/extract.mjs` into `site/lib/` and `site/src/` so the browser can load
+them. The copies keep their relative shape, because `lib/import.mjs`
+imports `../src/extract.mjs` and the parser is not duplicated.
 
 ## Running the site locally
 
@@ -176,15 +192,13 @@ publish carelessly, so:
 
 ## Limitations (honest)
 
-- **The static roster can drift from a re-run snapshot.** `index.html`'s
-  `#static-roster-section` and the status board's numbers were hand-authored
-  from the `data/ecosystem.json` current as of this writing
-  (`generatedAt: 2026-09-05T17:36:44.332Z`). `npm run build:site` only
-  copies the JSON; it does not regenerate that markup. If the real
-  ecosystem changes enough to warrant a new snapshot, the static roster and
-  the status board's numbers need a manual update to match, or they will
-  quietly disagree with the counts the JS side computes live from the fresh
-  `ecosystem.json`.
+- **An imported city can exceed the element budget the house map keeps to.**
+  DESIGN.md caps the map at 2,400 SVG elements and `tests/budget.test.mjs`
+  holds the shipped snapshot to it. The studio draws whatever it is handed:
+  importing this machine's real `~/.claude` (125 citizens, 171 skills, 38
+  guilds) produces 3,063 elements. It renders in well under a second and
+  pans smoothly, but the budget is a promise about the map polis ships, not
+  about a stranger's tree, and no test can hold the second one.
 - **"Offline after first load" means no further network calls, not a
   service worker.** The page fetches `ecosystem.json` once; after that,
   the map, filters, search, and panel are all driven from memory with zero
@@ -213,21 +227,44 @@ publish carelessly, so:
   design working as intended (id-or-description matching, deliberately not
   a body scan — see the comments in that file), but it does mean the one
   withheld member in this snapshot is a slightly noisy hit, not a clean one.
-- **`api/lead.mjs` has never been deployed.** Vercel builds functions found in
-  a top level `api/` directory for static projects as well as framework ones,
-  which is why the file sits there, but that has not been confirmed against a
-  real deployment of *this* project. The first thing to check on the first
-  deploy is that `POST /api/lead` is reachable at all. The ladder itself is
-  covered by 38 tests against stubs, which is a different claim.
+- **`api/lead.mjs` is deployed, was broken, and is still unconfigured.**
+  Vercel does build a top level `api/` directory for this static project:
+  the production deployment reports one Node lambda, `outputDirectory:
+  "site"` does not suppress it, and the tracer follows the imports out to
+  `lib/` and `src/`, so no `functions` block or `includeFiles` is needed.
+  That was established by probing the live deployment, which answered 500
+  `FUNCTION_INVOCATION_FAILED` on every call: line 30 imported
+  `templateSkills` from `lib/export.mjs`, which does not export it. It is
+  `lib/library.mjs` that does. Fixed, and `tests/lead.test.mjs` now imports
+  the route so a bad import fails the suite instead of the deployment.
+  Two environment values are still unset and both are needed before the
+  form can succeed: `POLIS_SITE_URL` (without it the origin check falls
+  back to `VERCEL_URL`, the deployment's own hostname, and a request from
+  the production domain is refused 403 `origin`) and the four
+  `POLIS_LEAD_*` mail values (without them the function answers 503
+  `not-configured`). The page reports both refusals rather than showing a
+  tick, which is the behaviour to expect until they are set.
 - **No email provider is chosen.** `api/lead.mjs` posts JSON to whatever
   endpoint `POLIS_LEAD_EMAIL_ENDPOINT` names, with the body shape defined by
   `mailBody` in `lib/lead.mjs`. Whether a given provider accepts that shape has
   not been tested against a live provider, only against a stub.
-- **The `lib/` modules are not wired into `site/` yet.** They are tested and
-  they work in Node; nothing in `site/index.html` imports them. Note also that
-  `src/extract.mjs` is imported by `lib/import.mjs` and lives outside `site/`,
-  so shipping the importer to the browser needs that file copied into `site/`
-  the way `build:site` already copies `data/ecosystem.json`.
+- **The File System Access API path is not covered by an automated run.**
+  `site/studio.mjs` uses `showDirectoryPicker()` where it exists (Chromium)
+  and a `webkitdirectory` input everywhere else (WebKit reports
+  `showDirectoryPicker: undefined`, verified). Playwright cannot drive a
+  native directory picker, so the browser runs exercise the input fallback
+  and the zip path in both engines, and the picker branch is covered only by
+  reading the code.
+- **A zip import is capped by what `DecompressionStream` will open.**
+  `lib/zip.mjs` refuses zip64, unsafe paths and bad checksums by name. A zip
+  produced by a tool that uses zip64 for an archive of ordinary size will be
+  refused, and the page says so rather than showing an empty city.
+- **The studio always fits the whole city into its frame.** The hero map
+  picks a frame by container size so a phone gets a district rather than a
+  postage stamp. The studio does not: it shows all of whatever is on the
+  stage, which is right for a four-member template and small for a
+  hundred-member import on a phone until you zoom. The member list beside
+  the map names everyone as text either way.
 - **The importer reads any `<name>/agents/*.md` as a guild called `<name>`.**
   Run against this machine's real `~/.claude` it turned a test fixture
   directory into a guild named "clean". That is discovery working as designed

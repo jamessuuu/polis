@@ -117,6 +117,133 @@
     </section>
     </div>
 
+<!-- =====================================================================
+         The studio: the second half of the page.
+
+         Above this line the city is James's. Below it, it is the visitor's,
+         and the same renderer draws both. Every panel here is a door into
+         lib/import.mjs, lib/library.mjs and lib/export.mjs, which are the
+         modules this page exists to make usable.
+
+         With JavaScript off, the studio cannot run at all: it reads files off
+         the visitor's own disk and writes a zip in the tab. So the markup
+         says exactly that and offers the repository instead, rather than
+         showing controls that do nothing.
+         ================================================================== -->
+    <section aria-labelledby="studio-heading" id="studio-section" class="studio">
+      <h2 id="studio-heading">Your turn</h2>
+
+      <p class="studio-lead" id="studio-lead">The same map, drawn from your own <code>.claude</code> folder or from a starter template.</p>
+
+      <noscript>
+        <p class="studio-nojs">The studio reads files from your disk and writes a zip in the browser,
+        so it needs JavaScript. With it off, the roster below is the whole page.</p>
+      </noscript>
+
+      <div class="studio-shell" id="studio-shell" hidden>
+        <div class="studio-tabs" role="tablist" aria-label="What to put on the stage">
+          <button type="button" role="tab" id="studio-tab-import" aria-selected="true" aria-controls="studio-panel-import">Your ecosystem</button>
+          <button type="button" role="tab" id="studio-tab-library" aria-selected="false" aria-controls="studio-panel-library" tabindex="-1">Library</button>
+        </div>
+
+        <div class="studio-body">
+          <div class="studio-rail">
+
+            <!-- ---- import ---------------------------------------------- -->
+            <div role="tabpanel" id="studio-panel-import" aria-labelledby="studio-tab-import" tabindex="0">
+              <div class="studio-drop" id="studio-drop">
+                <p class="studio-drop-hint">Drop a <code>.claude</code> folder or a zip of one here</p>
+                <div class="studio-drop-actions">
+                  <button type="button" id="studio-pick-folder">Choose a folder</button>
+                  <button type="button" id="studio-pick-zip">Choose a zip</button>
+                </div>
+                <p class="studio-note" id="studio-privacy">Read in this tab. No request is made.</p>
+                <input type="file" id="studio-input-dir" webkitdirectory directory multiple class="visually-hidden" tabindex="-1" aria-hidden="true">
+                <input type="file" id="studio-input-zip" accept=".zip,application/zip" class="visually-hidden" tabindex="-1" aria-hidden="true">
+              </div>
+
+              <p class="studio-status" id="studio-import-status" role="status" aria-live="polite"></p>
+
+              <div class="studio-report" id="studio-report" hidden>
+                <dl class="stats-grid stats-grid-small" id="studio-report-stats"></dl>
+                <details id="studio-report-detail" hidden>
+                  <summary><h3>What was dropped <span class="static-count" id="studio-skipped-count"></span></h3></summary>
+                  <ul class="studio-skipped" id="studio-skipped"></ul>
+                </details>
+                <ul class="studio-notes" id="studio-report-notes"></ul>
+              </div>
+            </div>
+
+            <!-- ---- library --------------------------------------------- -->
+            <div role="tabpanel" id="studio-panel-library" aria-labelledby="studio-tab-library" tabindex="0" hidden>
+              <p class="studio-status" id="studio-library-status" role="status" aria-live="polite"></p>
+              <ul class="studio-templates" id="studio-templates"></ul>
+            </div>
+          </div>
+
+          <!-- ---- the stage ------------------------------------------------
+               One map, two sources. An imported ecosystem and a template are
+               the same shape, so they get the same renderer, the same
+               palette and the same reading. A second view would be a second
+               thing to keep true.
+               ------------------------------------------------------------ -->
+          <div class="studio-stage">
+            <div class="hero-map studio-map" id="studio-map-frame" hidden>
+              <div class="map-toolbar">
+                <span class="studio-stage-title" id="studio-stage-title"></span>
+                <span class="map-controls">
+                  <button type="button" id="studio-zoom-in" aria-label="Zoom in">+</button>
+                  <button type="button" id="studio-zoom-out" aria-label="Zoom out">&minus;</button>
+                  <button type="button" id="studio-reset">Reset view</button>
+                </span>
+              </div>
+              <svg id="studio-map" tabindex="0" role="img" aria-label="An isometric model city, drawn the same way as the map above, from whatever ecosystem is currently on the stage."></svg>
+            </div>
+
+            <p class="studio-empty" id="studio-empty">Nothing on the stage yet. Choose a folder, or open the library.</p>
+
+            <div class="studio-actions" id="studio-actions" hidden>
+              <div class="studio-summary" id="studio-summary"></div>
+              <button type="button" id="studio-download" class="studio-download">Download the bundle</button>
+              <p class="studio-note" id="studio-download-note"></p>
+            </div>
+
+            <!-- ---- the gate --------------------------------------------
+                 Only the two locked templates reach this. It posts to
+                 /api/lead and reports what came back, including every way
+                 that can refuse, because a form that says "sent" when
+                 nothing was sent costs the person a reply they will wait
+                 for.
+                 -------------------------------------------------------- -->
+            <form class="studio-gate" id="studio-gate" hidden novalidate>
+              <h3 id="studio-gate-heading">Locked</h3>
+              <p class="studio-note" id="studio-gate-why"></p>
+              <div class="studio-gate-fields">
+                <div class="field">
+                  <label for="studio-lead-name">Name</label>
+                  <input type="text" id="studio-lead-name" name="name" autocomplete="name" maxlength="120" required>
+                </div>
+                <div class="field">
+                  <label for="studio-lead-email">Email</label>
+                  <input type="email" id="studio-lead-email" name="email" autocomplete="email" maxlength="254" required>
+                </div>
+                <div class="field field-wide">
+                  <label for="studio-lead-message">What are you building? (optional)</label>
+                  <input type="text" id="studio-lead-message" name="message" maxlength="2000">
+                </div>
+              </div>
+              <label class="studio-hp" aria-hidden="true">Leave this empty
+                <input type="text" name="botcheck" id="studio-lead-botcheck" tabindex="-1" autocomplete="off">
+              </label>
+              <button type="submit" id="studio-gate-submit">Send and download</button>
+              <p class="studio-status" id="studio-gate-status" role="status" aria-live="polite"></p>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
     <section aria-labelledby="filters-heading" id="filters-section" hidden>
       <h2 id="filters-heading">Find a citizen</h2>
       <p>Search by name or description, or narrow by district, tool, or Director status. Filters affect the map and the list below together.</p>
@@ -798,7 +925,11 @@
   <footer class="site-footer">
     <p>Polis renders James Lorenz Santos's agent ecosystem as a place you can walk around. Every number on this page comes from <code>ecosystem.json</code>, generated by <code>bin/snapshot.mjs</code> reading the real agent and skill files off disk.</p>
     <p>Generated <time datetime="2026-09-05T17:36:44.332Z">2026-09-05</time>. Charter bodies are never published; members whose id or description names a real client or employer are withheld and counted, not shown.</p>
-    <p><a href="https://agentjames.vercel.app/" rel="noopener">agentjames.vercel.app</a></p>
+    <p class="footer-links">
+      <a href="https://agentjames.vercel.app/" rel="noopener">agentjames.vercel.app</a>
+      <span aria-hidden="true">&middot;</span>
+      <a href="https://www.linkedin.com/in/james-lorenz-santos-720776251/" rel="noopener">LinkedIn</a>
+    </p>
     <p class="aj-attribution">
   <svg class="aj-attribution__mark" viewBox="0 0 64 64" width="20" height="20" role="img" aria-label="Agent James"><path fill="currentColor" fill-rule="evenodd" d="M4 16h8v4h-8zM52 16h8v4h-8zM16 4h4v8h-4zM16 52h4v8h-4zM4 28h8v4h-8zM52 28h8v4h-8zM28 4h4v8h-4zM28 52h4v8h-4zM4 40h8v4h-8zM52 40h8v4h-8zM40 4h4v8h-4zM40 52h4v8h-4zM12 12h40v40h-40zM16 16v32h32v-32zM36 20h4v20h-16v-4h12z"/><rect x="20" y="20" width="4" height="4" fill="var(--aj-attribution-signal, #B45309)"/></svg>Built by <a href="https://agentjames.vercel.app" rel="me noopener">James Lorenz Santos</a><span class="aj-attribution__sep" aria-hidden="true">&middot;</span><a href="https://www.linkedin.com/in/james-lorenz-santos-720776251/" rel="me noopener" target="_blank">LinkedIn</a>
 </p>
@@ -806,5 +937,6 @@
 </div>
 
 <script type="module" src="./app.mjs"></script>
+<script type="module" src="./studio.mjs"></script>
 </body>
 </html>
