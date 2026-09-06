@@ -223,6 +223,19 @@
   --hue-none: oklch(0.665 0.014 70);
   --hue-none-text: oklch(0.84 0.014 70);
 }
+
+/* The default a precinct falls back to when it carries a hue class this
+   palette does not define. polis ships six guild colours; an IMPORTED
+   ecosystem can carry a guild by any name at all, and this machine's own
+   tree has thirty eight. Without this, `var(--hue)` in those precincts
+   resolved to nothing, every rule built on it became invalid, and the
+   ground, the buildings and the label plate all painted black.
+
+   It sits on :root so any element that DOES have a defined hue class still
+   overrides it for itself and its descendants. The neutral is honest: the
+   guild has no colour here, and its name is on its plate, which is where
+   the identity was always carried anyway. */
+:root { --hue: var(--hue-none); --hue-text: var(--hue-none-text); }
 .hue-00 { --hue: var(--hue-00); --hue-text: var(--hue-00-text); }
 .hue-01 { --hue: var(--hue-01); --hue-text: var(--hue-01-text); }
 .hue-02 { --hue: var(--hue-02); --hue-text: var(--hue-02-text); }

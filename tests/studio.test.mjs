@@ -390,3 +390,22 @@ test('a map with no select handler does not call its citizens buttons', () => {
   assert.match(src, /onSelect = null/, 'onSelect has no default, so a map without one throws');
   assert.match(src, /if \(typeof onSelect === 'function'\) \{/, 'the button role is not conditional on there being a handler');
 });
+
+test('a precinct with a hue this palette does not define falls back to the neutral', async () => {
+  // polis ships six guild colours. An IMPORTED ecosystem carries whatever
+  // guilds the visitor has, and this machine's own tree has thirty eight, so
+  // `hue-guild-<name>` for thirty two of them matched no rule at all,
+  // `var(--hue)` resolved to nothing, and every rule built on it became
+  // invalid: the ground, the buildings and the plate painted solid black.
+  // Caught by looking at the screenshot of a real import, not by a test.
+  const { paletteCSS } = await import('../site/palette.mjs');
+  const css = paletteCSS();
+  assert.match(css, /^:root \{ --hue: var\(--hue-none\); --hue-text: var\(--hue-none-text\); \}$/m,
+    'no fallback, so an unknown guild has no hue at all');
+  // Before the six guild classes, so a defined guild still wins for itself.
+  assert.ok(
+    css.indexOf(':root { --hue: var(--hue-none)') < css.indexOf('.hue-guild-agentic'),
+    'the fallback is declared after the classes it must not beat',
+  );
+  assert.equal(read('site/palette.css'), css, 'site/palette.css is stale; run build:site');
+});
