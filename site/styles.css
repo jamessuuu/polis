@@ -157,25 +157,46 @@ svg :focus-visible {
   padding: 1.5rem 1.25rem 3rem;
 }
 
+/* The header is a nameplate, not a front page. It used to stack a title, a
+   three-line lead, a heading, six buttons and two instruction paragraphs
+   above the map, so at 1440x900 the city began 640px down and the first
+   thing a visitor saw was chrome. Everything that can live over the map now
+   lives over the map. */
 header.site-header {
-  padding: 1.5rem 0 1rem;
-  border-bottom: 1px solid var(--border-strong);
-  margin-bottom: 1.75rem;
+  padding: 0.85rem 0 0.7rem;
+  margin-bottom: 0.85rem;
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
   justify-content: space-between;
-  gap: 0.75rem 1.5rem;
+  gap: 0.35rem 1.5rem;
 }
 
 .site-header .titles {
-  max-width: 60ch;
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.2rem 0.85rem;
+  max-width: 88ch;
 }
+.site-header h1 { margin: 0; }
 
 .tagline {
   color: var(--ink-muted);
-  font-size: 1rem;
+  font-size: 0.95rem;
   margin: 0;
+}
+
+/* A second bypass, in the header, for anyone who tabs in before the map has
+   mounted its own. Invisible until focused, like the page skip link. */
+.header-skip {
+  position: absolute;
+  left: -9999px;
+  font-weight: 600;
+}
+.header-skip:focus {
+  position: static;
+  left: auto;
 }
 
 .header-controls {
@@ -401,14 +422,19 @@ button:hover {
      visitor touched anything. preserveAspectRatio letterboxes whichever axis
      is not binding, and the sky rect is three frames wide, so the spare space
      reads as more sky rather than an empty bar. */
-  height: min(64vh, 560px);
-  min-height: 420px;
+  height: min(72vh, 620px);
+  min-height: 430px;
+  /* The toolbar, the caption and the help disclosure are positioned against
+     this box, so the map is the first thing on the page and its controls are
+     subordinate to it rather than stacked above it. */
+  position: relative;
+  isolation: isolate;
 }
 @media (min-width: 600px) {
-  .hero-map { height: min(72vh, 640px); min-height: 480px; }
+  .hero-map { height: min(78vh, 700px); min-height: 480px; }
 }
 @media (min-width: 1024px) {
-  .hero-map { height: min(78vh, 760px); min-height: 560px; }
+  .hero-map { height: min(84vh, 800px); min-height: 560px; }
 }
 
 #city-map {
@@ -461,9 +487,13 @@ button:hover {
 }
 .tile-grid {
   fill: none;
-  stroke: var(--shadow-ink);
-  stroke-width: 0.5;
-  stroke-opacity: 0.35;
+  /* The paving takes the precinct's own colour rather than a shared grey, so
+     the floor of a district is part of its identity and its kerb is drawn in
+     the same stroke as its paving. */
+  stroke: var(--hue-text, var(--shadow-ink));
+  stroke-width: 0.6;
+  stroke-opacity: 0.30;
+  stroke-linejoin: round;
   pointer-events: none;
 }
 .numeral {
@@ -575,6 +605,10 @@ button:hover {
 
 /* The silhouette. Opacity only. In the dark theme it is the compliant
    boundary of every wall and stays on; in light it appears on hover. */
+/* The silhouette. At the default frame a building is about 45 CSS px tall,
+   which is exactly the size at which a soft-edged box stops reading as a
+   solid and starts reading as noise. The resting edge is a real line now, in
+   both themes; hover still takes it to full. */
 .edge {
   fill: none;
   stroke: var(--rim);
@@ -682,8 +716,11 @@ button:hover {
   stroke-opacity: 0.55;
   stroke-width: 1;
 }
-.precinct-plate .plate-bg { stroke: var(--hue-text); stroke-opacity: 0.6; }
-.plate-line1 { font-size: 27px; }
+.precinct-plate .plate-bg { stroke: var(--hue-text); stroke-opacity: 0.55; }
+/* The hue rule: the strip of precinct colour that ties a plate the placer had
+   to move back to the block it names, without a second leader line. */
+.plate-rule { fill: var(--hue); }
+.plate-line1 { font-size: 22px; }
 .plate-num {
   font-family: var(--font-mono);
   font-weight: 700;
@@ -696,23 +733,33 @@ button:hover {
   letter-spacing: -0.005em;
   fill: var(--ink);
 }
+/* The density fallback, drawn: a plate that could not fit whole next to its
+   plot drops its second line rather than lying across a roof. Nothing is
+   created or destroyed, one class is toggled, and the count is still one
+   hover away and always in the roster. */
+.precinct-plate.compact .plate-sub { display: none; }
+.precinct-plate.compact .plate-line1 { transform: translateY(-3px); }
 .plate-sub {
   font-family: var(--font-mono);
-  font-size: 19px;
+  font-size: 16px;
   font-weight: 400;
   letter-spacing: 0.02em;
   fill: var(--ink-muted);
 }
 /* Leaders are mounted for every plate and revealed only when that plate had
    to step aside — one class toggle, no node created or destroyed. */
+/* A leader has one job: say which block a moved label belongs to. At the
+   default frame the old 1.2-unit dashed hairline resolved to about one pale
+   pixel, so a label the placer had moved read as a label about nothing. */
 .plate-leader {
   stroke: var(--hue-text);
-  stroke-width: 1.2;
+  stroke-width: 2.2;
   opacity: 0;
-  stroke-dasharray: 4 3;
+  stroke-dasharray: 7 5;
+  stroke-linecap: round;
   pointer-events: none;
 }
-.plate-layer > .plate-leader.on { opacity: 0.55; }
+.plate-layer > .plate-leader.on { opacity: 0.75; }
 
 .name-plate { pointer-events: none; }
 .name-plate-in { opacity: 0; transform: translateY(3px); }
@@ -720,8 +767,8 @@ button:hover {
 /* A name plate that had to step aside to stay readable says which roof it
    belongs to, with the same dashed leader the precinct plates already use.
    Name plates carry no hue class, so they take the muted ink instead. */
-.name-plate .plate-leader { stroke: var(--ink-muted); stroke-width: 1.1; opacity: 0; }
-.name-plate.on.displaced .plate-leader { opacity: 0.55; }
+.name-plate .plate-leader { stroke: var(--ink-muted); stroke-width: 1.8; opacity: 0; }
+.name-plate.on.displaced .plate-leader { opacity: 0.7; }
 /* A label whose subject is off screen is debris, not information. */
 .precinct-plate.off-frame,
 .name-plate.off-frame,
@@ -837,16 +884,32 @@ button:hover {
 #city-map.life-off .figure.is-construct .fig-body { transform: translateY(-3px); }
 
 .map-toolbar {
+  position: absolute;
+  top: 0.6rem;
+  left: 0.6rem;
+  right: 0.6rem;
+  z-index: 2;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.5rem 0.9rem;
-  margin: 0 0 0.6rem;
-  font-size: 0.89rem;
+  gap: 0.4rem 0.6rem;
+  font-size: 0.84rem;
+  /* A control bar on glass: it belongs to the map, so it is drawn on the map,
+     tinted by the sky underneath rather than sitting on the page background. */
+  padding: 0.35rem 0.5rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--border-subtle);
+  background: color-mix(in oklab, var(--bg-elevated) 94%, transparent);
+  box-shadow: 0 1px 2px color-mix(in oklab, var(--shadow-ink) 18%, transparent);
+}
+.map-toolbar .tool-group {
+  display: inline-flex;
+  gap: 0.3rem;
 }
 .map-toolbar button {
   font: inherit;
-  padding: 0.25rem 0.6rem;
+  padding: 0.22rem 0.55rem;
+  min-width: 2rem;
   border: 1px solid var(--border-strong);
   border-radius: var(--radius);
   background: var(--bg-elevated);
@@ -858,6 +921,57 @@ button:hover {
 /* The bypass link rides in the toolbar rather than on its own row: same
    target, same reading order, one less block of chrome above the hero. */
 .map-toolbar .map-skip { font-weight: 600; }
+
+/* Two paragraphs of instructions used to sit between the visitor and the
+   city. They are one disclosure now: closed by default, still text, still
+   keyboard-reachable, and no longer the first thing anybody reads. */
+.map-help { position: relative; }
+.map-help > summary {
+  cursor: pointer;
+  padding: 0.22rem 0.55rem;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--bg-elevated);
+  list-style: none;
+}
+.map-help > summary::-webkit-details-marker { display: none; }
+.map-help > summary::after { content: " ?"; font-family: var(--font-mono); }
+.map-help[open] > summary { border-color: var(--accent); }
+.map-help-body {
+  position: absolute;
+  top: calc(100% + 0.4rem);
+  left: 0;
+  width: min(46ch, 78vw);
+  z-index: 3;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--bg-elevated);
+  box-shadow: 0 6px 16px color-mix(in oklab, var(--shadow-ink) 22%, transparent);
+}
+.map-help-body .map-hint + .map-hint { margin-top: 0.5rem; }
+
+/* The dark-half readout, over the bottom of the map where it describes what
+   just changed on it. */
+.map-caption {
+  position: absolute;
+  left: 0.6rem;
+  bottom: 0.6rem;
+  right: 0.6rem;
+  z-index: 2;
+  margin: 0;
+  font-size: 0.84rem;
+  color: var(--ink);
+  pointer-events: none;
+}
+.map-caption:not(:empty) {
+  padding: 0.3rem 0.55rem;
+  border-radius: var(--radius);
+  background: color-mix(in oklab, var(--bg-elevated) 94%, transparent);
+  border: 1px solid var(--border-subtle);
+}
+
+.map-underbar { margin-top: 0.7rem; }
 
 .map-hint {
   font-size: 0.89rem;
@@ -1099,7 +1213,17 @@ footer.site-footer p { margin: 0 0 0.5em; }
     margin-bottom: var(--space-4);
     gap: var(--space-2) var(--space-4);
   }
-  .tagline { font-size: 0.94rem; }
+  /* On a phone the tagline was three lines of chrome between the visitor and
+     the city. It is one quiet line under the title, and the theme control
+     rides beside the title rather than on a row of its own. */
+  header.site-header { flex-wrap: nowrap; align-items: center; }
+  .site-header .titles { flex: 1 1 auto; min-width: 0; display: block; }
+  .tagline {
+    font-size: 0.84rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
   .finding-strip {
     display: block;
     padding: var(--space-2) var(--space-3);
@@ -1108,8 +1232,24 @@ footer.site-footer p { margin: 0 0 0.5em; }
   }
   .finding-strip a { margin-left: 0; }
   .hero-section h2 { margin-bottom: var(--space-2); }
-  .map-toolbar { font-size: 0.84rem; gap: var(--space-2) var(--space-3); }
+  /* One row that scrolls, not four that wrap: a wrapped toolbar was eating
+     110px off the top of a 608px map. Every control is still there and still
+     in the same order, it is just reached by swiping the bar instead of by
+     the map getting shorter. */
+  .map-toolbar {
+    font-size: 0.78rem;
+    gap: 0.3rem 0.45rem;
+    padding: 0.3rem 0.4rem;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+  }
+  .map-toolbar::-webkit-scrollbar { display: none; }
+  .map-toolbar > * { flex: none; white-space: nowrap; }
   .map-toolbar .map-hint { font-size: 0.79rem; }
+  .map-help-body { width: min(40ch, 86vw); white-space: normal; }
+  .map-help-body .map-hint { white-space: normal; }
 }
 
 /* ---------- the dark half ----------

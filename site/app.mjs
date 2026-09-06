@@ -12,7 +12,7 @@
  */
 
 import { computeCity } from './layout.mjs';
-import { renderCity, attachCamera, refreshNamePlates, computeFocusFrame, NAME_POOL } from './city-view.mjs';
+import { renderCity, attachCamera, refreshNamePlates, computeFocusFrame, NAME_POOL, DIRECTOR_NAME_ZOOM } from './city-view.mjs';
 import { walkerPairs, isDark, darkHalfCounts, nextHops } from './life.mjs';
 import { createWalkers } from './walkers.mjs';
 
@@ -203,10 +203,21 @@ async function main() {
     g.addEventListener('blur', () => { hoverId = null; refreshHighlight(); });
   }
 
+  let namingPeople = false;
   const cam = attachCamera(svg, camera, {
     // Two LODs, rendered once, toggled by one class on the root.
     onZoom: (k, view) => {
       svg.classList.toggle('lod-1', k >= 1.5);
+      // The declutter rule: places are always named, people are named once
+      // you are close enough to be looking at people. Crossing the threshold
+      // is the only thing that re-runs the pass, so panning stays free.
+      scene.zoom = k;
+      const naming = k >= DIRECTOR_NAME_ZOOM;
+      if (naming !== namingPeople) {
+        namingPeople = naming;
+        svg.classList.toggle('naming-people', naming);
+        refreshHighlight();
+      }
       // What is actually on screen, in world units: the frame, undone by the
       // camera transform. Labels for anything outside it are switched off.
       const f = scene.frame;

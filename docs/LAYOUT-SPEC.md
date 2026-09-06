@@ -580,6 +580,14 @@ single-letter director marker already implied by the mantle geometry — it
 is never simply hidden, since "Directors are always named" is a stated page
 promise (`DESIGN.md` §6).
 
+> **Overturned 2026-09-07, rendering pass.** The promise was the problem. Seven
+> always-mounted director plates were most of the "pile of white boxes" the
+> client rejected, and T1's density fallback below is now what a precinct plate
+> does (drop the sub-line) while T2 is gated by zoom instead: people are named
+> above 1.3x or on interaction, places at every zoom. `DESIGN.md` §6 carries
+> the amended promise and the page copy matches it. Nothing became
+> unreachable; the roster still names all 59 with JavaScript off.
+
 ### 5.5 What this sacrifices
 
 - Simultaneous visibility of **every** neighbour/crew name at once when a

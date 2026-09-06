@@ -17,14 +17,47 @@
   <header class="site-header">
     <div class="titles">
       <h1>Polis</h1>
-      <p class="tagline">A map of James Lorenz Santos's agent ecosystem you can walk around: districts for divisions, citizens for agents, roads for the work that actually flows between them.</p>
+      <p class="tagline">James Lorenz Santos's agent ecosystem, drawn as a city you can walk around.</p>
     </div>
     <div class="header-controls">
+      <a class="header-skip" href="#list-heading">Skip the map, go to the list</a>
       <button type="button" id="theme-toggle" class="theme-toggle" aria-label="Theme: system. Activate to cycle system, light, dark.">Theme: system</button>
     </div>
   </header>
 
   <main id="main">
+
+    <section aria-labelledby="map-heading" id="map-section" class="hero-section" hidden>
+      <h2 id="map-heading" class="visually-hidden">The map</h2>
+      <div class="hero-map">
+        <svg id="city-map" tabindex="0" role="img" aria-label="An isometric model city of the agent ecosystem. Eight walled districts hold the constitutional members, six guild halls and an archive of skills stand outside the wall, and each member is a building whose height, storeys and windows all show how many other members it exchanges work with. A gabled roof means the member can change the repository. Directors fly a banner; a member nobody names is an empty dashed lot. Every citizen stands at their own door; the ones dispatched recently have their lights on and are at work, and citizens who were dispatched together walk the streets between their buildings. Every citizen is also listed as text below the map.">
+        </svg>
+        <div class="map-toolbar" role="group" aria-label="Map controls">
+          <a class="map-skip" href="#list-heading">Skip the map, go to the list</a>
+          <button type="button" id="map-dark-half" class="map-mode" aria-pressed="false">Show the dark half</button>
+          <span class="tool-group">
+            <button type="button" id="map-zoom-in" aria-label="Zoom in">+</button>
+            <button type="button" id="map-zoom-out" aria-label="Zoom out">&minus;</button>
+            <button type="button" id="map-reset">Reset view</button>
+            <button type="button" id="map-whole-city">Whole city</button>
+          </span>
+          <label><input type="checkbox" id="map-roads"> All roads</label>
+          <label><input type="checkbox" id="map-life" checked> Life</label>
+          <details class="map-help">
+            <summary>How to read this</summary>
+            <div class="map-help-body">
+              <p class="map-hint">Drag to pan, scroll to zoom. With the map focused: arrows pan, <kbd>+</kbd>/<kbd>-</kbd> zoom, <kbd>0</kbd> resets.</p>
+              <p class="map-hint">Hover or focus a citizen to see its roads highlighted, its name, its neighbours' names, and the citizens it has actually worked alongside. Click one to open its record, then click any citizen the map just lit to keep going. Click a walker mid-stride to follow that partnership &mdash; pause with the Life toggle first if you would rather they held still. Districts are named at every zoom; the people in them are named once you zoom past 1.3&times;, or whenever you point at one. <a href="#list-heading">Use the list below</a> to browse by keyboard alone, with no need to touch the map at all.</p>
+            </div>
+          </details>
+        </div>
+      </div>
+      <div class="map-underbar">
+        <p class="map-hint" id="map-dark-note"></p>
+        <p class="map-hint" id="map-life-note"></p>
+        <ul class="legend" id="map-legend" aria-label="District colour key"></ul>
+      </div>
+    </section>
 
     <p class="finding finding-strip" id="headline-strip">
         <strong class="finding-strip-count">8</strong>
@@ -32,29 +65,6 @@
         <a class="jump-to-citizen strip-go" href="#static-agentic-director" data-id="agentic-director">Click one to see why &rarr;</a>
         <a href="#findings-section">See all 8 &darr;</a>
       </p>
-
-    <section aria-labelledby="map-heading" id="map-section" class="hero-section" hidden>
-      <h2 id="map-heading">The map</h2>
-      <div class="map-toolbar">
-          <a class="map-skip" href="#list-heading">Skip the map, go to the list</a>
-          <button type="button" id="map-dark-half" class="map-mode" aria-pressed="false">Show the dark half</button>
-          <button type="button" id="map-zoom-in" aria-label="Zoom in">Zoom in</button>
-          <button type="button" id="map-zoom-out" aria-label="Zoom out">Zoom out</button>
-          <button type="button" id="map-reset">Reset view</button>
-          <button type="button" id="map-whole-city">See the whole city</button>
-          <label><input type="checkbox" id="map-roads"> Show all roads</label>
-          <label><input type="checkbox" id="map-life" checked> Life</label>
-          <span class="map-hint">Drag to pan, scroll to zoom. With the map focused: arrows pan, <kbd>+</kbd>/<kbd>-</kbd> zoom, <kbd>0</kbd> resets.</span>
-      </div>
-      <p class="map-hint map-dark-note" id="map-dark-note"></p>
-      <div class="hero-map">
-        <svg id="city-map" tabindex="0" role="img" aria-label="An isometric model city of the agent ecosystem. Eight walled districts hold the constitutional members, six guild halls and an archive of skills stand outside the wall, and each member is a building whose height, storeys and windows all show how many other members it exchanges work with. A gabled roof means the member can change the repository. Directors fly a banner; a member nobody names is an empty dashed lot. Every citizen stands at their own door; the ones dispatched recently have their lights on and are at work, and citizens who were dispatched together walk the streets between their buildings. Every citizen is also listed as text below the map.">
-        </svg>
-      </div>
-      <p class="map-hint">Hover or focus a citizen to see its roads highlighted, its name, its neighbours' names, and the citizens it has actually worked alongside. Click one to open its record, then click any citizen the map just lit to keep going. Click a walker mid-stride to follow that partnership &mdash; pause with the Life toggle first if you would rather they held still. Directors are always named. <a href="#list-heading">Use the list below</a> to browse by keyboard alone, with no need to touch the map at all. The Life toggle pauses everything that moves.</p>
-      <p class="map-hint" id="map-life-note"></p>
-      <ul class="legend" id="map-legend" aria-label="District colour key"></ul>
-    </section>
 
     <div class="findings-status">
     <section aria-labelledby="findings-heading" id="findings-section">

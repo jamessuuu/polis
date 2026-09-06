@@ -19,7 +19,7 @@
     "LICENSE"
   ],
   "scripts": {
-    "test": "node --test tests/extract.test.mjs tests/site.test.mjs tests/layout.test.mjs tests/workforce.test.mjs tests/life.test.mjs tests/contrast.test.mjs tests/budget.test.mjs tests/legibility.test.mjs tests/zip.test.mjs tests/import.test.mjs tests/export.test.mjs tests/library.test.mjs tests/lead.test.mjs",
+    "test": "node --test tests/extract.test.mjs tests/site.test.mjs tests/layout.test.mjs tests/workforce.test.mjs tests/life.test.mjs tests/contrast.test.mjs tests/budget.test.mjs tests/legibility.test.mjs tests/labels.test.mjs tests/zip.test.mjs tests/import.test.mjs tests/export.test.mjs tests/library.test.mjs tests/lead.test.mjs",
     "snapshot": "node bin/snapshot.mjs",
     "build:site": "node bin/build-site.mjs",
     "workforce": "node bin/workforce.mjs",

@@ -140,6 +140,28 @@ export function silhouettePath(col, row, height, footprint = 0.74) {
   return 'M ' + pts.map((p) => `${round(p.x)} ${round(p.y)}`).join(' L ') + ' Z';
 }
 
+/**
+ * The screen-space bounding box of a building's silhouette, centre-based.
+ *
+ * The label placer needs to know where the volumes are so it can stop parking
+ * a district title across the tower it is naming. `pitch` is the extra height
+ * a gable ridge or a banner adds above the flat roof, so the box covers what
+ * a viewer actually sees rather than what the box faces alone cover.
+ */
+export function silhouetteBox(col, row, height, footprint = 0.74, pitch = 0) {
+  const { n, e, s, w } = footprintCorners(col, row, footprint);
+  const top = Math.min(n.y, e.y, w.y) - height - pitch;
+  const bottom = s.y;
+  const left = w.x;
+  const right = e.x;
+  return {
+    cx: round((left + right) / 2),
+    cy: round((top + bottom) / 2),
+    w: round(right - left),
+    h: round(bottom - top),
+  };
+}
+
 export const STOREY_H = 10.2;
 
 /**
@@ -215,6 +237,13 @@ export function plotPolygon(col, row, cols, rows, inset = 0) {
  */
 export function tileGridPath(col, row, cols, rows) {
   const parts = [];
+  // The plot's own kerb, as one more subpath of the same <path>: a district
+  // gets a visible edge in its own colour for no extra element. Eight
+  // districts that differ only by roof tint read as one district painted
+  // eight ways; a floor, an edge and a numeral read as eight places.
+  const k = [toScreen(col, row), toScreen(col + cols, row),
+    toScreen(col + cols, row + rows), toScreen(col, row + rows)];
+  parts.push('M ' + k.map((q) => `${round(q.x)} ${round(q.y)}`).join(' L ') + ' Z');
   for (let c = 1; c < cols; c++) {
     const a = toScreen(col + c, row);
     const b = toScreen(col + c, row + rows);
@@ -335,6 +364,51 @@ export function footingBands(col, row, height, footprint = 0.74, band = 3.5) {
     right: pointsToString([up(e, h), up(s, h), s, e]),
     left: pointsToString([up(w, h), up(s, h), s, w]),
   };
+}
+
+/**
+ * The doorway, at the south corner where the citizen is already standing.
+ *
+ * Drawn as extra subpaths of the footing band, so a building gains an
+ * entrance and a human scale reference for ZERO extra elements — the budget
+ * for this map is 2,400 and one node per citizen is not spare change. The
+ * footing tone is what a recessed opening looks like anyway.
+ */
+export function doorPath(col, row, height, footprint = 0.74) {
+  const { e, s, w } = footprintCorners(col, row, footprint);
+  const dh = Math.min(9, Math.max(4, height * 0.14));
+  const half = 2.4;
+  // Along each wall, away from the south corner, in screen units.
+  const uR = { x: (e.x - s.x), y: (e.y - s.y) };
+  const uL = { x: (w.x - s.x), y: (w.y - s.y) };
+  const norm = (u) => { const m = Math.hypot(u.x, u.y) || 1; return { x: u.x / m, y: u.y / m }; };
+  const nR = norm(uR);
+  const nL = norm(uL);
+  const leaf = (n) => {
+    const a = { x: s.x + n.x * 1.0, y: s.y + n.y * 1.0 };
+    const b = { x: s.x + n.x * (1.0 + half), y: s.y + n.y * (1.0 + half) };
+    return `M ${round(a.x)} ${round(a.y)} L ${round(b.x)} ${round(b.y)} `
+      + `L ${round(b.x)} ${round(b.y - dh)} L ${round(a.x)} ${round(a.y - dh)} Z`;
+  };
+  return `${leaf(nR)} ${leaf(nL)}`;
+}
+
+/**
+ * A parapet rim inset from a flat roof: the "flat parapet (a reading room)"
+ * DESIGN.md §4 already names, drawn as one more subpath of the storey-line
+ * path so it costs nothing. A gable has a ridge instead and gets none.
+ */
+export function parapetPath(col, row, height, footprint = 0.74, inset = 2.6) {
+  const c = footprintCorners(col, row, footprint);
+  const mid = { x: (c.n.x + c.s.x) / 2, y: (c.n.y + c.s.y) / 2 };
+  const pull = (p) => {
+    const dx = mid.x - p.x;
+    const dy = mid.y - p.y;
+    const m = Math.hypot(dx, dy) || 1;
+    return { x: p.x + (dx / m) * inset, y: p.y + (dy / m) * inset };
+  };
+  const pts = [c.n, c.e, c.s, c.w].map(pull).map((p) => up(p, height));
+  return 'M ' + pts.map((p) => `${round(p.x)} ${round(p.y)}`).join(' L ') + ' Z';
 }
 
 /**

@@ -47,6 +47,34 @@ civic-map look the first implementation shipped.
 
 ## 2. Palette
 
+**AMENDED 2026-09-07, rendering pass.** The client's verdict on the shipped
+version was 2/100, and "washed out" was one of the four named defects. The
+cause was measurable: the board had drifted to L 0.94 with C 0.022, which is
+paper, and every roof had been pushed DOWN the ladder to keep 3:1 against it,
+so the page was dark muddy blocks on near-white card. The values below are the
+authored intent; the numbers `site/palette.mjs` now ships are the measured
+resolution of it, and `tools/contrast.mjs` is the arbiter, not this table:
+
+- The ground came down and warmed up (board L 0.895 C 0.030, board-outer
+  0.850, street 0.810), so the city stands on clay rather than on paper.
+- The tier ladder moved with it: light T1/T2/T3 = 0.485 / 0.425 / 0.350,
+  dark = 0.705 / 0.655 / 0.612. Deeper, and still measured at 3:1.
+- Division chroma went up where the gamut allows, because the entities are
+  the one layer where saturation is permitted.
+- The sky became a real backdrop instead of a second beige: deeper and
+  cooler overhead (L 0.868), lighter at the horizon (0.952).
+- `PLOT_MIX` went 10% -> 24% in light. A district's FLOOR is now visibly its
+  own colour, which is most of what makes eight districts read as eight
+  places rather than one district painted eight ways.
+- Haze came down (0.40 -> 0.26): the ground haze was veiling the front of
+  the city, not just the back of it.
+- The resting silhouette is on in both themes now (`rim` 0 -> 0.34 light).
+  At the default frame a building is about 45 CSS px tall, which is exactly
+  the size where a soft-edged box stops reading as a solid.
+
+All 408 gated pairs pass. Everything below stands as authored.
+
+
 Authored in **OKLCH**. Each precinct is ONE token; every face, text colour and
 swatch derives from it. `color-mix(in srgb, hue, #000)` is forbidden — it
 collapses chroma faster than lightness and drags every hue to the same brown.
@@ -198,6 +226,26 @@ loudest amateur tell on the canvas.
 | Precinct sub | 19 | mono | 400 | +0.02em, `--ink-muted` |
 | Citizen name plate | 20 | mono | 500 | 0 |
 
+**AMENDED 2026-09-07: the declutter rule.** "Name plates are mandatory" and
+"Directors are always named" were both kept as promises and both were wrong
+about the same thing: seven director plates permanently mounted over the
+middle of the city, plus fifteen precinct plates, is a pile of white boxes,
+and no placement algorithm fixes "there are too many labels". A map declutters
+by zoom. So: a PLACE is named at every zoom, a PERSON is named above
+`DIRECTOR_NAME_ZOOM` (1.3x) or whenever they are hovered, focused, selected,
+or standing next to whoever is. The page copy says so in those words. Nobody
+becomes unreachable — the roster and the panel name all 59 at every zoom,
+with JavaScript off included.
+
+The placement pass itself is `site/labels.mjs` now: pure, no DOM, and gated by
+`tests/labels.test.mjs`. It scores a fan of candidate positions per label
+against the BUILDINGS as well as the other labels, prefers the street in
+front of a plot (south, downhill, toward the camera) over the roofscape
+behind it, drops a citizen's name rather than printing it over something
+else, and degrades a precinct plate to its title alone before it will lie
+across a roof. Measured: labels covering a building fell from 62 to 1 in the
+resting desktop frame.
+
 **Every label sits on a plate.** `<rect rx=3>`, `--plate` @0.94, 1u border,
 10u padding. **No `paint-order`, no `text-shadow`, anywhere.** Nothing
 smaller than 19u exists on the map; if it has to be, the layout is wrong.
@@ -209,6 +257,18 @@ repositioned by transform on hover/focus/select; the seven Director plates
 always mounted. Hover creates zero DOM nodes.
 
 ## 7. Composition and camera
+
+**AMENDED 2026-09-07.** Two things changed and neither is in the table below.
+(1) The page above the map was a title, a lead, a finding strip, a heading,
+six buttons, two checkboxes and two instruction paragraphs, so at 1440x900
+the city began 640px down. The header is a nameplate now, the toolbar and the
+help disclosure sit ON the map, and the map starts at 106px. (2) The desktop
+default frame is the SUBJECT, not the plan: everything except the Archive,
+grown to the container's aspect ratio so nothing is letterboxed. Measured
+before: 47.5% of the hero was ground nobody built on and a citizen was 15.1
+CSS px tall. After: 96.4% and 21.5 px. The Archive is one click away on
+"Whole city", which is the only thing about reaching it that changed.
+
 
 - Map container `width: min(100vw − 2rem, 1480px)`, centred by transform
   (not by vw margins, which resolve against the parent and clipped the toolbar).

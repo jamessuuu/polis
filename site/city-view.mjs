@@ -25,10 +25,12 @@
  */
 
 import {
-  boxFaces, gableFaces, silhouettePath, storeyLinesPath, windowsPath, doorPoint,
+  boxFaces, gableFaces, silhouettePath, silhouetteBox, storeyLinesPath, windowsPath, doorPoint,
+  doorPath, parapetPath,
   plotPolygon, tileGridPath, toScreen, depthOf, screenBounds,
   shadowPolygon, footingBands, contactPatch, wallGeometry, plinthFaces, TILE_W,
 } from './iso.mjs';
+import { placeLabels } from './labels.mjs';
 import {
   activityOf, capabilityOf, roofOf, storeysOf, footprintOf, insigniaOf,
   buildRoutingGrid, gatesOf, createRouter, walkBetween, screenPath,
@@ -196,138 +198,152 @@ function construct(hueClass) {
 
 // ------------------------------------------------------------- labels ---
 
-const NUM_PX = 27;
-const TITLE_PX = 27;
-const SUB_PX = 19;
-const PLATE_PAD = 12;
-const PLATE_H = 66;
+const NUM_PX = 22;
+const TITLE_PX = 22;
+const SUB_PX = 16;
+const PLATE_PAD = 11;
+const PLATE_H = 50;
+const PLATE_COMPACT_H = 32;
 
 /*
- * One placement pass for every label on the map.
+ * One placement pass for every label on the map, run by `labels.mjs`.
  *
- * There used to be two systems: precinct plates lifted themselves vertically
- * until they cleared each other, and name plates sat at a fixed offset above
- * a roof with no idea anything else existed. Two labels at the same depth can
- * never be separated by lifting alone — both keep landing at the same height —
- * so a director's name printed across a district title and the whole map read
- * as broken. The fix is one pass, in priority order, with a horizontal member
- * in the search: district > director > citizen, and only a citizen may be
- * dropped from a frame (the roster below still names everyone).
+ * The old pass lifted a plate vertically until it stopped touching another
+ * plate. That fixed nothing visible, because the two things it never knew
+ * about are the two things that actually broke the picture: buildings, and
+ * how many labels a frame can carry. Sixteen opaque plates and seven
+ * always-on director names read as a pile of white boxes over a city, and
+ * every one of them was technically collision-free.
  *
- * Widths are ESTIMATED from character counts rather than measured: measuring
- * would be three forced reflows per label on every hover.
+ * So the pass now scores candidates against the BUILDINGS as well as the
+ * other labels, prefers the street in front of a plot over the roofscape
+ * behind it, and declutters by zoom: districts always, people once you are
+ * close enough to be looking at people. Widths are estimated from character
+ * counts rather than measured, because measuring is three forced reflows per
+ * label on every hover.
  */
-const PAD_X = 8;
-const PAD_Y = 6;
-const LIFT_STEP = 28;
-const LIFT_TRIES = 26;
 
-/** Boxes are centre-based so a 66u plate and a 32u plate compare honestly. */
-function boxesHit(a, b) {
-  return Math.abs(a.cx - b.cx) < (a.w + b.w) / 2 + PAD_X
-    && Math.abs(a.cy - b.cy) < (a.h + b.h) / 2 + PAD_Y;
-}
-
-/** Natural spot first, then each lift step tried centred and to either side. */
-function* offsetsFor(w) {
-  yield [0, 0];
-  for (let i = 1; i <= LIFT_TRIES; i++) {
-    const dy = -i * LIFT_STEP;
-    yield [0, dy];
-    yield [-0.4 * w, dy];
-    yield [0.4 * w, dy];
-  }
-}
-
-/** Returns false when nothing in the offset budget was free. */
-function placeCandidate(c, placed) {
-  for (const [dx, dy] of offsetsFor(c.w)) {
-    const box = { cx: c.cx0 + dx, cy: c.cy0 + dy, w: c.w, h: c.h };
-    if (!placed.some((q) => boxesHit(box, q))) {
-      c.box = box;
-      c.displaced = dx !== 0 || dy !== 0;
-      placed.push(box);
-      return true;
-    }
-  }
-  // A district or a director is never hidden. LAYOUT-SPEC §5.4's numeral-chip
-  // fallback is the escalation if this ever fires at real density; with 78
-  // candidate positions per label and 22 labels it cannot today, so the honest
-  // behaviour is "lifted clear of its anchor and drawn", not "gone".
-  const dy = -LIFT_TRIES * LIFT_STEP;
-  c.box = { cx: c.cx0, cy: c.cy0 + dy, w: c.w, h: c.h };
-  c.displaced = true;
-  placed.push(c.box);
-  return false;
-}
+/** Above this camera zoom, the map starts naming people as well as places. */
+export const DIRECTOR_NAME_ZOOM = 1.3;
 
 /**
  * How big a label is drawn, relative to the world.
  *
  * Plate type is in world units, so a frame that zooms in to make a 22-unit
- * citizen legible on a phone also blows a 27-unit district title up to 33 CSS
- * px — a caption bar sitting across the city it is labelling. A label is UI,
- * not a building: it should read at roughly the same size whatever the camera
- * is doing. This returns the factor that holds a district title near
- * PLATE_TARGET_PX, and the placement pass then packs the sizes actually drawn
- * rather than the ones drawn at some other zoom.
+ * citizen legible on a phone also blows a district title up to a caption bar
+ * lying across the city it names. A label is UI, not a building: it should
+ * read at roughly the same size whatever the camera is doing.
  */
-const PLATE_TARGET_PX = 15;
+const PLATE_TARGET_PX = 13;
 
 export function plateScaleFor(frame, container) {
   const pxPerUnit = Math.min(container.width / frame.w, container.height / frame.h);
   if (!(pxPerUnit > 0)) return 1;
-  return Math.max(0.4, Math.min(1, PLATE_TARGET_PX / (TITLE_PX * pxPerUnit)));
+  return Math.max(0.34, Math.min(1, PLATE_TARGET_PX / (TITLE_PX * pxPerUnit)));
 }
 
-/** T1: the precinct plates. Placed first, so nothing below them can move them. */
-function plateCandidates(city) {
+/**
+ * What the label placer must not cover: one box per standing volume.
+ *
+ * A ruin contributes nothing, because nothing stands there - the empty lot IS
+ * the finding and a label sitting on it hides nothing. Pure, so the
+ * regression test can build the same obstacle field the renderer builds.
+ */
+export function obstacleBoxes(city) {
+  const out = [];
+  for (const item of city.buildings) {
+    if (item.kind === 'citizen' && item.unreachable) continue;
+    const fp = footprintOf(item);
+    const pitch = (item.director ? 26 : 0)
+      + (item.kind === 'citizen' && roofOf(item.tools) === 'gable' ? 12 : 0);
+    out.push({ id: item.id, ...silhouetteBox(item.col, item.row, item.height, fp, pitch) });
+  }
+  return out;
+}
+
+/**
+ * T1: the precinct plates.
+ *
+ * The anchor is the plot's FRONT corner, not its back one. In this
+ * projection the back corner is exactly where the roofs climb, which is why
+ * "00 · Cabinet" used to sit across the Cabinet's own tower; the front corner
+ * is the street, where nothing is built and nothing extrudes upward.
+ */
+export function plateCandidates(city) {
   return [...city.plots.values()]
     .map((plot) => {
-      const north = toScreen(plot.col, plot.row);
+      const front = toScreen(plot.col + plot.cols, plot.row + plot.rows);
       const num = plot.kind === 'district' ? `${plot.number} · ` : '';
       const title = plot.kind === 'district' ? plot.label.replace(/^\d\d · /, '') : plot.label;
       const sub = plot.sub || `${plot.count} ${plot.count === 1 ? 'member' : 'members'}`;
       const line1 = num.length * NUM_PX * 0.62 + title.length * TITLE_PX * 0.55;
+      const titleUnits = line1 + PLATE_PAD * 2;
       const wUnits = Math.max(line1, sub.length * SUB_PX * 0.62) + PLATE_PAD * 2;
       return {
-        key: plot.key, cls: plotHueClass(plot), num, title, sub, wUnits,
-        anchorX: north.x, anchorY: north.y - 2, north,
+        key: plot.key, cls: plotHueClass(plot), num, title, sub, wUnits, titleUnits,
+        anchorX: front.x, anchorY: front.y + 2, front,
         depth: depthOf(plot.col, plot.row),
       };
     })
     .sort((a, b) => a.depth - b.depth || a.key.localeCompare(b.key));
 }
 
-function placePlates(candidates, placed, scale) {
+/** Run the T1 pass and write the result back onto each candidate. */
+export function placePlates(candidates, placed, scale, obstacles) {
+  const labels = candidates.map((p) => {
+    const w = p.wUnits * scale;
+    const h = PLATE_H * scale;
+    const cw = p.titleUnits * scale;
+    const ch = PLATE_COMPACT_H * scale;
+    p.w = w; p.h = h;
+    return {
+      id: p.key, tier: 1, w, h, droppable: false,
+      anchor: { x: p.front.x, y: p.front.y },
+      natural: { cx: p.front.x, cy: p.front.y + 10 + h / 2 },
+      // The density fallback: title only, one line, roughly half the area.
+      compact: { w: cw, h: ch, natural: { cx: p.front.x, cy: p.front.y + 10 + ch / 2 } },
+    };
+  });
+  const { placements } = placeLabels(labels, { obstacles });
   for (const p of candidates) {
-    p.w = p.wUnits * scale;
-    p.h = PLATE_H * scale;
-    p.cx0 = p.north.x;
-    p.cy0 = p.north.y - 10 - p.h / 2;
-    placeCandidate(p, placed);
+    const got = placements.get(p.key);
+    p.box = got.box;
+    p.displaced = got.displaced;
+    p.cover = got.cover;
+    p.compactForm = Boolean(got.compact);
+    p.w = got.box.w;
+    p.h = got.box.h;
     p.x = p.box.cx;
     p.y = p.box.cy - p.h / 2;
+    placed.push(p.box);
   }
   return candidates;
 }
 
+/**
+ * The plate itself: a hue rule on the left edge, the number in the precinct's
+ * own text tone, the title, and the count under it. The rule is what ties an
+ * off-street label back to the block it names once the placer has moved it.
+ */
 function precinctPlate(p) {
   // Geometry is authored once at scale 1 and the group's own transform carries
   // the frame's label scale, so re-framing is 15 attribute writes rather than
   // a re-render, and no wrapper element is spent on it.
   const g = s('g', { class: `precinct-plate ${p.cls} kind-${p.key.startsWith('__') ? 'outside' : 'district'}` });
-  g.appendChild(s('rect', { class: 'plate-bg', x: r2(-p.wUnits / 2), y: 0, width: r2(p.wUnits), height: PLATE_H, rx: 3 }));
-  const t1 = s('text', { class: 'plate-line1', x: 0, y: 31, 'text-anchor': 'middle' });
+  p.bg = s('rect', { class: 'plate-bg', x: r2(-p.wUnits / 2), y: 0, width: r2(p.wUnits), height: PLATE_H, rx: 3 });
+  p.rule = s('rect', { class: 'plate-rule', x: r2(-p.wUnits / 2), y: 0, width: 4, height: PLATE_H });
+  g.appendChild(p.bg);
+  g.appendChild(p.rule);
+  const t1 = s('text', { class: 'plate-line1', x: 0, y: 24, 'text-anchor': 'middle' });
   if (p.num) t1.appendChild(s('tspan', { class: 'plate-num' }, p.num));
   t1.appendChild(s('tspan', { class: 'plate-title' }, p.title));
   g.appendChild(t1);
-  g.appendChild(s('text', { class: 'plate-sub', x: 0, y: 54, 'text-anchor': 'middle' }, p.sub));
+  g.appendChild(s('text', { class: 'plate-sub', x: 0, y: 41, 'text-anchor': 'middle' }, p.sub));
   return g;
 }
 
 const NAME_PX = 20;
-const NAME_H = 32;
+export const NAME_H = 30;
 export const NAME_POOL = 24;
 
 function namePlate() {
@@ -339,12 +355,12 @@ function namePlate() {
   outer.appendChild(leader);
   const inner = s('g', { class: 'name-plate-in' });
   inner.appendChild(s('rect', { class: 'plate-bg', x: 0, y: 0, width: 10, height: NAME_H, rx: 3 }));
-  inner.appendChild(s('text', { class: 'plate-name', x: 0, y: 21, 'text-anchor': 'middle' }, ''));
+  inner.appendChild(s('text', { class: 'plate-name', x: 0, y: 20, 'text-anchor': 'middle' }, ''));
   outer.appendChild(inner);
   return { outer, inner, leader, rect: inner.firstChild, text: inner.lastChild, id: null, anchor: null, box: null };
 }
 
-const nameWidth = (id) => id.length * NAME_PX * 0.62 + 18;
+export const nameWidth = (id) => id.length * NAME_PX * 0.62 + 18;
 
 const r2 = (n) => Math.round(n * 100) / 100;
 
@@ -492,11 +508,16 @@ export function renderCity({ svg, data, city, workforce = null, onSelect }) {
   const citizenEls = new Map();
   const figures = new Map();
   const buildingOrder = [];
+  // What the label placer must not cover. One box per standing volume, in
+  // the same world units labels are measured in. A ruin contributes nothing
+  // because nothing stands there.
+  const obstacles = [];
   const ordered = [...city.buildings].sort(
     (p, q) => depthOf(p.col, p.row) - depthOf(q.col, q.row) || p.id.localeCompare(q.id),
   );
   const activities = new Map();
   let contentTop = b.minY;
+  let contentBottom = b.maxY;
 
   ordered.forEach((item, idx) => {
     const fp = footprintOf(item);
@@ -513,6 +534,10 @@ export function renderCity({ svg, data, city, workforce = null, onSelect }) {
     g.dataset.id = item.id;
     g.dataset.kind = item.kind;
     g.dataset.depth = String(depthOf(item.col, item.row));
+    if (!(item.kind === 'citizen' && item.unreachable)) {
+      const pitch = (item.director ? 26 : 0) + (item.kind === 'citizen' && roofOf(item.tools) === 'gable' ? 12 : 0);
+      obstacles.push({ id: item.id, ...silhouetteBox(item.col, item.row, item.height, fp, pitch) });
+    }
 
     if (item.kind === 'citizen' && item.unreachable) {
       // A ruin is an empty lot. Nothing stands there, nothing casts a shadow,
@@ -535,8 +560,15 @@ export function renderCity({ svg, data, city, workforce = null, onSelect }) {
       g.appendChild(s('polygon', { class: 'face face-left', points: faces.left }));
       g.appendChild(s('polygon', { class: 'face face-right', points: faces.right }));
       const foot = footingBands(item.col, item.row, item.height, fp);
-      g.appendChild(s('path', { class: 'face face-foot', d: `M ${foot.left.split(' ').join(' L ')} Z M ${foot.right.split(' ').join(' L ')} Z` }));
-      if (storeys > 1) g.appendChild(s('path', { class: 'storeys', d: storeyLinesPath(item.col, item.row, item.height, fp) }));
+      // Footing band and doorway share one path: the door is where the
+      // citizen is already standing, and it costs no element to draw it.
+      const footD = `M ${foot.left.split(' ').join(' L ')} Z M ${foot.right.split(' ').join(' L ')} Z `
+        + doorPath(item.col, item.row, item.height, fp);
+      g.appendChild(s('path', { class: 'face face-foot', d: footD }));
+      const flat = roofOf(item.tools) !== 'gable';
+      const lines = (storeys > 1 ? storeyLinesPath(item.col, item.row, item.height, fp) : '')
+        + (flat ? ' ' + parapetPath(item.col, item.row, item.height, fp) : '');
+      if (lines.trim()) g.appendChild(s('path', { class: 'storeys', d: lines.trim() }));
       const win = windowsPath(item.col, item.row, item.height, fp, storeys);
       if (win) {
         const wp = s('path', { class: 'windows', d: win });
@@ -612,7 +644,7 @@ export function renderCity({ svg, data, city, workforce = null, onSelect }) {
   const plateLayer = s('g', { class: 'plate-layer' });
   const plateBoxes = [];
   const plates = plateCandidates(city);
-  placePlates(plates, plateBoxes, 1);
+  placePlates(plates, plateBoxes, 1, obstacles);
   for (const p of plates) {
     // One leader per plate, mounted once and toggled — the same pool
     // discipline the name plates use, so re-framing never creates a node.
@@ -621,6 +653,7 @@ export function renderCity({ svg, data, city, workforce = null, onSelect }) {
     p.el = precinctPlate(p);
     plateLayer.appendChild(p.el);
     contentTop = Math.min(contentTop, p.y - 8);
+    contentBottom = Math.max(contentBottom, p.y + p.h + 8);
   }
 
   /**
@@ -658,9 +691,16 @@ export function renderCity({ svg, data, city, workforce = null, onSelect }) {
   /** Re-place and redraw every precinct plate at a new label scale. */
   function relayoutPlates(scale) {
     plateBoxes.length = 0;
-    placePlates(plates, plateBoxes, scale);
+    placePlates(plates, plateBoxes, scale, obstacles);
     for (const p of plates) {
       p.el.setAttribute('transform', `translate(${r2(p.x)} ${r2(p.y)}) scale(${r2(scale)})`);
+      p.el.classList.toggle('compact', p.compactForm);
+      const bw = p.compactForm ? p.titleUnits : p.wUnits;
+      p.bg.setAttribute('x', r2(-bw / 2));
+      p.bg.setAttribute('width', r2(bw));
+      p.bg.setAttribute('height', p.compactForm ? PLATE_COMPACT_H : PLATE_H);
+      p.rule.setAttribute('x', r2(-bw / 2));
+      p.rule.setAttribute('height', p.compactForm ? PLATE_COMPACT_H : PLATE_H);
       p.leader.setAttribute('x1', r2(p.x));
       p.leader.setAttribute('y1', r2(p.y + p.h));
       p.leader.setAttribute('x2', r2(p.anchorX));
@@ -689,12 +729,12 @@ export function renderCity({ svg, data, city, workforce = null, onSelect }) {
     x: b.minX - PAD,
     y: contentTop - 12,
     w: b.maxX - b.minX + PAD * 2,
-    h: b.maxY + PLINTH - contentTop + 12 + PAD * 0.6,
+    h: Math.max(b.maxY + PLINTH, contentBottom) - contentTop + 12 + PAD * 0.6,
   };
   svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
 
   /** Switch frames as a hard cut: viewBox is not a transform and never tweens. */
-  const state = { plateScale: 1 };
+  const state = { plateScale: 1, zoom: 1 };
   function setFrame(f, container) {
     svg.setAttribute('viewBox', `${r2(f.x)} ${r2(f.y)} ${r2(f.w)} ${r2(f.h)}`);
     // The sky is three frames wide so a letterboxed axis reads as more sky
@@ -712,9 +752,11 @@ export function renderCity({ svg, data, city, workforce = null, onSelect }) {
   setFrame(view);
 
   return {
-    camera, citizenEls, roadEls, figures, activities, view,
+    camera, citizenEls, roadEls, figures, activities, view, obstacles,
     buildLayer, buildingOrder, walkLayer, shadowLayer, plateLayer, plateBoxes,
     namePool: pool, router, buildingsById, agentsById, setFrame, cullLabels,
+    set zoom(k) { state.zoom = k; },
+    get zoom() { return state.zoom ?? 1; },
     get plateScale() { return state.plateScale; },
     get frame() { return state.frame; },
   };
@@ -735,8 +777,8 @@ export function renderCity({ svg, data, city, workforce = null, onSelect }) {
  * true when the roster grows.
  */
 export const FIGURE_UNITS = 22;
-const LABEL_HEADROOM = 96; // the plate/banner stack above the tallest roof
-const GROUND_SLACK = 16; // contact shadow and the figure standing at the door
+const ROOF_HEADROOM = 46; // banner poles and pennants above the tallest roof
+const LABEL_HEADROOM = 108; // the plate stack, which now hangs BELOW its plot
 const LATERAL = 14; // a sliver of street either side, in screen units
 const RING_MAX = 6;
 const FLOOR_MIN = 24; // a head resolves to ~6.3px here: a region, not a pixel
@@ -780,10 +822,39 @@ function frameOfPlots(city, list) {
   }
   return {
     x: minX - LATERAL,
-    y: minY - LABEL_HEADROOM,
+    y: minY - ROOF_HEADROOM,
     w: (maxX - minX) + LATERAL * 2,
-    h: (maxY - minY) + LABEL_HEADROOM + GROUND_SLACK,
+    h: (maxY - minY) + ROOF_HEADROOM + LABEL_HEADROOM,
   };
+}
+
+/**
+ * Grow a frame to the container's aspect ratio, clamped to the whole plan.
+ *
+ * `preserveAspectRatio="meet"` letterboxes whichever axis is not binding, and
+ * a letterbox on an isometric diorama is wasted screen: the subject shrinks
+ * so that empty sky can be drawn beside it. Growing the frame instead spends
+ * that space on more city, for free, and stops when there is no more city to
+ * show. Measured before this existed: 47.5% of the desktop hero was ground
+ * nobody built on.
+ */
+function fitToAspect(frame, container, limit) {
+  const target = container.width / container.height;
+  if (!(target > 0)) return frame;
+  const out = { ...frame };
+  const wide = out.w / out.h;
+  if (wide < target) {
+    const want = Math.min(out.h * target, limit ? limit.w : Infinity);
+    const grow = want - out.w;
+    out.x -= grow / 2;
+    out.w = want;
+  } else if (wide > target) {
+    const want = Math.min(out.w / target, limit ? limit.h : Infinity);
+    const grow = want - out.h;
+    out.y -= grow / 2;
+    out.h = want;
+  }
+  return out;
 }
 
 /** Figure height in CSS pixels at k=1, the way preserveAspectRatio="meet" fits. */
@@ -799,12 +870,23 @@ export function legibilityOf(frame, container) {
  */
 export function computeFocusFrame(city, container, cityFrame) {
   const band = bandFor(container.width);
-  if (band === 'desktop') return { name: 'city', band, ...cityFrame };
+  if (band === 'desktop') {
+    // The desktop default is the SUBJECT, not the plan. The Archive is 86
+    // sheds that DESIGN.md §7 already calls a backdrop; framing to include
+    // all of it pushed a 22-unit citizen down to 15 CSS px and left nearly
+    // half the hero as ground nobody built on. Everything inside the wall
+    // plus the guild ring is the default; "Whole city" is one click away and
+    // is the only thing that changed about how you reach the Archive.
+    const subject = [...city.plots.values()].filter((p) => p.kind !== 'archive');
+    if (!subject.length) return { name: 'city', band, ...cityFrame };
+    const core = frameOfPlots(city, subject);
+    return { name: 'subject', band, ...fitToAspect(core, container, null) };
+  }
   const focus = focalPlot(city);
   if (!focus) return { name: 'city', band, ...cityFrame };
 
   const district = frameOfPlots(city, [focus]);
-  if (band === 'phone') return { name: 'district', band, ...district };
+  if (band === 'phone') return { name: 'district', band, ...fitToAspect(district, container, null) };
 
   // FOCUS_RING: the plaza plus its nearest neighbours, as many as still read.
   const others = [...city.plots.values()]
@@ -825,57 +907,78 @@ export function computeFocusFrame(city, container, cityFrame) {
     bestSet = set;
     if (legibilityOf(frame, container) < FLOOR_COMFORTABLE) break;
   }
-  return { name: 'ring', band, members: bestSet.map((p) => p.key), ...best };
+  return { name: 'ring', band, members: bestSet.map((p) => p.key), ...fitToAspect(best, container, null) };
 }
 
 /**
  * Tiers 2 and 3 of the same pass: director names, then citizen names, placed
- * against the precinct plates and each other.
+ * against the precinct plates, the buildings, and each other.
  *
- * `wanted` arrives in priority order (directors first). A director is never
- * dropped; a citizen whose offset budget is exhausted is simply not labelled
- * this frame — it is still a building, still in the roster, still one click
- * from its record. Returns the ids that were dropped, for whoever wants to
- * know rather than guess.
+ * The declutter rule, stated plainly because it changed what the page
+ * promises: a PLACE is always named, a PERSON is named when you are close
+ * enough to be looking at people. Seven director plates permanently mounted
+ * over the middle of the city was most of the pile of white boxes, and no
+ * placement algorithm fixes "there are too many labels" — only a rule about
+ * how many labels a frame may carry does. So directors appear above
+ * `DIRECTOR_NAME_ZOOM`, and at any zoom for whoever is hovered, focused,
+ * selected, or standing next to them. Nobody becomes unreachable: the roster
+ * and the panel name all 59 at every zoom, with JavaScript off included.
+ *
+ * `wanted` arrives in priority order. A citizen whose fan of candidate
+ * positions is exhausted is simply not labelled this frame rather than
+ * printed over something else.
  */
 export function refreshNamePlates(scene, { directors, anchors, others }, citizenEls) {
-  const { namePool, plateBoxes } = scene;
+  const { namePool, plateBoxes, obstacles = [] } = scene;
   const scale = scene.plateScale ?? 1;
-  const placed = plateBoxes.slice();
+  const zoom = scene.zoom ?? 1;
   const dropped = [];
-  const positions = new Map();
   const depth = (id) => Number(citizenEls.get(id)?.dataset.depth ?? 0);
   const byDepth = (a, b) => depth(a) - depth(b) || a.localeCompare(b);
-  // T2 back-to-front, matching the precinct pass. Anchors keep their place at
-  // the head of T3 — dropping the label on the thing the visitor is pointing
-  // at would be the one drop nobody could read as deliberate.
-  const order = [...directors].sort(byDepth)
+  const interactive = new Set([...anchors, ...others]);
+  // T2 back-to-front, matching the precinct pass. A director being pointed at
+  // is already in `anchors`, so gating the resting set never costs the
+  // visitor the label they asked for.
+  const namedDirectors = zoom >= DIRECTOR_NAME_ZOOM
+    ? [...directors].sort(byDepth)
+    : [...directors].filter((id) => interactive.has(id)).sort(byDepth);
+  const order = namedDirectors
     .concat(anchors, [...others].sort(byDepth))
     .filter((id, i, all) => all.indexOf(id) === i);
-  const isDirector = new Set(directors);
+  const undroppable = new Set(namedDirectors);
+
+  const labels = [];
   for (const id of order) {
     const g = citizenEls.get(id);
     if (!g || !g.dataset.apexX) continue; // a ruin has no roof to name
     const x = Number(g.dataset.apexX);
     const y = Number(g.dataset.apexY);
     const h = NAME_H * scale;
-    const c = {
-      w: nameWidth(id) * scale, h, scale,
-      cx0: x, cy0: y - 10 - h / 2,
-      anchorX: x, anchorY: y,
-    };
-    const fits = placeCandidate(c, placed);
-    if (!fits && !isDirector.has(id)) {
-      placed.pop(); // a dropped citizen does not reserve space it never used
-      dropped.push(id);
-      continue;
-    }
-    positions.set(id, c);
+    labels.push({
+      id, subject: id, tier: undroppable.has(id) ? 2 : 3,
+      w: nameWidth(id) * scale, h,
+      droppable: !undroppable.has(id),
+      anchor: { x, y },
+      natural: { cx: x, cy: y - 8 - h / 2 },
+      scale,
+    });
+  }
+
+  const { placements, dropped: cut } = placeLabels(labels, {
+    obstacles,
+    reserved: plateBoxes,
+  });
+  dropped.push(...cut);
+
+  const positions = new Map();
+  for (const l of labels) {
+    const got = placements.get(l.id);
+    if (got) positions.set(l.id, { ...got, scale });
   }
 
   for (const np of namePool) if (np.id && !positions.has(np.id)) unmountNamePlate(np);
   for (const [id, c] of positions) {
-    const slot = namePool.find((p) => p.id === id) || namePool.find((p) => !p.id);
+    const slot = namePool.find((q) => q.id === id) || namePool.find((q) => !q.id);
     if (!slot) break; // pool exhausted: the roster is the record
     mountNamePlate(slot, citizenEls.get(id), id, c);
   }
@@ -912,7 +1015,7 @@ export function mountNamePlate(np, structureEl, id, placement) {
   const w = nameWidth(id);
   const scale = placement ? placement.scale : 1;
   const cx = placement ? placement.box.cx : x;
-  const cy = placement ? placement.box.cy : y - 10 - NAME_H / 2;
+  const cy = placement ? placement.box.cy : y - 8 - NAME_H / 2;
   const top = cy - (NAME_H * scale) / 2;
   const displaced = placement ? placement.displaced : false;
   np.rect.setAttribute('x', r2(-w / 2));
