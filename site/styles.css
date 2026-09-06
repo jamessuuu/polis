@@ -626,6 +626,11 @@ button:hover {
 .name-plate { pointer-events: none; }
 .name-plate-in { opacity: 0; transform: translateY(3px); }
 .name-plate.on .name-plate-in { opacity: 1; transform: none; }
+/* A name plate that had to step aside to stay readable says which roof it
+   belongs to, with the same dashed leader the precinct plates already use.
+   Name plates carry no hue class, so they take the muted ink instead. */
+.name-plate .plate-leader { stroke: var(--ink-muted); stroke-width: 1.1; opacity: 0; }
+.name-plate.on.displaced .plate-leader { opacity: 0.55; }
 .plate-name {
   font-family: var(--font-mono);
   font-size: 20px;

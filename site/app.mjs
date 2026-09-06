@@ -12,7 +12,7 @@
  */
 
 import { computeCity } from './layout.mjs';
-import { renderCity, attachCamera, mountNamePlate, unmountNamePlate, NAME_POOL } from './city-view.mjs';
+import { renderCity, attachCamera, refreshNamePlates, computeFocusFrame, NAME_POOL } from './city-view.mjs';
 import { walkerPairs } from './life.mjs';
 import { createWalkers } from './walkers.mjs';
 
@@ -165,7 +165,7 @@ async function main() {
     workforce,
     onSelect: (id) => selectCitizen(id),
   });
-  const { camera, citizenEls, roadEls, figures, namePool, buildingsById } = scene;
+  const { camera, citizenEls, roadEls, figures, buildingsById } = scene;
 
   // Who worked alongside whom, from telemetry. Both ends must be citizens on
   // this map; general-purpose is tooling, not a citizen, and never appears.
@@ -191,9 +191,33 @@ async function main() {
     // Two LODs, rendered once, toggled by one class on the root.
     onZoom: (k) => svg.classList.toggle('lod-1', k >= 1.5),
   });
+
+  // ---- framing --------------------------------------------------------
+  // The map is framed for the space it is actually given, not for the widest
+  // screen anyone might have. A phone gets the plaza, a tablet gets the
+  // plaza and its neighbours, a desktop gets the plan. Switching is a hard
+  // cut — viewBox is not a transform and must never be tweened.
+  const heroBox = svg.parentElement;
+  let frameName = null;
+  function applyFrame(force = false) {
+    const r = heroBox.getBoundingClientRect();
+    if (!r.width || !r.height) return;
+    const f = computeFocusFrame(city, { width: r.width, height: r.height }, scene.view);
+    if (!force && f.name === frameName) return;
+    frameName = f.name;
+    scene.setFrame(f);
+    cam.reset();
+  }
+  function showWholeCity() {
+    frameName = 'city';
+    scene.setFrame(scene.view);
+    cam.reset();
+  }
+
   document.getElementById('map-zoom-in')?.addEventListener('click', () => cam.zoomIn());
   document.getElementById('map-zoom-out')?.addEventListener('click', () => cam.zoomOut());
-  document.getElementById('map-reset')?.addEventListener('click', () => cam.reset());
+  document.getElementById('map-reset')?.addEventListener('click', () => applyFrame(true));
+  document.getElementById('map-whole-city')?.addEventListener('click', showWholeCity);
   const roadsToggle = document.getElementById('map-roads');
   roadsToggle?.addEventListener('change', () => {
     svg.classList.toggle('roads-on', roadsToggle.checked);
@@ -253,24 +277,23 @@ async function main() {
   }
 
   // ---- name plates ----------------------------------------------------
+  // Priority order IS placement order, and city-view runs the single pass:
+  // precinct plates are already down and immovable, directors are named next
+  // and never dropped, then whoever is being looked at, then their
+  // neighbours. A citizen name that cannot find clear space is not drawn this
+  // frame rather than printed over something else — the roster below and the
+  // panel are the complete record either way.
   const directorIds = data.agents.filter((a) => a.director).map((a) => a.id).sort();
   function refreshPlates(anchors, neighbors) {
-    const wanted = [...directorIds];
-    for (const id of anchors) if (!wanted.includes(id)) wanted.push(id);
+    const taken = new Set(directorIds);
+    const pick = [];
+    for (const id of anchors) if (!taken.has(id)) { taken.add(id); pick.push(id); }
+    const others = [];
     for (const id of [...neighbors].sort()) {
-      if (wanted.length >= NAME_POOL) break;
-      if (!wanted.includes(id)) wanted.push(id);
+      if (taken.size + others.length >= NAME_POOL) break;
+      if (!taken.has(id)) { taken.add(id); others.push(id); }
     }
-    const showing = new Set(namePool.filter((p) => p.id).map((p) => p.id));
-    for (const p of namePool) if (p.id && !wanted.includes(p.id)) unmountNamePlate(p);
-    for (const id of wanted) {
-      if (showing.has(id)) continue;
-      const g = citizenEls.get(id);
-      if (!g || !g.dataset.apexX) continue; // a ruin has no roof to name
-      const free = namePool.find((p) => !p.id);
-      if (!free) break;
-      mountNamePlate(free, g, id);
-    }
+    refreshNamePlates(scene, { directors: directorIds, anchors: pick, others }, citizenEls);
   }
   refreshPlates([], new Set());
 
@@ -525,6 +548,15 @@ async function main() {
   document.getElementById('map-section').hidden = false;
   document.getElementById('list-section').hidden = false;
   document.getElementById('static-roster-section').hidden = true;
+
+  // Framing needs a laid-out box, so it runs once the hero is no longer
+  // hidden, and again whenever the space the map is given crosses a band.
+  applyFrame(true);
+  if (typeof ResizeObserver === 'function') {
+    new ResizeObserver(() => applyFrame()).observe(heroBox);
+  } else {
+    window.addEventListener('resize', () => applyFrame());
+  }
 
   // For tests and tooling: the live scene, never for the page itself.
   window.__polis = { scene, walkers, pairs, city, data, workforce };
