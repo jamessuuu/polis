@@ -992,14 +992,70 @@ export function attachCamera(svg, camera, { onReset, onZoom } = {}) {
     apply();
   }
 
+  // Pinch. `touch-action: none` turns off the browser's own gestures, which
+  // until now left a touch visitor with no way to zoom at all except the
+  // toolbar buttons — on a map whose whole mobile story is "get close enough
+  // to see a person". Two touch pointers, an 8px deadzone so a two-finger
+  // rest is not a zoom, an incremental frame-over-frame factor (dividing by
+  // the gesture's START distance compounds wrongly across moves), the live
+  // midpoint as the anchor so it is pinch-to-point, and the same single k
+  // clamp everything else uses. No momentum: 1:1, like the pan.
+  const PINCH_DEADZONE = 8;
+  const touches = new Map();
+  let pinch = null;
+  let dragPointerId = null;
+  const gap = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+  const midpoint = (a, b) => ({ x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 });
+
+  const endDrag = (ev) => {
+    dragging = false;
+    last = null;
+    svg.classList.remove('grabbing');
+    const id = ev && ev.pointerId != null ? ev.pointerId : dragPointerId;
+    if (id != null && svg.hasPointerCapture?.(id)) svg.releasePointerCapture(id);
+    dragPointerId = null;
+  };
+
   svg.addEventListener('pointerdown', (ev) => {
-    if (ev.button !== 0) return;
+    if (ev.pointerType === 'touch') {
+      touches.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
+      if (touches.size >= 2) {
+        const [a, b] = [...touches.values()];
+        const d = gap(a, b);
+        pinch = { start: d, last: d, active: false };
+        endDrag(null); // a second finger ends the pan rather than fighting it
+        return;
+      }
+    }
+    if (ev.button !== 0 || pinch) return;
     dragging = true;
     last = { x: ev.clientX, y: ev.clientY };
+    dragPointerId = ev.pointerId;
     svg.classList.add('grabbing');
     svg.setPointerCapture(ev.pointerId);
   });
+
   svg.addEventListener('pointermove', (ev) => {
+    if (ev.pointerType === 'touch' && touches.has(ev.pointerId)) {
+      touches.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
+    }
+    if (pinch && touches.size >= 2) {
+      const [a, b] = [...touches.values()];
+      const d = gap(a, b);
+      if (!pinch.active) {
+        // Swallow the deadzone travel so the zoom starts from where the
+        // gesture was recognised, not from where the fingers first landed.
+        if (Math.abs(d - pinch.start) >= PINCH_DEADZONE) pinch.active = true;
+        pinch.last = d;
+        return;
+      }
+      if (pinch.last > 0 && d > 0) {
+        const c = midpoint(a, b);
+        zoomAt(d / pinch.last, c.x, c.y);
+      }
+      pinch.last = d;
+      return;
+    }
     if (!dragging || !last) return;
     const ctm = svg.getScreenCTM();
     const scale = ctm ? 1 / ctm.a : 1;
@@ -1008,14 +1064,18 @@ export function attachCamera(svg, camera, { onReset, onZoom } = {}) {
     last = { x: ev.clientX, y: ev.clientY };
     apply();
   });
-  const endDrag = (ev) => {
-    dragging = false;
-    last = null;
-    svg.classList.remove('grabbing');
-    if (ev && ev.pointerId != null && svg.hasPointerCapture?.(ev.pointerId)) svg.releasePointerCapture(ev.pointerId);
+
+  const liftPointer = (ev) => {
+    if (ev.pointerType === 'touch') {
+      touches.delete(ev.pointerId);
+      // Panning does not resume under the remaining finger; it waits for a
+      // fresh pointerdown, so the map never lurches as a pinch ends.
+      if (touches.size < 2) pinch = null;
+    }
+    endDrag(ev);
   };
-  svg.addEventListener('pointerup', endDrag);
-  svg.addEventListener('pointercancel', endDrag);
+  svg.addEventListener('pointerup', liftPointer);
+  svg.addEventListener('pointercancel', liftPointer);
 
   svg.addEventListener('wheel', (ev) => {
     ev.preventDefault();
