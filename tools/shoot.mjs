@@ -2,10 +2,16 @@
 /**
  * Render the map and look at it.
  *
- * Screenshots #map-section at 1440px and a 2x crop of the Cabinet plaza, in
- * light and dark, two seconds in so the animations are mid-cycle. Also prints
- * what a screenshot cannot show: element count, viewBox, walkers out, console
- * errors, and whether reduced motion really stops everything.
+ * Screenshots #map-section at the two widths that matter — a 1440px desktop
+ * and a 390px phone — in light and dark, plus a 2x crop of the Cabinet plaza,
+ * plus the Dark Half mode on both widths. Two seconds in, so the animations
+ * are mid-cycle rather than at their start pose.
+ *
+ * It also prints what a screenshot cannot show: element count, viewBox,
+ * walkers out, console errors, whether reduced motion really stops
+ * everything, and — for the Dark Half — how many buildings are actually lit
+ * versus dimmed, because "it looks emptier" is an opinion and 37 against 22
+ * is not.
  *
  *   node tools/shoot.mjs [--url http://localhost:8099/] [--out .]
  *
@@ -21,11 +27,22 @@ const url = flag('--url', 'http://localhost:8099/');
 const out = flag('--out', 'C:/Users/admin/polis').replace(/\\/g, '/');
 const themes = (flag('--themes', 'light,dark')).split(',');
 
+const VIEWS = {
+  desktop: { width: 1440, height: 1200 },
+  phone: { width: 390, height: 844 },
+};
+
 const browser = await chromium.launch();
 const report = [];
 
-async function shoot(theme, { scale = 1, reduced = false } = {}) {
-  const ctx = await browser.newContext({ viewport: { width: 1440, height: 1200 }, deviceScaleFactor: scale, reducedMotion: reduced ? 'reduce' : 'no-preference' });
+async function shoot(theme, { scale = 1, reduced = false, view = 'desktop', dark = false } = {}) {
+  const ctx = await browser.newContext({
+    viewport: VIEWS[view],
+    deviceScaleFactor: scale,
+    reducedMotion: reduced ? 'reduce' : 'no-preference',
+    hasTouch: view === 'phone',
+    isMobile: view === 'phone',
+  });
   const page = await ctx.newPage();
   const errors = [];
   page.on('console', (m) => { if (m.type() === 'error' || m.type() === 'warning') errors.push(`${m.type()}: ${m.text()}`); });
@@ -33,6 +50,7 @@ async function shoot(theme, { scale = 1, reduced = false } = {}) {
   await page.goto(url, { waitUntil: 'networkidle' });
   await page.evaluate((t) => document.documentElement.setAttribute('data-theme', t), theme);
   await page.waitForSelector('#map-section:not([hidden])', { timeout: 15000 });
+  if (dark) await page.click('#map-dark-half');
   await page.waitForTimeout(2000);
 
   const facts = await page.evaluate(() => {
@@ -44,6 +62,7 @@ async function shoot(theme, { scale = 1, reduced = false } = {}) {
     const cos = document.querySelector('[data-id="chief-of-staff"]');
     const r = cos ? cos.getBoundingClientRect() : null;
     const section = document.getElementById('map-section').getBoundingClientRect();
+    const citizens = [...svg.querySelectorAll('.structure.kind-citizen')];
     return {
       elements: svg.querySelectorAll('*').length,
       viewBox: svg.getAttribute('viewBox'),
@@ -54,10 +73,16 @@ async function shoot(theme, { scale = 1, reduced = false } = {}) {
       section: { x: section.x, y: section.y, w: section.width, h: section.height },
       pairs: P.pairs ? P.pairs.length : 0,
       lifeOff: svg.classList.contains('life-off'),
+      darkHalf: svg.classList.contains('dark-half'),
+      // The measurable half of "does the dark half read": how many citizens
+      // are lifted, how many have receded, and what the page says about it.
+      lit: citizens.filter((c) => c.classList.contains('dark')).length,
+      dimmed: citizens.filter((c) => c.classList.contains('dimmed')).length,
+      darkNote: (document.getElementById('map-dark-note') || {}).textContent || '',
     };
   });
 
-  const suffix = `${theme}${reduced ? '-reduced' : ''}`;
+  const suffix = `${theme}-${view}${dark ? '-darkhalf' : ''}${reduced ? '-reduced' : ''}`;
   if (!reduced) {
     if (scale === 1) {
       await page.locator('#map-section').screenshot({ path: `${out}/.shot-${suffix}.png` });
@@ -76,12 +101,17 @@ async function shoot(theme, { scale = 1, reduced = false } = {}) {
 for (const theme of themes) {
   await shoot(theme, { scale: 1 });
   await shoot(theme, { scale: 2 });
+  await shoot(theme, { view: 'phone' });
 }
+// The Dark Half, on both widths, in the theme most people arrive in.
+await shoot('light', { dark: true });
+await shoot('light', { view: 'phone', dark: true });
 await shoot('light', { reduced: true });
 await browser.close();
 
 for (const r of report) {
-  process.stdout.write(`[${r.theme} @${r.scale}x] elements=${r.elements} viewBox=${r.viewBox} pairs=${r.pairs} walkersOut=${r.walkers.length} animated=${r.animatedElements} running=${r.runningAnimations} lifeOff=${r.lifeOff}\n`);
+  process.stdout.write(`[${r.theme} @${r.scale}x] elements=${r.elements} viewBox=${r.viewBox} pairs=${r.pairs} walkersOut=${r.walkers.length} animated=${r.animatedElements} running=${r.runningAnimations} lifeOff=${r.lifeOff} darkHalf=${r.darkHalf} lit=${r.lit} dimmed=${r.dimmed}\n`);
   if (r.walkers.length) process.stdout.write(`    walking: ${r.walkers.join(', ')}\n`);
+  if (r.darkHalf && r.darkNote) process.stdout.write(`    note: ${r.darkNote}\n`);
   for (const e of r.errors) process.stdout.write(`    ${e}\n`);
 }

@@ -20,6 +20,7 @@ import {
   activityOf, capabilityOf, roofOf, storeysOf, insigniaOf,
   walkerPairs, pairForSlot, buildRoutingGrid, gatesOf, createRouter, walkBetween, doorNode,
   screenPath, pointAlong, walkTiming, walkProgress, footprintOf,
+  isDark, darkHalfCounts, nextHops,
 } from '../site/life.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -225,4 +226,76 @@ test('walk timing goes out, pauses, and comes back', () => {
   assert.equal(walkProgress(t, t.leg + t.pause / 2).pausing, true);
   assert.equal(walkProgress(t, t.total).s, 0);
   assert.equal(walkProgress(t, t.total).returning, true);
+});
+
+// ----------------------------------------------------------- dark half ---
+
+test('the dark half is never-called or never-named, and idle is neither', () => {
+  // The button says "never been called". A citizen who was dispatched five
+  // months ago HAS been called, so lighting them would make the sentence
+  // under the button false — that is why `idle` is warm.
+  assert.equal(isDark('dormant', false), true);
+  assert.equal(isDark('idle', false), false);
+  assert.equal(isDark('recent', false), false);
+  assert.equal(isDark('active', false), false);
+  assert.equal(isDark('active', true), true, 'a ruin is dark however busy its record');
+  assert.equal(isDark('idle', true), true);
+});
+
+test('the dark-half sentence is counted from the snapshot, and its arithmetic closes', () => {
+  const wfById = new Map(workforce.agents.map((a) => [a.id, a]));
+  const unreachable = new Set(snap.unreachable);
+  const ids = snap.agents.map((a) => a.id);
+  const counts = darkHalfCounts(
+    ids,
+    (id) => activityOf(wfById.get(id), workforce.generatedAt),
+    (id) => unreachable.has(id),
+  );
+  assert.equal(counts.total, snap.stats.agents);
+  assert.equal(counts.lit + counts.dark, counts.total, 'every citizen is on exactly one side');
+  assert.equal(counts.dark, counts.never + counts.unnamed - counts.both, 'inclusion-exclusion');
+  assert.equal(counts.unnamed, snap.unreachable.length);
+  // The number STRATEGY §2 calls the finding worth sharing, and the one the
+  // reconciliation commit derived: never dispatched from the roster, not the
+  // 30 agents ever dispatched (four of which are not roster members).
+  assert.equal(counts.never, workforce.stats.neverDispatched);
+  assert.equal(counts.never + workforce.stats.rosterEverDispatched, snap.stats.agents,
+    '33 + 26 must close on 59, or the copy is quoting two different populations');
+});
+
+test('a citizen nobody names still has one honest next hop', () => {
+  // GAME-DESIGN §3: a dead-end click must cost zero recovery time. Every
+  // unreachable citizen on this snapshot gets a real hop, and the kind names
+  // the relationship rather than implying a stronger one.
+  for (const id of snap.unreachable) {
+    const a = snap.agents.find((x) => x.id === id);
+    const hop = nextHops(a, snap.agents, snap.unreachable);
+    assert.notEqual(hop.kind, 'none', `${id} is a flat dead end`);
+    assert.ok(hop.ids.length > 0, `${id} has an empty hop list`);
+    assert.ok(!hop.ids.includes(id), `${id} was offered itself as the way out`);
+    if (hop.kind === 'guild') {
+      for (const other of hop.ids) {
+        assert.equal(snap.agents.find((x) => x.id === other).guild, a.guild);
+      }
+    }
+    if (hop.kind === 'unreachable') {
+      for (const other of hop.ids) assert.ok(snap.unreachable.includes(other));
+    }
+  }
+});
+
+test('next hops prefer the district, then the guild, then the others nobody names', () => {
+  const agents = [
+    { id: 'a', division: '03 Engineering', guild: null },
+    { id: 'b', division: '03 Engineering', guild: null },
+    { id: 'c', division: null, guild: 'game-guild' },
+    { id: 'd', division: null, guild: 'game-guild' },
+    { id: 'e', division: null, guild: 'lonely-guild' },
+  ];
+  assert.deepEqual(nextHops(agents[0], agents, ['e']), { kind: 'division', of: '03 Engineering', ids: ['b'] });
+  assert.deepEqual(nextHops(agents[2], agents, ['e']), { kind: 'guild', of: 'game-guild', ids: ['d'] });
+  // The last member of a one-person guild falls through to its siblings.
+  assert.deepEqual(nextHops(agents[4], agents, ['e', 'c']), { kind: 'unreachable', of: null, ids: ['c'] });
+  // And a citizen alone in the world is reported as such rather than faked.
+  assert.deepEqual(nextHops(agents[4], [agents[4]], ['e']), { kind: 'none', of: null, ids: [] });
 });

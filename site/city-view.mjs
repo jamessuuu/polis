@@ -140,6 +140,15 @@ export function figure({ item, hueClass, activity, delayMs = 0, walker = false }
   const g = s('g', { class: cls.join(' ') });
   if (!walker) g.style.setProperty('--bob-delay', `${delayMs}ms`);
 
+  // A walker is a click target: following a live partnership is a move the
+  // visitor makes (GAME-DESIGN §2, concept 2). The kit is 8u wide and ~22u
+  // tall, and chasing that with a mouse would be a dexterity test, so one
+  // invisible rect per walker gives the whole person a hit area. `fill:none`
+  // plus `pointer-events:all` means it is targetable without painting
+  // anything. Twelve of these exist for the whole page — they are counted in
+  // WALKER_ELEMENTS and asserted by tests/budget.test.mjs.
+  if (walker) g.appendChild(s('rect', { class: 'fig-hit', x: -10, y: -25, width: 20, height: 28 }));
+
   // The road pulse: a ripple of light under a walker's feet, so the street
   // being walked is visibly the one lit.
   if (walker) g.appendChild(s('ellipse', { class: 'fig-pulse', cx: 0, cy: 0.6, rx: 9, ry: 4.5 }));
@@ -1007,9 +1016,27 @@ export function attachCamera(svg, camera, { onReset, onZoom } = {}) {
   const gap = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
   const midpoint = (a, b) => ({ x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 });
 
+  // A press is not yet a drag.
+  //
+  // This used to call `setPointerCapture` on every pointerdown, which is the
+  // conventional way to keep a pan alive when the cursor leaves the element —
+  // and it silently broke the core verb of the whole page. With the pointer
+  // captured by the <svg>, the compatibility click event retargets to the
+  // capture element, so a real mouse click on a building was delivered to the
+  // map root and the citizen's own click handler never ran: the panel could
+  // only ever be opened from the roster list or the findings links. Verified
+  // against the committed build before this line changed, not assumed.
+  //
+  // So capture is deferred until the pointer has actually travelled. Under
+  // the threshold it is a click and the building gets it; over the threshold
+  // it is a pan and behaves exactly as before, 1:1 and with no inertia.
+  const DRAG_SLOP = 4; // CSS px
+  let press = null;
+
   const endDrag = (ev) => {
     dragging = false;
     last = null;
+    press = null;
     svg.classList.remove('grabbing');
     const id = ev && ev.pointerId != null ? ev.pointerId : dragPointerId;
     if (id != null && svg.hasPointerCapture?.(id)) svg.releasePointerCapture(id);
@@ -1028,16 +1055,21 @@ export function attachCamera(svg, camera, { onReset, onZoom } = {}) {
       }
     }
     if (ev.button !== 0 || pinch) return;
-    dragging = true;
-    last = { x: ev.clientX, y: ev.clientY };
-    dragPointerId = ev.pointerId;
-    svg.classList.add('grabbing');
-    svg.setPointerCapture(ev.pointerId);
+    press = { id: ev.pointerId, x: ev.clientX, y: ev.clientY };
   });
 
   svg.addEventListener('pointermove', (ev) => {
     if (ev.pointerType === 'touch' && touches.has(ev.pointerId)) {
       touches.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
+    }
+    // Promote a press into a pan once it has moved far enough to mean one.
+    if (press && !dragging && !pinch && ev.pointerId === press.id
+      && Math.hypot(ev.clientX - press.x, ev.clientY - press.y) >= DRAG_SLOP) {
+      dragging = true;
+      last = { x: press.x, y: press.y };
+      dragPointerId = press.id;
+      svg.classList.add('grabbing');
+      svg.setPointerCapture(press.id);
     }
     if (pinch && touches.size >= 2) {
       const [a, b] = [...touches.values()];

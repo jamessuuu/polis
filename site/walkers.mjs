@@ -31,11 +31,13 @@ const INSTRUMENT_D = {
 };
 
 export const WALKER_CAP = 12;
-export const WALKER_ELEMENTS = 9; // per slot, pre-created; counted in the budget test
+// Per slot, pre-created and counted in the budget test: one route path plus
+// the eight-element walker kit plus its hit rect.
+export const WALKER_ELEMENTS = 10;
 
 export function createWalkers({
   svg, pairs, cap = WALKER_CAP, buildingsById, agentsById, router,
-  buildLayer, buildingOrder, walkLayer, figures, onWalk,
+  buildLayer, buildingOrder, walkLayer, figures, onWalk, onFollow, onFollowEnd,
 }) {
   const doc = svg.ownerDocument;
   const SVG_NS = 'http://www.w3.org/2000/svg';
@@ -56,12 +58,52 @@ export function createWalkers({
     walkLayer.appendChild(route);
     const el = figure({ item: { tools: ['Write'], director: true }, hueClass: 'hue-none', activity: 'idle', walker: true });
     el.setAttribute('transform', 'translate(0 0)');
+    // Hidden from assistive technology from the moment it exists, not only
+    // once it is dressed for a walk: a walker is a second rendering of a
+    // citizen who is already announced at their own front door, and the
+    // partnership it draws is read as text in that citizen's panel.
+    el.setAttribute('aria-hidden', 'true');
     buildLayer.appendChild(el);
-    slots.push({
+    const w = {
       slot: i, el, route, pair: null, path: null, timing: null, startedAt: 0, cycle: 0,
       walkerId: null, hostId: null, lastX: 0, orderIndex: -1,
       tool: el.querySelector('.fig-tool'),
+    };
+    // Click a walker mid-stride and you follow that partnership. The walker
+    // itself is the only affordance that has to move; everything the click
+    // then lights already exists (the pair's roads, their two buildings, the
+    // route this slot is already drawing). A moving element is a poor tab
+    // stop, so walkers stay out of the keyboard order and aria-hidden — the
+    // same partnerships are reachable as text in every citizen's panel under
+    // "Worked alongside", which is the keyboard path.
+    el.addEventListener('click', (ev) => {
+      if (!w.pair || !onFollow) return;
+      ev.stopPropagation();
+      follow(w.slot);
+      onFollow({ slot: w.slot, pair: w.pair, walkerId: w.walkerId, hostId: w.hostId, sessions: w.pair.sessions });
     });
+    slots.push(w);
+  }
+
+  // Which slot the visitor is following, if any. One at a time: two lit
+  // routes would be two claims about what "right now" means.
+  let followed = -1;
+  function follow(slot) {
+    if (followed >= 0 && followed !== slot) unfollowEl(slots[followed]);
+    followed = slot;
+    if (slot >= 0) {
+      slots[slot].el.classList.add('followed');
+      slots[slot].route.classList.add('followed');
+    }
+  }
+  function unfollowEl(w) {
+    w.el.classList.remove('followed');
+    w.route.classList.remove('followed');
+  }
+  function unfollow() {
+    if (followed < 0) return;
+    unfollowEl(slots[followed]);
+    followed = -1;
   }
 
   const upperBound = (depth) => {
@@ -131,6 +173,12 @@ export function createWalkers({
   }
 
   function finish(w) {
+    // A followed walk that ends stops being "right now", and the panel is
+    // told so it can drop that word rather than keep asserting it.
+    if (followed === w.slot) {
+      unfollow();
+      if (onFollowEnd) onFollowEnd({ walkerId: w.walkerId, hostId: w.hostId });
+    }
     w.el.classList.remove('on', 'pausing');
     w.route.classList.remove('on');
     away.delete(w.walkerId);
@@ -207,5 +255,10 @@ export function createWalkers({
     raf = requestAnimationFrame(frame);
   }
 
-  return { start, pause, resume, slots, get running() { return running; }, awayIds: () => [...away] };
+  return {
+    start, pause, resume, slots, unfollow,
+    get running() { return running; },
+    get followed() { return followed; },
+    awayIds: () => [...away],
+  };
 }

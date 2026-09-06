@@ -154,6 +154,13 @@ export function audit() {
     push('env', 'warn vs warn-bg', env.warn, env['warn-bg'], 4.5);
     push('env', 'focus ring vs page bg', env.focus, env.bg, 3);
     push('env', 'border strong vs page bg', env['border-strong'], env.bg, 3);
+    // Surfaces the game layer added. The panel chip that says "never called"
+    // and the pressed Dark Half button are both state carried in text, so
+    // they are held to the text ratio, not the non-text one.
+    push('env', 'chip state (never called) vs chip', env.warn, env.bg, 4.5);
+    push('env', 'chip state vs chip hover', env.warn, env['bg-elevated'], 4.5);
+    push('env', 'pressed mode button label vs accent', env['bg-elevated'], env.accent, 4.5);
+    push('env', 'chip link on hover vs chip hover', env.accent, env['bg-elevated'], 4.5);
   }
   return rows;
 }

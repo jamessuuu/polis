@@ -13,7 +13,7 @@
 
 import { computeCity } from './layout.mjs';
 import { renderCity, attachCamera, refreshNamePlates, computeFocusFrame, NAME_POOL } from './city-view.mjs';
-import { walkerPairs } from './life.mjs';
+import { walkerPairs, isDark, darkHalfCounts, nextHops } from './life.mjs';
 import { createWalkers } from './walkers.mjs';
 
 function el(tag, attrs = {}, children = []) {
@@ -157,6 +157,12 @@ async function main() {
   let hoverId = null;
   let selectedId = null;
   let lastFocusedEl = null;
+  // The dark half is a MODE, not a selection: it stays on while you click
+  // around inside it, and a selection temporarily takes over the highlight
+  // because a citizen's own connections are the next move either way.
+  let darkHalf = false;
+  // The partnership being followed, when the visitor clicked a walker.
+  let following = null;
 
   const scene = renderCity({
     svg,
@@ -165,7 +171,17 @@ async function main() {
     workforce,
     onSelect: (id) => selectCitizen(id),
   });
-  const { camera, citizenEls, roadEls, figures, buildingsById } = scene;
+  const { camera, citizenEls, roadEls, figures, buildingsById, activities } = scene;
+
+  // The dark half, computed once from the same two fields the map drew with:
+  // `activityOf`'s dormant branch (no dispatch record at all) and the
+  // snapshot's `unreachable` list. One predicate, no second source of truth.
+  const activityOfId = (id) => activities.get(id) || 'dormant';
+  const isUnreachable = (id) => unreachableSet.has(id);
+  const darkIds = new Set(
+    [...citizenEls.keys()].filter((id) => isDark(activityOfId(id), isUnreachable(id))),
+  );
+  const darkCounts = darkHalfCounts([...citizenEls.keys()], activityOfId, isUnreachable);
 
   // Who worked alongside whom, from telemetry. Both ends must be citizens on
   // this map; general-purpose is tooling, not a citizen, and never appears.
@@ -237,6 +253,36 @@ async function main() {
     svg.classList.toggle('roads-on', roadsToggle.checked);
   });
 
+  // ---- the dark half ----------------------------------------------------
+  // The single most shareable fact about this ecosystem is how much of it
+  // never runs. As a sentence it is read once and forgotten; as a place it
+  // is somewhere you can stand. One button, one predicate, no new geometry:
+  // everybody who has ever been called goes to the same 0.22 the existing
+  // highlight already uses, and the ones nobody calls are all that is left.
+  const darkToggle = document.getElementById('map-dark-half');
+  const darkNote = document.getElementById('map-dark-note');
+  const darkSentence = `${darkCounts.dark} of ${darkCounts.total} citizens are dark: `
+    + `${darkCounts.never} have never been dispatched, ${darkCounts.unnamed} are named by no charter`
+    + `${darkCounts.both ? `, and ${darkCounts.both} are both` : ''}. `
+    + `The other ${darkCounts.lit} are the city you normally see.`;
+  if (darkNote) darkNote.textContent = darkSentence;
+  function setDarkHalf(on, refresh = true) {
+    darkHalf = on;
+    svg.classList.toggle('dark-half', on);
+    if (darkToggle) {
+      darkToggle.setAttribute('aria-pressed', String(on));
+      darkToggle.textContent = on ? 'Leave the dark half' : 'Show the dark half';
+      darkToggle.setAttribute('aria-label', on
+        ? 'Leave the dark half and show the whole city'
+        : `Show the dark half: the ${darkCounts.never} citizens never dispatched and the ${darkCounts.unnamed} named by no charter`);
+    }
+    if (refresh) refreshHighlight();
+  }
+  darkToggle?.addEventListener('click', () => setDarkHalf(!darkHalf));
+  // Labels only at boot: the first real highlight pass runs with applyFrame,
+  // after the name-plate machinery below exists.
+  if (darkToggle) setDarkHalf(false, false);
+
   // ---- life -----------------------------------------------------------------
   // Walkers are real collaboration pairs. They start unless the visitor asked
   // for reduced motion, and the toolbar toggle pauses everything that moves
@@ -251,6 +297,25 @@ async function main() {
     buildingOrder: scene.buildingOrder,
     walkLayer: scene.walkLayer,
     figures,
+    // Concept 2: a walker mid-stride is the most alive thing on the map, and
+    // until now it was the one thing you could not touch. Clicking it locks
+    // the highlight to that live pair, keeps its own route lit under it, and
+    // opens the panel on the partnership rather than on one of its two ends.
+    // No camera motion — MOTION-SPEC §1 prohibition 7 rules out any move the
+    // visitor did not drive, and the pair is already on screen by definition.
+    onFollow: ({ pair, walkerId, hostId, sessions }) => {
+      following = { walkerId, hostId, pair };
+      selectCitizen(walkerId, { walkerId, hostId, sessions });
+    },
+    onFollowEnd: ({ walkerId, hostId }) => {
+      if (!following || following.walkerId !== walkerId) return;
+      following = null;
+      if (panelWalk && !panelWalk.hidden) {
+        panelWalk.textContent = `That walk has ended: ${walkerId} is home. `
+          + `The partnership with ${hostId} is in the record below.`;
+      }
+      refreshHighlight();
+    },
   });
   const lifeToggle = document.getElementById('map-life');
   const reduced = prefersReducedMotion();
@@ -312,12 +377,32 @@ async function main() {
   refreshPlates([], new Set());
 
   function refreshHighlight() {
-    for (const g of citizenEls.values()) g.classList.remove('active', 'neighbor', 'crew', 'dimmed');
+    for (const g of citizenEls.values()) g.classList.remove('active', 'neighbor', 'crew', 'dimmed', 'dark');
     for (const f of figures.values()) f.classList.remove('crew');
     for (const r of roadEls) r.classList.remove('highlight', 'dimmed');
-    const anchors = [hoverId, selectedId].filter(Boolean);
+    // Following a walker locks BOTH ends of the live pair as anchors, so the
+    // highlight belongs to the partnership rather than to one of the two
+    // people in it. Everything else about the pass is unchanged.
+    const anchors = [...new Set([
+      hoverId, selectedId,
+      ...(following ? [following.walkerId, following.hostId] : []),
+    ].filter(Boolean))];
     svg.classList.toggle('has-focus', anchors.length > 0);
-    if (!anchors.length) { refreshPlates([], new Set()); return; }
+    if (!anchors.length) {
+      // Nothing selected. If the dark half is on, THAT is the highlight: the
+      // people nobody calls are lifted and everyone else recedes, using the
+      // same two classes a hover already uses.
+      if (darkHalf) {
+        const lifted = [];
+        for (const [id, g] of citizenEls) {
+          if (darkIds.has(id)) { g.classList.add('dark'); lifted.push(id); } else g.classList.add('dimmed');
+        }
+        refreshPlates([], new Set(lifted));
+        return;
+      }
+      refreshPlates([], new Set());
+      return;
+    }
     const activeSet = new Set(anchors);
     const neighborSet = new Set();
     const crewSet = new Set();
@@ -355,6 +440,11 @@ async function main() {
   const panelUpstream = document.getElementById('panel-upstream');
   const panelCrew = document.getElementById('panel-crew');
   const panelClose = document.getElementById('panel-close');
+  const panelNextLead = document.getElementById('panel-next-lead');
+  const panelHopsBlock = document.getElementById('panel-hops-block');
+  const panelHopsLead = document.getElementById('panel-hops-lead');
+  const panelHops = document.getElementById('panel-hops');
+  const panelWalk = document.getElementById('panel-walk');
 
   function renderChips(container, values, emptyText) {
     container.textContent = '';
@@ -365,6 +455,15 @@ async function main() {
     for (const v of values) container.appendChild(el('li', {}, [v]));
   }
 
+  /**
+   * The next move, rendered as moves.
+   *
+   * These were already clickable and already correct; what they were not was
+   * obviously the point of the panel. Each id is now a whole chip rather than
+   * an underlined word inside one, and the members of the dark half say so in
+   * words — never colour alone — so the two halves of this city stay legible
+   * to each other from inside the record.
+   */
   function renderCitizenLinks(container, ids, emptyText) {
     container.textContent = '';
     if (!ids.length) {
@@ -372,9 +471,18 @@ async function main() {
       return;
     }
     for (const id of ids.slice().sort()) {
-      const btn = el('button', { type: 'button', class: 'link-button' }, [id]);
+      const dark = isUnreachable(id) ? 'unnamed'
+        : activityOfId(id) === 'dormant' ? 'never called' : null;
+      const btn = el('button', { type: 'button', class: `link-button${dark ? ' is-dark' : ''}` }, [
+        el('span', { class: 'chip-id' }, [id]),
+        // A real space between the two spans: the flex gap separates them on
+        // screen, but a screen reader reads the accessible name as one run of
+        // text and would otherwise say "api-designernever called".
+        dark ? ' ' : null,
+        dark ? el('span', { class: 'chip-state' }, [dark]) : null,
+      ]);
       btn.addEventListener('click', () => selectCitizen(id));
-      container.appendChild(el('li', {}, [btn]));
+      container.appendChild(el('li', { class: dark ? 'is-dark' : '' }, [btn]));
     }
   }
 
@@ -388,12 +496,25 @@ async function main() {
       (rec.active ? ` — active in the last ${workforce.activeHours} hours` : '');
   }
 
-  function selectCitizen(id) {
+  /**
+   * The loop, closed (GAME-DESIGN §1).
+   *
+   * The fourth arrow — a reason to click again — was the missing one, and it
+   * did not need new geometry: at the exact moment this panel opens, every
+   * citizen this one works with is already lit on the map by
+   * refreshHighlight(). All that was missing was saying so, and putting them
+   * where the eye lands first. So the connected set is now the top of the
+   * panel and the record is underneath it, and the count in the lead sentence
+   * is the size of the set the map just lit — the same union, never a second
+   * number with its own opinion.
+   */
+  function selectCitizen(id, walk = null) {
     const a = byId.get(id);
     if (!a) return;
     lastFocusedEl = document.activeElement;
     selectedId = id;
     hoverId = null;
+    if (!walk) { following = null; walkers.unfollow?.(); }
     refreshHighlight();
 
     panelHeading.textContent = a.id;
@@ -408,10 +529,60 @@ async function main() {
     panelUnreachable.textContent = unreachableSet.has(a.id) ? 'Yes' : 'No';
     if (panelActivity) panelActivity.textContent = activityText(id);
     renderChips(panelTools, a.tools, 'none declared');
-    renderCitizenLinks(panelDownstream, downstream.get(id) || [], 'hands work to no one');
-    renderCitizenLinks(panelUpstream, upstream.get(id) || [], 'receives work from no one');
+    const down = downstream.get(id) || [];
+    const up = upstream.get(id) || [];
+    const mates = [...crewOf(id)];
+    renderCitizenLinks(panelDownstream, down, 'hands work to no one');
+    renderCitizenLinks(panelUpstream, up, 'receives work from no one');
     if (panelCrew) {
-      renderCitizenLinks(panelCrew, [...crewOf(id)], workforce ? 'no recorded session shared with another citizen' : 'no telemetry loaded');
+      renderCitizenLinks(panelCrew, mates, workforce ? 'no recorded session shared with another citizen' : 'no telemetry loaded');
+    }
+
+    // Exactly the set refreshHighlight() just lit: charter neighbours plus
+    // recorded crew. Counting it here rather than typing a number keeps the
+    // sentence true when the snapshot changes.
+    const connected = new Set([...down, ...up, ...mates]);
+    if (panelNextLead) {
+      panelNextLead.textContent = connected.size === 1
+        ? `1 citizen is lit on the map right now — the one ${id} actually works with. Click it to keep going.`
+        : connected.size
+          ? `${connected.size} citizens are lit on the map right now — the ones ${id} actually works with. Click any of them to keep going.`
+          : `Nobody is lit: no charter names ${id}, and no recorded session pairs them with anyone.`;
+      panelNextLead.classList.toggle('is-empty', connected.size === 0);
+    }
+
+    // The dead-end rule (GAME-DESIGN §3): a stop is allowed to be a finding,
+    // never an anticlimax. When the wiring and the telemetry are both empty,
+    // the panel still owes one honest next hop, and says what makes it one.
+    if (panelHopsBlock) {
+      if (connected.size) {
+        panelHopsBlock.hidden = true;
+      } else {
+        const hop = nextHops(a, data.agents, data.unreachable);
+        panelHopsBlock.hidden = hop.kind === 'none';
+        if (hop.kind !== 'none') {
+          panelHopsLead.textContent = hop.kind === 'division'
+            ? `Filed under ${hop.of} all the same. The others in that district:`
+            : hop.kind === 'guild'
+              ? `Filed under the ${hop.of} all the same. The others in that guild:`
+              : 'The other citizens nobody names, who are in exactly this position:';
+          renderCitizenLinks(panelHops, hop.ids, '');
+        }
+      }
+    }
+
+    // Follow-the-walker framing. "Right now" is a claim with a clock on it,
+    // so it is only ever printed while the walk is actually running, and
+    // onFollowEnd below takes the word back the moment it stops being true.
+    if (panelWalk) {
+      if (walk) {
+        panelWalk.hidden = false;
+        panelWalk.textContent = `On the street right now: ${walk.walkerId} is walking to ${walk.hostId}. `
+          + `They were dispatched together in ${walk.sessions} recorded ${walk.sessions === 1 ? 'session' : 'sessions'}.`;
+      } else {
+        panelWalk.hidden = true;
+        panelWalk.textContent = '';
+      }
     }
 
     panel.hidden = false;
@@ -430,6 +601,8 @@ async function main() {
   function closePanel() {
     panel.hidden = true;
     selectedId = null;
+    following = null;
+    walkers.unfollow();
     refreshHighlight();
     for (const b of document.querySelectorAll('.roster-agent-button.selected')) b.classList.remove('selected');
     if (lastFocusedEl && document.body.contains(lastFocusedEl)) lastFocusedEl.focus();
@@ -563,8 +736,13 @@ async function main() {
 
   // ---- jump-to-citizen buttons in the static status board ----------------
 
+  // Buttons in the findings list, and the anchor in the headline strip. The
+  // strip's is an <a href="#static-…"> so it still reaches that citizen's
+  // record with JavaScript off; here, where the map exists, it opens them on
+  // the map instead of jumping to a roster that is now hidden.
   for (const btn of document.querySelectorAll('.jump-to-citizen')) {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', (ev) => {
+      ev.preventDefault();
       selectCitizen(btn.dataset.id);
       panel.scrollIntoView({ behavior: prefersReducedMotion() ? 'auto' : 'smooth', block: 'start' });
     });

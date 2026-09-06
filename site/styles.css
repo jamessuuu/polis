@@ -600,9 +600,15 @@ button:hover {
 }
 .ao-patch { stroke: none; pointer-events: none; }
 
-/* A citizen nobody names has a foundation and nothing built on it. */
+/* A citizen nobody names has a foundation and nothing built on it.
+   `pointer-events: all` because `fill: none` otherwise leaves a 1.6px dashed
+   outline as the entire hit target: the eight empty lots are the finding this
+   whole page is about, and until this line they were the one thing on the map
+   you could not click. Costs nothing and creates no element — it makes the
+   interior of a shape that paints no interior targetable. */
 .ruin-lot {
   fill: none;
+  pointer-events: all;
   stroke: var(--warn);
   stroke-width: 1.6;
   stroke-dasharray: 4 3;
@@ -1104,4 +1110,151 @@ footer.site-footer p { margin: 0 0 0.5em; }
   .hero-section h2 { margin-bottom: var(--space-2); }
   .map-toolbar { font-size: 0.84rem; gap: var(--space-2) var(--space-3); }
   .map-toolbar .map-hint { font-size: 0.79rem; }
+}
+
+/* ---------- the dark half ----------
+
+   One mode, no new geometry. `refreshHighlight()` puts `.dimmed` on every
+   citizen who has ever been dispatched and `.dark` on the ones who never
+   were plus the ones no charter names; both classes already existed for
+   hover, so the toggle spends zero elements and reuses a treatment the
+   visitor has already been taught by pointing at somebody.
+
+   Everything that is not part of the question recedes with them: the Archive
+   is procedures rather than people, and a walker is by definition somebody
+   who was dispatched, so both belong to the warm half. */
+
+#city-map.dark-half .structure.dark { --lift: -2px; }
+#city-map.dark-half .structure.dark .edge { opacity: max(var(--rim-alpha), 0.8); }
+/* Deeper than the 0.22 a hover uses, and deliberately so: a hover is asking
+   "who does this one work with", where the rest of the city is still context
+   worth reading. This mode is asking "how much of this never runs", and the
+   answer only lands if the half that does run gets out of the way. The
+   buildings do not disappear — they are still there, which is the honest
+   drawing — and the complete record stays in the roster below either way. */
+#city-map.dark-half .structure.dimmed,
+#city-map.dark-half .structure.kind-skill { opacity: 0.10; }
+#city-map.dark-half .figure.walker.on { opacity: 0.22; }
+#city-map.dark-half .walk-route.on { opacity: 0.12; }
+#city-map.roads-on.dark-half .road { opacity: 0.06; }
+
+.map-toolbar button.map-mode {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.map-toolbar button.map-mode[aria-pressed="true"] {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--bg-elevated);
+}
+.map-dark-note { margin-top: -0.35rem; }
+
+/* ---------- following a walker ----------
+
+   A walker is 8 units wide, so the person gets a hit area rather than the
+   ink getting one: `.fig-hit` paints nothing and is targetable anyway.
+   `.figure` is pointer-events:none for everyone else, which is what keeps
+   hover on the building underneath honest. */
+
+.fig-hit { fill: none; pointer-events: all; }
+.figure.walker.on { pointer-events: auto; cursor: pointer; }
+.figure.walker:not(.on) { pointer-events: none; }
+.walk-route.followed { opacity: 1; }
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Opacity only: the route the followed pair is walking breathes so it is
+     obvious which of the twelve streets is the one being talked about. */
+  .walk-route.followed { animation: route-follow 1800ms var(--ease-ambient) infinite; }
+  @keyframes route-follow {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.45; }
+  }
+}
+
+/* ---------- the panel as the next move ----------
+
+   The connected set was always clickable and always correct; it was never
+   obviously the point. It sits above the record now, it says how many of
+   these the map has just lit, and each id is a whole chip instead of an
+   underlined word inside one. */
+
+.panel-walk {
+  font-family: var(--font-mono);
+  font-size: 0.89rem;
+  border: 1.5px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 0.5rem 0.7rem;
+  margin: 0.7rem 0 0;
+}
+.panel-next { margin-top: 0.9rem; }
+.panel-next-lead {
+  margin: 0 0 0.6rem;
+  font-weight: 600;
+}
+.panel-next-lead.is-empty {
+  font-weight: 400;
+  color: var(--ink-muted);
+}
+.panel-next h3 {
+  font-size: 0.79rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-muted);
+  margin: 0 0 0.35rem;
+}
+.panel-hops {
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 0.7rem;
+  margin-top: 0.2rem;
+}
+.panel-hops[hidden] { display: none; }
+.panel-hops-lead { margin: 0 0 0.5rem; }
+
+.panel-list.panel-links li { padding: 0; overflow: hidden; }
+.panel-links .link-button {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5em;
+  padding: 0.28rem 0.6rem;
+  color: var(--ink);
+  text-decoration: none;
+  font-family: var(--font-mono);
+  font-size: 0.89rem;
+}
+.panel-links .link-button:hover { background: var(--bg-elevated); color: var(--accent); }
+.panel-links .link-button .chip-id { font-weight: 600; }
+/* The dark half, seen from inside a record. Never colour alone: the state is
+   spelled out in words on the chip. */
+.panel-links li.is-dark { border-color: var(--warn); }
+.panel-links .link-button .chip-state {
+  font-size: 0.79rem;
+  color: var(--warn);
+  white-space: nowrap;
+}
+
+/* ---------- the headline strip's invitation ---------- */
+
+.finding-strip .strip-go {
+  margin-left: auto;
+  font-weight: 600;
+  text-decoration: none;
+  /* It inherits .jump-to-citizen, which is warn-coloured because it names a
+     citizen inside a warning panel. Here it is the invitation, not the
+     warning — the count next to it already carries that — so text and border
+     agree on the accent. Both ratios measured in tools/contrast.mjs. */
+  color: var(--accent);
+  border: 1.5px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 0.2rem 0.6rem;
+}
+.finding-strip .strip-go:hover { background: var(--accent); color: var(--bg-elevated); }
+.finding-strip .strip-go + a { margin-left: 0; }
+
+@media (max-width: 599px) {
+  .finding-strip .strip-go {
+    display: inline-block;
+    margin-left: 0;
+    margin-top: var(--space-2);
+  }
+  .panel-links .link-button { padding: 0.35rem 0.6rem; }
 }

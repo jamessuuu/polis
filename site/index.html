@@ -28,14 +28,16 @@
 
     <p class="finding finding-strip" id="headline-strip">
         <strong class="finding-strip-count">8</strong>
-        <span class="finding-strip-text">of 59 citizens are named by no charter, upstream or downstream.</span>
-        <a href="#findings-section">See the findings &darr;</a>
+        <span class="finding-strip-text">of 59 citizens answer to nobody &mdash; no charter names them, upstream or downstream.</span>
+        <a class="jump-to-citizen strip-go" href="#static-agentic-director" data-id="agentic-director">Click one to see why &rarr;</a>
+        <a href="#findings-section">See all 8 &darr;</a>
       </p>
 
     <section aria-labelledby="map-heading" id="map-section" class="hero-section" hidden>
       <h2 id="map-heading">The map</h2>
       <div class="map-toolbar">
           <a class="map-skip" href="#list-heading">Skip the map, go to the list</a>
+          <button type="button" id="map-dark-half" class="map-mode" aria-pressed="false">Show the dark half</button>
           <button type="button" id="map-zoom-in" aria-label="Zoom in">Zoom in</button>
           <button type="button" id="map-zoom-out" aria-label="Zoom out">Zoom out</button>
           <button type="button" id="map-reset">Reset view</button>
@@ -44,11 +46,12 @@
           <label><input type="checkbox" id="map-life" checked> Life</label>
           <span class="map-hint">Drag to pan, scroll to zoom. With the map focused: arrows pan, <kbd>+</kbd>/<kbd>-</kbd> zoom, <kbd>0</kbd> resets.</span>
       </div>
+      <p class="map-hint map-dark-note" id="map-dark-note"></p>
       <div class="hero-map">
         <svg id="city-map" tabindex="0" role="img" aria-label="An isometric model city of the agent ecosystem. Eight walled districts hold the constitutional members, six guild halls and an archive of skills stand outside the wall, and each member is a building whose height, storeys and windows all show how many other members it exchanges work with. A gabled roof means the member can change the repository. Directors fly a banner; a member nobody names is an empty dashed lot. Every citizen stands at their own door; the ones dispatched recently have their lights on and are at work, and citizens who were dispatched together walk the streets between their buildings. Every citizen is also listed as text below the map.">
         </svg>
       </div>
-      <p class="map-hint">Hover or focus a citizen to see its roads highlighted, its name, its neighbours' names, and the citizens it has actually worked alongside. Directors are always named. <a href="#list-heading">Use the list below</a> to browse by keyboard alone, with no need to touch the map at all. The Life toggle pauses everything that moves.</p>
+      <p class="map-hint">Hover or focus a citizen to see its roads highlighted, its name, its neighbours' names, and the citizens it has actually worked alongside. Click one to open its record, then click any citizen the map just lit to keep going. Click a walker mid-stride to follow that partnership &mdash; pause with the Life toggle first if you would rather they held still. Directors are always named. <a href="#list-heading">Use the list below</a> to browse by keyboard alone, with no need to touch the map at all. The Life toggle pauses everything that moves.</p>
       <p class="map-hint" id="map-life-note"></p>
       <ul class="legend" id="map-legend" aria-label="District colour key"></ul>
     </section>
@@ -739,6 +742,25 @@
       <h2 id="panel-heading" tabindex="-1">&mdash;</h2>
       <p class="panel-division" id="panel-division">&mdash;</p>
       <p id="panel-desc">&mdash;</p>
+      <p class="panel-walk" id="panel-walk" hidden></p>
+
+      <!-- The next move comes before the record. Everyone listed here is
+           already lit on the map at the moment this panel opens; putting them
+           first is the whole of the fix, and it costs nothing to draw. -->
+      <div class="panel-next">
+        <p class="panel-next-lead" id="panel-next-lead">&mdash;</p>
+        <h3>Hands work to (downstream)</h3>
+        <ul class="panel-list panel-links" id="panel-downstream"></ul>
+        <h3>Receives work from (upstream)</h3>
+        <ul class="panel-list panel-links" id="panel-upstream"></ul>
+        <h3>Worked alongside (from session telemetry)</h3>
+        <ul class="panel-list panel-links" id="panel-crew"></ul>
+        <div class="panel-hops" id="panel-hops-block" hidden>
+          <p class="panel-hops-lead" id="panel-hops-lead">&mdash;</p>
+          <ul class="panel-list panel-links" id="panel-hops"></ul>
+        </div>
+      </div>
+
       <dl class="panel-meta">
         <div><dt>Model</dt><dd id="panel-model">&mdash;</dd></div>
         <div><dt>Director</dt><dd id="panel-director">&mdash;</dd></div>
@@ -747,12 +769,6 @@
       </dl>
       <h3>Tools</h3>
       <ul class="panel-list" id="panel-tools"></ul>
-      <h3>Hands work to (downstream)</h3>
-      <ul class="panel-list panel-links" id="panel-downstream"></ul>
-      <h3>Receives work from (upstream)</h3>
-      <ul class="panel-list panel-links" id="panel-upstream"></ul>
-      <h3>Worked alongside (from session telemetry)</h3>
-      <ul class="panel-list panel-links" id="panel-crew"></ul>
     </aside>
 
   </main>

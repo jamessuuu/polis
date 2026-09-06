@@ -32,6 +32,80 @@ export function activityOf(rec, generatedAt) {
   return 'idle';
 }
 
+// ------------------------------------------------------------ the dark ---
+
+/**
+ * The dark half: a citizen nobody ever called, or a citizen nobody names.
+ *
+ * Two different darknesses, and the toggle lifts both because they are the
+ * same finding seen from two sides — the declared system and the running
+ * system are not the same system (STRATEGY §2). `dormant` is the activity
+ * side: `activityOf` returns it only when the telemetry holds no record at
+ * all, which is exactly "never dispatched". `unreachable` is the structural
+ * side: no charter names them upstream or downstream.
+ *
+ * Note what is NOT dark: `idle` — a citizen dispatched at some point but not
+ * in the last 30 days. They were called. The button says "never called", so
+ * they belong to the warm half, and lighting them would make the sentence
+ * under the button false.
+ */
+export function isDark(activity, unreachable) {
+  return activity === 'dormant' || Boolean(unreachable);
+}
+
+/**
+ * The three numbers the dark-half copy is allowed to say, counted rather
+ * than typed. One generator, one sentence — the same discipline the headline
+ * strip runs under, for the same reason.
+ *
+ * @param {Iterable<string>} ids the citizens on the map
+ * @param {(id:string) => string} activityOfId
+ * @param {(id:string) => boolean} isUnreachable
+ */
+export function darkHalfCounts(ids, activityOfId, isUnreachable) {
+  let dark = 0; let never = 0; let unnamed = 0; let both = 0; let total = 0;
+  for (const id of ids) {
+    total += 1;
+    const n = activityOfId(id) === 'dormant';
+    const u = isUnreachable(id);
+    if (n) never += 1;
+    if (u) unnamed += 1;
+    if (n && u) both += 1;
+    if (n || u) dark += 1;
+  }
+  return { dark, never, unnamed, both, total, lit: total - dark };
+}
+
+/**
+ * The dead-end rule (GAME-DESIGN §3): selecting a citizen nobody names must
+ * never be a flat stop. When the declared wiring and the telemetry both come
+ * back empty, the panel still owes the visitor one honest next hop.
+ *
+ * Order of preference, each one a real relationship already in the snapshot:
+ *   1. their district — the citizens they were filed alongside
+ *   2. their guild — same, for the members who sit outside the wall
+ *   3. the other citizens nobody names — siblings in exactly this condition
+ *
+ * Never invents a link: every id returned shares a declared field with the
+ * subject, and the returned `kind` says which one, so the panel can name the
+ * relationship instead of implying a stronger one.
+ */
+export function nextHops(agent, agents = [], unreachable = []) {
+  if (!agent) return { kind: 'none', ids: [] };
+  const others = agents.filter((a) => a.id !== agent.id);
+  if (agent.division) {
+    const ids = others.filter((a) => a.division === agent.division).map((a) => a.id).sort();
+    if (ids.length) return { kind: 'division', of: agent.division, ids };
+  }
+  if (agent.guild) {
+    const ids = others.filter((a) => a.guild === agent.guild).map((a) => a.id).sort();
+    if (ids.length) return { kind: 'guild', of: agent.guild, ids };
+  }
+  const ids = [...unreachable].filter((id) => id !== agent.id).sort();
+  if (ids.length) return { kind: 'unreachable', of: null, ids };
+  return { kind: 'none', of: null, ids: [] };
+}
+
 // ---------------------------------------------------------------- kit ---
 
 /**

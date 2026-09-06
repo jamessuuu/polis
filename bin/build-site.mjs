@@ -185,18 +185,34 @@ const withheldNote = snap.withheld.length
 // FIRST in this list and nothing else — it holds no independently typed
 // number, because a second author of the same number is exactly how this page
 // came to publish 45 citizens while the repo said 59.
+//
+// It is also the page's onboarding, and it does that job by being an
+// INVITATION as well as a finding (GAME-DESIGN §3/§5): the sentence states
+// the number for the skimmer who will never click anything, and the link
+// beside it hands the first click to everyone else, already aimed at a real
+// citizen the number is about. `jump` is the id that link opens — chosen by
+// the generator from the finding's own list, never typed here, and simply
+// absent for a finding whose members are deliberately unnamed.
 const findings = [
   { id: 'unreachable-finding', count: snap.unreachable.length, html: unreachableHtml,
-    sentence: `of ${s.agents} citizens are named by no charter, upstream or downstream.` },
+    sentence: `of ${s.agents} citizens answer to nobody &mdash; no charter names them, upstream or downstream.`,
+    invite: 'Click one to see why', jump: snap.unreachable[0] || null },
   { id: 'withheld-finding', count: snap.withheld.length, html: withheldHtml,
-    sentence: `of ${s.agents} members are counted here and deliberately not named.` },
+    sentence: `of ${s.agents} members are counted here and deliberately not named.`,
+    invite: null, jump: null },
 ];
 const lead = findings[0];
 const stripHtml = [
   `        <strong class="finding-strip-count">${lead.count}</strong>`,
   `        <span class="finding-strip-text">${lead.sentence}</span>`,
-  '        <a href="#findings-section">See the findings &darr;</a>',
-].join('\n');
+  // A real anchor, not a button: with JavaScript off it still lands on that
+  // citizen's entry in the static roster, and with JavaScript on the same
+  // handler that runs the findings list selects them on the map instead.
+  lead.invite && lead.jump
+    ? `        <a class="jump-to-citizen strip-go" href="#static-${esc(lead.jump)}" data-id="${esc(lead.jump)}">${lead.invite} &rarr;</a>`
+    : '',
+  `        <a href="#findings-section">See all ${lead.count} &darr;</a>`,
+].filter(Boolean).join('\n');
 
 const rosterHtml = [
   '      <h2 id="static-roster-heading">Districts and citizens</h2>',
