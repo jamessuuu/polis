@@ -366,9 +366,22 @@ const r2 = (n) => Math.round(n * 100) / 100;
 
 // ------------------------------------------------------------- render ---
 
-export function renderCity({ svg, data, city, workforce = null, onSelect }) {
+/**
+ * @param {{svg: Element, data: object, city: object, workforce?: object|null,
+ *          onSelect?: Function, idPrefix?: string}} input
+ *
+ * `idPrefix` exists because the studio draws a SECOND city on the same page.
+ * The four gradient ids below are document-wide, and two elements sharing an
+ * id is a document that is wrong even when it happens to paint correctly (a
+ * `url(#sky)` reference resolves to whichever came first). One prefix keeps
+ * the second map's defs its own; the default is empty, so the hero map's
+ * markup is byte for byte what it was.
+ */
+export function renderCity({ svg, data, city, workforce = null, onSelect, idPrefix = '' }) {
   doc = svg.ownerDocument || globalThis.document;
   svg.textContent = '';
+  const gid = (name) => `${idPrefix}${name}`;
+  const gurl = (name) => `url(#${idPrefix}${name})`;
 
   const agentsById = new Map(data.agents.map((a) => [a.id, a]));
   const wfById = new Map(((workforce && workforce.agents) || []).map((a) => [a.id, a]));
@@ -380,13 +393,13 @@ export function renderCity({ svg, data, city, workforce = null, onSelect }) {
 
   // ---- defs ------------------------------------------------------------
   const defs = s('defs');
-  const sky = s('linearGradient', { id: 'sky', x1: 0, y1: 0, x2: 0, y2: 1 });
+  const sky = s('linearGradient', { id: gid('sky'), x1: 0, y1: 0, x2: 0, y2: 1 });
   sky.appendChild(s('stop', { offset: 0, 'stop-color': 'var(--sky-top)' }));
   sky.appendChild(s('stop', { offset: 1, 'stop-color': 'var(--sky-bottom)' }));
   defs.appendChild(sky);
   // One radial gradient, referenced by every contact patch. Defining it per
   // building would be one gradient per building for one visual effect.
-  const ao = s('radialGradient', { id: 'ao-patch' });
+  const ao = s('radialGradient', { id: gid('ao-patch') });
   ao.appendChild(s('stop', { offset: 0, 'stop-color': 'var(--ao-ink)', 'stop-opacity': 0.30 }));
   ao.appendChild(s('stop', { offset: 0.55, 'stop-color': 'var(--ao-ink)', 'stop-opacity': 0.16 }));
   ao.appendChild(s('stop', { offset: 1, 'stop-color': 'var(--ao-ink)', 'stop-opacity': 0 }));
@@ -394,7 +407,7 @@ export function renderCity({ svg, data, city, workforce = null, onSelect }) {
   // Aerial perspective: two planes, stop-opacity on the gradient so no group
   // opacity is needed anywhere but here.
   for (const [id, alpha] of [['haze-ground', 'var(--haze-ground-alpha)'], ['haze-object', 'var(--haze-object-alpha)']]) {
-    const g = s('linearGradient', { id, x1: 0, y1: 0, x2: 0, y2: 1 });
+    const g = s('linearGradient', { id: gid(id), x1: 0, y1: 0, x2: 0, y2: 1 });
     g.appendChild(s('stop', { offset: 0, 'stop-color': 'var(--sky-bottom)', 'stop-opacity': alpha }));
     g.appendChild(s('stop', { offset: 0.62, 'stop-color': 'var(--sky-bottom)', 'stop-opacity': 0 }));
     defs.appendChild(g);
@@ -402,7 +415,7 @@ export function renderCity({ svg, data, city, workforce = null, onSelect }) {
   svg.appendChild(defs);
 
   // ---- sky (environment, outside the camera) -----------------------------
-  const skyRect = s('rect', { class: 'sky', fill: 'url(#sky)' });
+  const skyRect = s('rect', { class: 'sky', fill: gurl('sky') });
   svg.appendChild(skyRect);
 
   // The camera. Pan and zoom move this one node, and nothing else ever does.
@@ -420,7 +433,13 @@ export function renderCity({ svg, data, city, workforce = null, onSelect }) {
   boardLayer.appendChild(s('polygon', { class: 'plinth-right', points: plinth.right }));
   boardLayer.appendChild(s('polygon', { class: 'board-outer', points: plinth.top }));
   const w = city.wall;
-  boardLayer.appendChild(s('polygon', { class: 'board-inner', points: plotPolygon(w.col, w.row, w.cols, w.rows) }));
+  // An ecosystem with no declared divisions has nothing inside a wall, so it
+  // gets neither the paved ground nor the wall itself. Drawing a walled
+  // enclosure around an empty rectangle would say a district exists.
+  const walled = w.cols > 0 && w.rows > 0;
+  if (walled) {
+    boardLayer.appendChild(s('polygon', { class: 'board-inner', points: plotPolygon(w.col, w.row, w.cols, w.rows) }));
+  }
   camera.appendChild(boardLayer);
 
   // ---- precinct ground ---------------------------------------------------
@@ -447,27 +466,29 @@ export function renderCity({ svg, data, city, workforce = null, onSelect }) {
   camera.appendChild(plotLayer);
 
   // ---- the wall ----------------------------------------------------------
-  const gates = gatesOf(w);
-  const wallGeo = wallGeometry(w, gates, 26, 4);
-  const wallLayer = s('g', { class: 'wall-layer' });
-  for (const seg of wallGeo.north) {
-    wallLayer.appendChild(s('polygon', { class: 'wall-face wall-north', points: seg.face }));
-    wallLayer.appendChild(s('line', { class: 'wall-cap', ...seg.cap }));
+  if (walled) {
+    const gates = gatesOf(w);
+    const wallGeo = wallGeometry(w, gates, 26, 4);
+    const wallLayer = s('g', { class: 'wall-layer' });
+    for (const seg of wallGeo.north) {
+      wallLayer.appendChild(s('polygon', { class: 'wall-face wall-north', points: seg.face }));
+      wallLayer.appendChild(s('line', { class: 'wall-cap', ...seg.cap }));
+    }
+    for (const seg of wallGeo.west) {
+      wallLayer.appendChild(s('polygon', { class: 'wall-face wall-west', points: seg.face }));
+      wallLayer.appendChild(s('line', { class: 'wall-cap', ...seg.cap }));
+    }
+    // The two FRONT edges as a 4u kerb — a wall that stops halfway reads as
+    // an accident; a wall you cannot see over hides the city.
+    for (const seg of wallGeo.kerbs) {
+      wallLayer.appendChild(s('polygon', { class: 'wall-kerb', points: seg.face }));
+    }
+    camera.appendChild(wallLayer);
   }
-  for (const seg of wallGeo.west) {
-    wallLayer.appendChild(s('polygon', { class: 'wall-face wall-west', points: seg.face }));
-    wallLayer.appendChild(s('line', { class: 'wall-cap', ...seg.cap }));
-  }
-  // The two FRONT edges as a 4u kerb — a wall that stops halfway reads as
-  // an accident; a wall you cannot see over hides the city.
-  for (const seg of wallGeo.kerbs) {
-    wallLayer.appendChild(s('polygon', { class: 'wall-kerb', points: seg.face }));
-  }
-  camera.appendChild(wallLayer);
 
   // ---- ground haze -------------------------------------------------------
   const boardBox = { x: b.minX, y: b.minY, w: b.maxX - b.minX, h: b.maxY - b.minY };
-  camera.appendChild(s('rect', { class: 'haze haze-ground', x: boardBox.x, y: boardBox.y - 40, width: boardBox.w, height: boardBox.h + 40, fill: 'url(#haze-ground)' }));
+  camera.appendChild(s('rect', { class: 'haze haze-ground', x: boardBox.x, y: boardBox.y - 40, width: boardBox.w, height: boardBox.h + 40, fill: gurl('haze-ground') }));
 
   // ---- streets: roads, shadows, walk routes ------------------------------
   // Roads are the charter edges, routed along the real streets between two
@@ -552,7 +573,7 @@ export function renderCity({ svg, data, city, workforce = null, onSelect }) {
       g.appendChild(s('polygon', { class: 'face face-right', points: pitched.right }));
       g.appendChild(s('polygon', { class: 'face face-top', points: pitched.top }));
     } else {
-      shadowLayer.appendChild(s('ellipse', { class: 'ao-patch', ...contactPatch(item.col, item.row, fp), fill: 'url(#ao-patch)' }));
+      shadowLayer.appendChild(s('ellipse', { class: 'ao-patch', ...contactPatch(item.col, item.row, fp), fill: gurl('ao-patch') }));
       shadowLayer.appendChild(s('polygon', { class: 'cast-shadow', points: shadowPolygon(item.col, item.row, item.height, fp) }));
 
       const faces = boxFaces(item.col, item.row, item.height, fp);
@@ -635,7 +656,7 @@ export function renderCity({ svg, data, city, workforce = null, onSelect }) {
   camera.appendChild(buildLayer);
 
   // ---- object haze (above buildings, capped at 0.10 by arithmetic) ---------
-  camera.appendChild(s('rect', { class: 'haze haze-object', x: boardBox.x, y: boardBox.y - 160, width: boardBox.w, height: boardBox.h + 160, fill: 'url(#haze-object)' }));
+  camera.appendChild(s('rect', { class: 'haze haze-object', x: boardBox.x, y: boardBox.y - 160, width: boardBox.w, height: boardBox.h + 160, fill: gurl('haze-object') }));
 
   // ---- plates --------------------------------------------------------------
   // Tier 1 of the unified pass. These boxes are computed once and never move,

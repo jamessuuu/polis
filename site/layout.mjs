@@ -226,13 +226,35 @@ export function computeCity(divisions, agents, edges, skills = [], unreachable =
   }
 
   // --- the wall ----------------------------------------------------------
+  //
+  // The wall encloses the DISTRICTS, and an ecosystem can have none. That is
+  // not a broken snapshot: a `.claude` directory with no `ECOSYSTEM.md` has
+  // agents and skills and no constitutional divisions at all, which is what
+  // most imported ecosystems look like. So the empty case is a real case.
+  //
+  // It was not handled. `Math.min(...[])` is Infinity and `Math.max(...[])` is
+  // -Infinity, so `wall.cols` came out NaN, `bounds` came out NaN, the routing
+  // grid was allocated with a NaN length and every road silently failed to
+  // route. Found by importing a five-agent tree with no constitution: the map
+  // drew a frame full of NaN geometry and not one road, in Chromium and WebKit
+  // alike.
+  //
+  // With nothing to enclose, there is no wall. An empty rectangle at the
+  // origin keeps every coordinate finite, blocks no routing cell, and the
+  // renderer draws no wall rather than a wall around nothing.
   const districtRects = [...plots.values()];
-  const wall = {
-    col: Math.min(...districtRects.map((p) => p.col)) - WALL_MARGIN,
-    row: Math.min(...districtRects.map((p) => p.row)) - WALL_MARGIN,
-  };
-  wall.cols = Math.max(...districtRects.map((p) => p.col + p.cols)) + WALL_MARGIN - wall.col;
-  wall.rows = Math.max(...districtRects.map((p) => p.row + p.rows)) + WALL_MARGIN - wall.row;
+  const wall = districtRects.length
+    ? {
+      col: Math.min(...districtRects.map((p) => p.col)) - WALL_MARGIN,
+      row: Math.min(...districtRects.map((p) => p.row)) - WALL_MARGIN,
+    }
+    : { col: 0, row: 0 };
+  wall.cols = districtRects.length
+    ? Math.max(...districtRects.map((p) => p.col + p.cols)) + WALL_MARGIN - wall.col
+    : 0;
+  wall.rows = districtRects.length
+    ? Math.max(...districtRects.map((p) => p.row + p.rows)) + WALL_MARGIN - wall.row
+    : 0;
 
   // --- outside the wall --------------------------------------------------
   const outside = [];

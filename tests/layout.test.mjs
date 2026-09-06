@@ -240,3 +240,58 @@ test('silhouette variants are stable per id and spread across buckets', () => {
     'mentor', 'controller'].map((id) => variantOf(id, 4)));
   assert.ok(seen.size > 1, 'every id landed in the same bucket; the hash is not distributing');
 });
+
+/**
+ * An ecosystem with no divisions at all, which is what most imported ones are.
+ *
+ * A `.claude` directory with no ECOSYSTEM.md declares agents and skills and no
+ * constitutional divisions. The wall encloses districts, so with none there is
+ * nothing to enclose, and `Math.min(...[])` is Infinity: `wall.cols` came out
+ * NaN, `bounds` came out NaN, the routing grid was allocated with a NaN length
+ * and every road silently failed to route. On screen that was an empty frame
+ * and a run of SVG parse errors, in Chromium and WebKit alike.
+ *
+ * Found by actually importing such a tree in a browser rather than by reading
+ * the code, which is why the studio exists at all: the second half of the page
+ * feeds the layout inputs the house snapshot never has.
+ */
+test('a city with no declared divisions is finite and routable', () => {
+  const agents = [
+    { id: 'a', division: null, guild: null, director: false, system: false, tools: [], model: null },
+    { id: 'b', division: null, guild: null, director: false, system: false, tools: [], model: null },
+    { id: 'c', division: null, guild: null, director: false, system: false, tools: [], model: null },
+  ];
+  const edges = [{ from: 'a', to: 'b' }, { from: 'b', to: 'c' }];
+  const city = computeCity([], agents, edges, [{ id: 'k' }], [], []);
+
+  for (const [name, v] of Object.entries(city.bounds)) {
+    assert.ok(Number.isFinite(v), `bounds.${name} is ${v}`);
+  }
+  for (const [name, v] of Object.entries(city.wall)) {
+    assert.ok(Number.isFinite(v), `wall.${name} is ${v}`);
+  }
+  // No districts means no wall, not a wall around nothing.
+  assert.equal(city.wall.cols, 0);
+  assert.equal(city.wall.rows, 0);
+
+  for (const b of city.buildings) {
+    assert.ok(Number.isFinite(b.col) && Number.isFinite(b.row), `${b.id} sits at ${b.col},${b.row}`);
+  }
+  assert.equal(city.buildings.length, 4);
+});
+
+test('roads route between citizens who share one holding precinct', async () => {
+  // The consequence of the NaN, and the thing a visitor would actually notice:
+  // their charters name each other and the map drew no roads.
+  const { buildRoutingGrid, createRouter, walkBetween } = await import('../site/life.mjs');
+  const agents = ['a', 'b', 'c'].map((id) => ({
+    id, division: null, guild: null, director: false, system: false, tools: [], model: null,
+  }));
+  const city = computeCity([], agents, [{ from: 'a', to: 'c' }], [], [], []);
+  const grid = buildRoutingGrid(city);
+  assert.ok(grid.cols > 0 && grid.rows > 0, 'the routing grid has no cells');
+  const router = createRouter(grid);
+  const byId = new Map(city.buildings.map((b) => [b.id, b]));
+  const walk = walkBetween(router, byId.get('a'), byId.get('c'), 1, 1);
+  assert.ok(walk, 'no route between two citizens whose charters name each other');
+});
