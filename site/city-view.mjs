@@ -252,36 +252,63 @@ function placeCandidate(c, placed) {
   return false;
 }
 
+/**
+ * How big a label is drawn, relative to the world.
+ *
+ * Plate type is in world units, so a frame that zooms in to make a 22-unit
+ * citizen legible on a phone also blows a 27-unit district title up to 33 CSS
+ * px — a caption bar sitting across the city it is labelling. A label is UI,
+ * not a building: it should read at roughly the same size whatever the camera
+ * is doing. This returns the factor that holds a district title near
+ * PLATE_TARGET_PX, and the placement pass then packs the sizes actually drawn
+ * rather than the ones drawn at some other zoom.
+ */
+const PLATE_TARGET_PX = 15;
+
+export function plateScaleFor(frame, container) {
+  const pxPerUnit = Math.min(container.width / frame.w, container.height / frame.h);
+  if (!(pxPerUnit > 0)) return 1;
+  return Math.max(0.4, Math.min(1, PLATE_TARGET_PX / (TITLE_PX * pxPerUnit)));
+}
+
 /** T1: the precinct plates. Placed first, so nothing below them can move them. */
-function placePlates(city, placed) {
-  const wanted = [...city.plots.values()]
+function plateCandidates(city) {
+  return [...city.plots.values()]
     .map((plot) => {
       const north = toScreen(plot.col, plot.row);
       const num = plot.kind === 'district' ? `${plot.number} · ` : '';
       const title = plot.kind === 'district' ? plot.label.replace(/^\d\d · /, '') : plot.label;
       const sub = plot.sub || `${plot.count} ${plot.count === 1 ? 'member' : 'members'}`;
       const line1 = num.length * NUM_PX * 0.62 + title.length * TITLE_PX * 0.55;
-      const w = Math.max(line1, sub.length * SUB_PX * 0.62) + PLATE_PAD * 2;
+      const wUnits = Math.max(line1, sub.length * SUB_PX * 0.62) + PLATE_PAD * 2;
       return {
-        key: plot.key, cls: plotHueClass(plot), num, title, sub,
-        cx0: north.x, cy0: north.y - 10 - PLATE_H / 2,
-        anchorX: north.x, anchorY: north.y - 2,
-        w, h: PLATE_H, depth: depthOf(plot.col, plot.row),
+        key: plot.key, cls: plotHueClass(plot), num, title, sub, wUnits,
+        anchorX: north.x, anchorY: north.y - 2, north,
+        depth: depthOf(plot.col, plot.row),
       };
     })
     .sort((a, b) => a.depth - b.depth || a.key.localeCompare(b.key));
+}
 
-  for (const p of wanted) {
+function placePlates(candidates, placed, scale) {
+  for (const p of candidates) {
+    p.w = p.wUnits * scale;
+    p.h = PLATE_H * scale;
+    p.cx0 = p.north.x;
+    p.cy0 = p.north.y - 10 - p.h / 2;
     placeCandidate(p, placed);
     p.x = p.box.cx;
     p.y = p.box.cy - p.h / 2;
   }
-  return wanted;
+  return candidates;
 }
 
 function precinctPlate(p) {
-  const g = s('g', { class: `precinct-plate ${p.cls} kind-${p.key.startsWith('__') ? 'outside' : 'district'}`, transform: `translate(${r2(p.x)} ${r2(p.y)})` });
-  g.appendChild(s('rect', { class: 'plate-bg', x: r2(-p.w / 2), y: 0, width: r2(p.w), height: p.h, rx: 3 }));
+  // Geometry is authored once at scale 1 and the group's own transform carries
+  // the frame's label scale, so re-framing is 15 attribute writes rather than
+  // a re-render, and no wrapper element is spent on it.
+  const g = s('g', { class: `precinct-plate ${p.cls} kind-${p.key.startsWith('__') ? 'outside' : 'district'}` });
+  g.appendChild(s('rect', { class: 'plate-bg', x: r2(-p.wUnits / 2), y: 0, width: r2(p.wUnits), height: PLATE_H, rx: 3 }));
   const t1 = s('text', { class: 'plate-line1', x: 0, y: 31, 'text-anchor': 'middle' });
   if (p.num) t1.appendChild(s('tspan', { class: 'plate-num' }, p.num));
   t1.appendChild(s('tspan', { class: 'plate-title' }, p.title));
@@ -305,7 +332,7 @@ function namePlate() {
   inner.appendChild(s('rect', { class: 'plate-bg', x: 0, y: 0, width: 10, height: NAME_H, rx: 3 }));
   inner.appendChild(s('text', { class: 'plate-name', x: 0, y: 21, 'text-anchor': 'middle' }, ''));
   outer.appendChild(inner);
-  return { outer, inner, leader, rect: inner.firstChild, text: inner.lastChild, id: null };
+  return { outer, inner, leader, rect: inner.firstChild, text: inner.lastChild, id: null, anchor: null, box: null };
 }
 
 const nameWidth = (id) => id.length * NAME_PX * 0.62 + 18;
@@ -575,14 +602,64 @@ export function renderCity({ svg, data, city, workforce = null, onSelect }) {
   // set and a director's plate never drifts between two hovers.
   const plateLayer = s('g', { class: 'plate-layer' });
   const plateBoxes = [];
-  const plates = placePlates(city, plateBoxes);
+  const plates = plateCandidates(city);
+  placePlates(plates, plateBoxes, 1);
   for (const p of plates) {
-    if (p.displaced) {
-      plateLayer.appendChild(s('line', { class: `plate-leader ${p.cls}`, x1: r2(p.x), y1: r2(p.y + p.h), x2: r2(p.anchorX), y2: r2(p.anchorY) }));
-    }
-    plateLayer.appendChild(precinctPlate(p));
+    // One leader per plate, mounted once and toggled — the same pool
+    // discipline the name plates use, so re-framing never creates a node.
+    p.leader = s('line', { class: `plate-leader ${p.cls}` });
+    plateLayer.appendChild(p.leader);
+    p.el = precinctPlate(p);
+    plateLayer.appendChild(p.el);
     contentTop = Math.min(contentTop, p.y - 8);
   }
+
+  /**
+   * Hide the label of anything that is not on screen.
+   *
+   * Once the default frame stopped being "the whole city", plates for
+   * districts outside it clipped against the frame edge and printed half a
+   * word. A label whose subject is off screen is not information, it is
+   * debris, so it is switched off by class — no node created, no node
+   * destroyed, and the roster still lists everyone either way.
+   */
+  const labelled = [];
+  function cullLabels(next) {
+    if (next) state.cull = next;
+    const rect = state.cull;
+    if (!rect) return;
+    const inside = (px, py) => px >= rect.x && px <= rect.x + rect.w
+      && py >= rect.y && py <= rect.y + rect.h;
+    // Whole box, not just its centre: half a word clipped against the frame
+    // edge reads as a rendering bug, and the subject has to be on screen too
+    // or the label is naming something the visitor cannot see.
+    const shows = (box, ax, ay) => inside(ax, ay)
+      && inside(box.cx - box.w / 2, box.cy - box.h / 2)
+      && inside(box.cx + box.w / 2, box.cy + box.h / 2);
+    for (const p of plates) {
+      const off = !shows(p.box, p.anchorX, p.anchorY);
+      p.el.classList.toggle('off-frame', off);
+      p.leader.classList.toggle('off-frame', off);
+    }
+    for (const np of labelled) {
+      np.outer.classList.toggle('off-frame', Boolean(np.anchor) && !shows(np.box, np.anchor.x, np.anchor.y));
+    }
+  }
+
+  /** Re-place and redraw every precinct plate at a new label scale. */
+  function relayoutPlates(scale) {
+    plateBoxes.length = 0;
+    placePlates(plates, plateBoxes, scale);
+    for (const p of plates) {
+      p.el.setAttribute('transform', `translate(${r2(p.x)} ${r2(p.y)}) scale(${r2(scale)})`);
+      p.leader.setAttribute('x1', r2(p.x));
+      p.leader.setAttribute('y1', r2(p.y + p.h));
+      p.leader.setAttribute('x2', r2(p.anchorX));
+      p.leader.setAttribute('y2', r2(p.anchorY));
+      p.leader.classList.toggle('on', Boolean(p.displaced));
+    }
+  }
+  relayoutPlates(1);
   // Name plates: a pool created once, repositioned by transform, revealed
   // by opacity. Hover creates zero DOM nodes.
   const pool = [];
@@ -590,6 +667,7 @@ export function renderCity({ svg, data, city, workforce = null, onSelect }) {
     const np = namePlate();
     plateLayer.appendChild(np.outer);
     pool.push(np);
+    labelled.push(np);
   }
   camera.appendChild(plateLayer);
 
@@ -607,7 +685,8 @@ export function renderCity({ svg, data, city, workforce = null, onSelect }) {
   svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
 
   /** Switch frames as a hard cut: viewBox is not a transform and never tweens. */
-  function setFrame(f) {
+  const state = { plateScale: 1 };
+  function setFrame(f, container) {
     svg.setAttribute('viewBox', `${r2(f.x)} ${r2(f.y)} ${r2(f.w)} ${r2(f.h)}`);
     // The sky is three frames wide so a letterboxed axis reads as more sky
     // rather than a hard-edged empty bar.
@@ -615,13 +694,20 @@ export function renderCity({ svg, data, city, workforce = null, onSelect }) {
     skyRect.setAttribute('y', r2(f.y - f.h));
     skyRect.setAttribute('width', r2(f.w * 3));
     skyRect.setAttribute('height', r2(f.h * 3));
+    state.frame = f;
+    if (container) {
+      state.plateScale = plateScaleFor(f, container);
+      relayoutPlates(state.plateScale);
+    }
   }
   setFrame(view);
 
   return {
     camera, citizenEls, roadEls, figures, activities, view,
     buildLayer, buildingOrder, walkLayer, shadowLayer, plateLayer, plateBoxes,
-    namePool: pool, router, buildingsById, agentsById, setFrame,
+    namePool: pool, router, buildingsById, agentsById, setFrame, cullLabels,
+    get plateScale() { return state.plateScale; },
+    get frame() { return state.frame; },
   };
 }
 
@@ -743,7 +829,9 @@ export function computeFocusFrame(city, container, cityFrame) {
  * from its record. Returns the ids that were dropped, for whoever wants to
  * know rather than guess.
  */
-export function refreshNamePlates({ namePool, plateBoxes }, { directors, anchors, others }, citizenEls) {
+export function refreshNamePlates(scene, { directors, anchors, others }, citizenEls) {
+  const { namePool, plateBoxes } = scene;
+  const scale = scene.plateScale ?? 1;
   const placed = plateBoxes.slice();
   const dropped = [];
   const positions = new Map();
@@ -761,9 +849,10 @@ export function refreshNamePlates({ namePool, plateBoxes }, { directors, anchors
     if (!g || !g.dataset.apexX) continue; // a ruin has no roof to name
     const x = Number(g.dataset.apexX);
     const y = Number(g.dataset.apexY);
+    const h = NAME_H * scale;
     const c = {
-      w: nameWidth(id), h: NAME_H,
-      cx0: x, cy0: y - 10 - NAME_H / 2,
+      w: nameWidth(id) * scale, h, scale,
+      cx0: x, cy0: y - 10 - h / 2,
       anchorX: x, anchorY: y,
     };
     const fits = placeCandidate(c, placed);
@@ -781,6 +870,8 @@ export function refreshNamePlates({ namePool, plateBoxes }, { directors, anchors
     if (!slot) break; // pool exhausted: the roster is the record
     mountNamePlate(slot, citizenEls.get(id), id, c);
   }
+  // Newly mounted plates have never been tested against the visible rect.
+  scene.cullLabels?.();
   return dropped;
 }
 
@@ -810,26 +901,32 @@ export function mountNamePlate(np, structureEl, id, placement) {
   const x = Number(structureEl.dataset.apexX);
   const y = Number(structureEl.dataset.apexY);
   const w = nameWidth(id);
+  const scale = placement ? placement.scale : 1;
   const cx = placement ? placement.box.cx : x;
   const cy = placement ? placement.box.cy : y - 10 - NAME_H / 2;
+  const top = cy - (NAME_H * scale) / 2;
   const displaced = placement ? placement.displaced : false;
   np.rect.setAttribute('x', r2(-w / 2));
   np.rect.setAttribute('width', r2(w));
   np.text.textContent = id;
-  np.outer.setAttribute('transform', `translate(${r2(cx)} ${r2(cy - NAME_H / 2)})`);
-  // The leader is drawn in the plate's own local space: from its bottom edge
-  // back to the roof it belongs to, so a nudged label still points home.
+  np.outer.setAttribute('transform', `translate(${r2(cx)} ${r2(top)}) scale(${r2(scale)})`);
+  // The leader is drawn in the plate's own local space — which the same
+  // transform scales — so it is divided back out to land on the real roof.
   np.leader.setAttribute('x1', 0);
   np.leader.setAttribute('y1', NAME_H);
-  np.leader.setAttribute('x2', r2(x - cx));
-  np.leader.setAttribute('y2', r2(y - (cy - NAME_H / 2)));
+  np.leader.setAttribute('x2', r2((x - cx) / scale));
+  np.leader.setAttribute('y2', r2((y - top) / scale));
   np.outer.classList.toggle('displaced', displaced);
   np.outer.classList.add('on');
+  np.anchor = { x, y };
+  np.box = { cx, cy: top + (NAME_H * scale) / 2, w: w * scale, h: NAME_H * scale };
   np.id = id;
 }
 
 export function unmountNamePlate(np) {
-  np.outer.classList.remove('on', 'displaced');
+  np.outer.classList.remove('on', 'displaced', 'off-frame');
+  np.anchor = null;
+  np.box = null;
   np.id = null;
 }
 
@@ -879,7 +976,7 @@ export function attachCamera(svg, camera, { onReset, onZoom } = {}) {
 
   function apply() {
     camera.setAttribute('transform', `translate(${state.x} ${state.y}) scale(${state.k})`);
-    if (onZoom) onZoom(state.k);
+    if (onZoom) onZoom(state.k, state);
   }
 
   function zoomAt(factor, cx, cy) {

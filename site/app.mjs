@@ -189,7 +189,17 @@ async function main() {
 
   const cam = attachCamera(svg, camera, {
     // Two LODs, rendered once, toggled by one class on the root.
-    onZoom: (k) => svg.classList.toggle('lod-1', k >= 1.5),
+    onZoom: (k, view) => {
+      svg.classList.toggle('lod-1', k >= 1.5);
+      // What is actually on screen, in world units: the frame, undone by the
+      // camera transform. Labels for anything outside it are switched off.
+      const f = scene.frame;
+      if (f) {
+        scene.cullLabels({
+          x: (f.x - view.x) / k, y: (f.y - view.y) / k, w: f.w / k, h: f.h / k,
+        });
+      }
+    },
   });
 
   // ---- framing --------------------------------------------------------
@@ -202,16 +212,20 @@ async function main() {
   function applyFrame(force = false) {
     const r = heroBox.getBoundingClientRect();
     if (!r.width || !r.height) return;
-    const f = computeFocusFrame(city, { width: r.width, height: r.height }, scene.view);
+    const container = { width: r.width, height: r.height };
+    const f = computeFocusFrame(city, container, scene.view);
     if (!force && f.name === frameName) return;
     frameName = f.name;
-    scene.setFrame(f);
+    scene.setFrame(f, container);
     cam.reset();
+    refreshHighlight();
   }
   function showWholeCity() {
+    const r = heroBox.getBoundingClientRect();
     frameName = 'city';
-    scene.setFrame(scene.view);
+    scene.setFrame(scene.view, { width: r.width, height: r.height });
     cam.reset();
+    refreshHighlight();
   }
 
   document.getElementById('map-zoom-in')?.addEventListener('click', () => cam.zoomIn());
@@ -405,6 +419,9 @@ async function main() {
 
     const rosterLi = rosterButtons.get(id);
     if (rosterLi) {
+      // Selecting someone opens their district, or the mark would land on a
+      // row inside a closed disclosure and read as nothing happening.
+      rosterLi.closest('details')?.setAttribute('open', '');
       for (const b of document.querySelectorAll('.roster-agent-button.selected')) b.classList.remove('selected');
       rosterLi.querySelector('.roster-agent-button')?.classList.add('selected');
     }
@@ -442,16 +459,23 @@ async function main() {
     return li;
   }
 
+  // Same disclosure pattern as the no-JS roster: one browser-native
+  // <details> per district, closed at rest. Nothing is removed from the DOM,
+  // so a filter, a find-in-page or a selection can still reach every citizen.
   function buildRosterGroup(root, heading, note, members, noun = ['citizen', 'citizens']) {
     if (!members.length) return;
     const wrap = el('div', { class: 'roster-district' });
-    wrap.appendChild(el('h3', {}, [`${heading} `, el('span', { class: 'roster-count' }, [`(${members.length} ${members.length === 1 ? noun[0] : noun[1]})`])]));
-    if (note) wrap.appendChild(el('p', { class: 'static-note' }, [note]));
+    const det = el('details');
+    det.appendChild(el('summary', {}, [
+      el('h3', {}, [`${heading} `, el('span', { class: 'roster-count' }, [`(${members.length} ${members.length === 1 ? noun[0] : noun[1]})`])]),
+    ]));
+    if (note) det.appendChild(el('p', { class: 'static-note' }, [note]));
     const ul = el('ul', { class: 'roster-agent-list' });
     for (const a of members) ul.appendChild(rosterAgentLi(a));
-    wrap.appendChild(ul);
+    det.appendChild(ul);
+    wrap.appendChild(det);
     root.appendChild(wrap);
-    rosterDistricts.set(heading, wrap);
+    rosterDistricts.set(heading, { wrap, det });
   }
 
   const rosterRoot = document.getElementById('roster-list');
@@ -513,9 +537,13 @@ async function main() {
       if (li) li.hidden = !match;
     }
     filterSummary.textContent = `Showing ${shown} of ${data.agents.length} citizens.`;
-    for (const wrap of rosterDistricts.values()) {
+    // An active filter opens whatever it matched — collapsed-by-default is the
+    // resting state, not a wall between a search and its results.
+    const filtering = Boolean(q || div || tool || directorsOnly);
+    for (const { wrap, det } of rosterDistricts.values()) {
       const anyVisible = Array.from(wrap.querySelectorAll('.roster-agent')).some((li) => !li.hidden);
       wrap.hidden = !anyVisible;
+      det.open = filtering && anyVisible;
     }
   }
 

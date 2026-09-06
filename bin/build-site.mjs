@@ -95,35 +95,60 @@ function agentLi(a) {
   ].filter(Boolean).join('\n');
 }
 
+/**
+ * A district, collapsed.
+ *
+ * Every citizen is still here — nothing is dropped, nothing is lazy-loaded,
+ * and no script is involved. `<details>` is the browser's own disclosure
+ * widget, so the no-JS fallback stays complete: one click per district with
+ * JavaScript switched off, and in-page find still reaches the closed text.
+ * Uncollapsed, this list was 97% of a 23,500px page.
+ */
+function districtDetails(cls, heading, count, noun, body) {
+  return [
+    `      <li class="${cls}">`,
+    '        <details>',
+    `          <summary><h3>${heading} <span class="static-count">(${count} ${count === 1 ? noun[0] : noun[1]})</span></h3></summary>`,
+    body,
+    '        </details>',
+    '      </li>',
+  ].join('\n');
+}
+
 const districts = [...byDivision.entries()].map(([name, members]) => {
   const [num, ...rest] = name.split(' ');
   const flagged = members.some((a) => snap.unreachable.includes(a.id));
-  return [
-    `      <li class="static-district${flagged ? ' static-district-flagged' : ''}">`,
-    `        <h3>${esc(num)} &middot; ${esc(rest.join(' '))} <span class="static-count">(${members.length} citizens)</span></h3>`,
-    '        <ul class="static-agent-list">',
-    members.map(agentLi).join('\n'),
-    '        </ul>',
-    '      </li>',
-  ].join('\n');
+  return districtDetails(
+    `static-district${flagged ? ' static-district-flagged' : ''}`,
+    `${esc(num)} &middot; ${esc(rest.join(' '))}`,
+    members.length, ['citizen', 'citizens'],
+    ['        <ul class="static-agent-list">', members.map(agentLi).join('\n'), '        </ul>'].join('\n'),
+  );
 });
 
 if (unplaced.length) {
-  districts.push([
-    '      <li class="static-district">',
-    `        <h3>No district <span class="static-count">(${unplaced.length} citizens)</span></h3>`,
-    '        <ul class="static-agent-list">',
-    unplaced.map(agentLi).join('\n'),
-    '        </ul>',
-    '      </li>',
-  ].join('\n'));
+  districts.push(districtDetails(
+    'static-district', 'No district', unplaced.length, ['citizen', 'citizens'],
+    ['        <ul class="static-agent-list">', unplaced.map(agentLi).join('\n'), '        </ul>'].join('\n'),
+  ));
 }
+
+// The Archive, grouped by the guild that owns each procedure — the same six
+// collections the map's palette already draws, rather than one 86-row slab.
+const skillLi = (k) => `          <li class="static-skill"><strong>${esc(k.id)}</strong> &mdash; ${esc(k.description)}</li>`;
+const skillCollections = [
+  ...(snap.guilds || []).map((g) => [g, snap.skills.filter((k) => k.guild === g)]),
+  ['Open to every citizen', snap.skills.filter((k) => !k.guild)],
+].filter(([, list]) => list.length);
 
 const skillsHtml = [
   '      <h2 id="skills-heading">The archive &mdash; skills</h2>',
-  `      <p>${snap.skills.length} procedures the citizens draw on. Skills are not citizens: they carry no division, no Director, and no wiring of their own.</p>`,
-  '      <ul class="static-skill-list">',
-  snap.skills.map((k) => `        <li class="static-skill"><strong>${esc(k.id)}</strong> &mdash; ${esc(k.description)}</li>`).join('\n'),
+  `      <p>${snap.skills.length} procedures the citizens draw on, in ${skillCollections.length} collections. Skills are not citizens: they carry no division, no Director, and no wiring of their own.</p>`,
+  '      <ul class="static-district-list">',
+  skillCollections.map(([name, list]) => districtDetails(
+    'static-district', esc(name), list.length, ['procedure', 'procedures'],
+    ['        <ul class="static-skill-list">', list.map(skillLi).join('\n'), '        </ul>'].join('\n'),
+  )).join('\n'),
   '      </ul>',
 ].join('\n');
 
@@ -155,6 +180,24 @@ const withheldNote = snap.withheld.length
   ? `      <p class="static-meta">${snap.withheld.length} member(s) withheld: ${esc(snap.withheld.map((w) => w.reason).join('; '))}. Their names are not printed.</p>`
   : '';
 
+// --- the headline strip -----------------------------------------------------
+// One generator, two render targets. The strip states whichever finding is
+// FIRST in this list and nothing else — it holds no independently typed
+// number, because a second author of the same number is exactly how this page
+// came to publish 45 citizens while the repo said 59.
+const findings = [
+  { id: 'unreachable-finding', count: snap.unreachable.length, html: unreachableHtml,
+    sentence: `of ${s.agents} citizens are named by no charter, upstream or downstream.` },
+  { id: 'withheld-finding', count: snap.withheld.length, html: withheldHtml,
+    sentence: `of ${s.agents} members are counted here and deliberately not named.` },
+];
+const lead = findings[0];
+const stripHtml = [
+  `        <strong class="finding-strip-count">${lead.count}</strong>`,
+  `        <span class="finding-strip-text">${lead.sentence}</span>`,
+  '        <a href="#findings-section">See the findings &darr;</a>',
+].join('\n');
+
 const rosterHtml = [
   '      <h2 id="static-roster-heading">Districts and citizens</h2>',
   `      <p>Generated from <code>ecosystem.json</code> by <code>bin/build-site.mjs</code>. Snapshot taken ${esc(snap.generatedAt)}.</p>`,
@@ -170,6 +213,7 @@ html = replaceRegion(html, /<section aria-labelledby="static-roster-heading" id=
 html = replaceRegion(html, /<section aria-labelledby="skills-heading">/, '</section>', skillsHtml, 'skills archive');
 html = replaceRegion(html, /<div class="finding finding-warn" id="unreachable-finding">/, '</div>', unreachableHtml, 'unreachable finding');
 html = replaceRegion(html, /<div class="finding" id="withheld-finding">/, '</div>', withheldHtml, 'withheld finding');
+html = replaceRegion(html, /<p class="finding finding-strip" id="headline-strip">/, '</p>', stripHtml, 'headline strip');
 writeFileSync(INDEX, html);
 
 process.stdout.write(

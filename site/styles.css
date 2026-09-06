@@ -19,6 +19,40 @@
   --font-mono: ui-monospace, "Cascadia Mono", Consolas, "SF Mono", Menlo, "Liberation Mono", monospace;
   --radius: 6px;
   color-scheme: light dark;
+
+  /* Spacing. Values chosen to match rhythm already in the file, so adopting
+     them in the rules this pass does not touch is a rename, not a re-layout. */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-11: 2.75rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+
+  /* Motion. Ten hand-authored durations were scattered through this file;
+     they agreed with each other, which is precisely how a codebase acquires
+     an eleventh that does not. Loops keep their own periods below because a
+     bob, a step and a ripple are different physical behaviours, not
+     inconsistent ones. */
+  --dur-fast: 120ms;
+  --dur-base: 140ms;
+  --dur-cross: 300ms;
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-ambient: ease-in-out;
+  --ease-ripple: ease-out;
+  --ease-mechanical: linear;
+  --loop-bob: 3.4s;
+  --loop-walk-step: 0.46s;
+  --loop-tool-swing: 1.2s;
+  --loop-window-pulse: 2.8s;
+  --loop-banner-wave: 2.6s;
+  --loop-road-pulse: 1.4s;
+  --loop-construct-spin: 9s;
 }
 
 * { box-sizing: border-box; }
@@ -95,7 +129,7 @@ kbd {
   padding: 0.5rem 0.9rem;
   border-radius: var(--radius);
   z-index: 100;
-  transition: top 0.15s ease;
+  transition: top var(--dur-fast) var(--ease-standard);
 }
 .skip-link:focus {
   top: 0.5rem;
@@ -246,6 +280,41 @@ button:hover {
 }
 .finding li { margin-bottom: 0.25em; }
 
+/* The headline strip: one generated sentence, above the map, on every
+   breakpoint. It reuses the .finding component rather than inventing a
+   second card, and its number is written by the same pass that writes the
+   findings panel — never typed twice. */
+.finding-strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2) var(--space-3);
+  max-width: none;
+  padding: var(--space-3) var(--space-4);
+  margin-bottom: var(--space-6);
+}
+.finding-strip-count {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 1.125rem;
+  color: var(--warn);
+}
+.finding-strip a { margin-left: auto; }
+
+/* Findings lead, the status board supports it. On a wide screen they sit
+   side by side, findings wider and first; below 1024px they stack in the
+   same order. */
+@media (min-width: 1024px) {
+  .findings-status {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr;
+    gap: var(--space-8);
+    align-items: start;
+  }
+}
+
+.hero-section { margin-bottom: var(--space-10); }
+
 .jump-to-citizen {
   font-family: var(--font-mono);
   font-size: 0.89rem;
@@ -312,27 +381,40 @@ button:hover {
 
 /* ---------- the map ---------- */
 
-.map-scroll {
+.hero-map {
   overflow: hidden;
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius);
   background: var(--sky-bottom);
   /* The map is the subject of this page and was being drawn inside a text
-     column, at roughly half a CSS pixel per user unit. Breaking it out is a
-     ~33% linear gain for one declaration — more than any shading change buys. */
-  width: min(100vw - 2rem, 1480px);
-  /* Centred on the parent rather than offset from it. margin-inline with vw
-     units resolves against the parent box, so in a narrow column it shoved the
-     toolbar off the left edge instead of widening the map. */
+     column, at roughly half a CSS pixel per user unit. It now breaks out to
+     the full viewport, capped so a 3440px ultrawide gets a diorama rather
+     than a stretched one. Centred on the parent rather than offset from it:
+     margin-inline with vw units resolves against the parent box, so in a
+     narrow column it shoved the toolbar off the left edge instead. */
+  width: min(100vw, 1800px);
   margin-left: 50%;
   transform: translateX(-50%);
+  /* Explicit, viewport-relative height. This was `height:auto` on the SVG
+     with `min-width:640px`, which on a 390px phone drew the map 640px wide
+     inside a 358px frame and threw ~44% of the city off-screen before the
+     visitor touched anything. preserveAspectRatio letterboxes whichever axis
+     is not binding, and the sky rect is three frames wide, so the spare space
+     reads as more sky rather than an empty bar. */
+  height: min(64vh, 560px);
+  min-height: 420px;
+}
+@media (min-width: 600px) {
+  .hero-map { height: min(72vh, 640px); min-height: 480px; }
+}
+@media (min-width: 1024px) {
+  .hero-map { height: min(78vh, 760px); min-height: 560px; }
 }
 
 #city-map {
   display: block;
   width: 100%;
-  height: auto;
-  min-width: 640px;
+  height: 100%;
 }
 
 #city-map { cursor: grab; touch-action: none; }
@@ -615,13 +697,16 @@ button:hover {
   letter-spacing: 0.02em;
   fill: var(--ink-muted);
 }
+/* Leaders are mounted for every plate and revealed only when that plate had
+   to step aside — one class toggle, no node created or destroyed. */
 .plate-leader {
   stroke: var(--hue-text);
   stroke-width: 1.2;
-  opacity: 0.55;
+  opacity: 0;
   stroke-dasharray: 4 3;
   pointer-events: none;
 }
+.plate-layer > .plate-leader.on { opacity: 0.55; }
 
 .name-plate { pointer-events: none; }
 .name-plate-in { opacity: 0; transform: translateY(3px); }
@@ -631,6 +716,10 @@ button:hover {
    Name plates carry no hue class, so they take the muted ink instead. */
 .name-plate .plate-leader { stroke: var(--ink-muted); stroke-width: 1.1; opacity: 0; }
 .name-plate.on.displaced .plate-leader { opacity: 0.55; }
+/* A label whose subject is off screen is debris, not information. */
+.precinct-plate.off-frame,
+.name-plate.off-frame,
+.plate-layer > .plate-leader.off-frame { opacity: 0; }
 .plate-name {
   font-family: var(--font-mono);
   font-size: 20px;
@@ -660,39 +749,36 @@ button:hover {
    without motion. */
 
 @media (prefers-reduced-motion: no-preference) {
-  .structure { transition: opacity 0.14s cubic-bezier(0.2, 0, 0, 1), transform 0.14s cubic-bezier(0.2, 0, 0, 1); }
-  .road, .walk-route, .edge { transition: opacity 0.16s ease; }
-  .figure.away, .figure.walker { transition: opacity 0.3s ease; }
-  .name-plate-in { transition: opacity 0.12s ease, transform 0.12s ease; }
+  .structure { transition: opacity var(--dur-base) var(--ease-standard), transform var(--dur-base) var(--ease-standard); }
+  .road, .walk-route, .edge { transition: opacity var(--dur-base) var(--ease-standard); }
+  .figure.away, .figure.walker { transition: opacity var(--dur-cross) var(--ease-standard); }
+  .name-plate-in { transition: opacity var(--dur-fast) var(--ease-standard), transform var(--dur-fast) var(--ease-standard); }
 
-  /* A one-time settle as the city arrives. Then nothing idles on the camera. */
-  .settle {
-    animation: settle 900ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
-    transform-box: view-box;
-    transform-origin: 50% 50%;
-  }
-  @keyframes settle {
-    from { opacity: 0; transform: translateY(14px) scale(0.985); }
-    to { opacity: 1; transform: none; }
-  }
+  /* There is no load animation. A 900ms fade of the whole scene from
+     opacity 0 used to live here, and it was an intro a visitor had to sit
+     through before the page could say anything — for 900ms the answer to
+     "is this real and populated" was a blank frame. The city paints at full
+     opacity, in place, in one frame. The only frame-to-frame difference at
+     load is the phase offset already baked into the bob and walker-launch
+     schedules, which desynchronises a running loop rather than delaying it. */
 
   /* A city with nobody moving in it is a diagram of a city. The bob is 1.8u
      and staggered so the crowd never pulses in unison. */
   .figure .fig-body {
-    animation: fig-bob 3.4s ease-in-out infinite;
+    animation: fig-bob var(--loop-bob) var(--ease-ambient) infinite;
     animation-delay: var(--bob-delay, 0ms);
   }
   @keyframes fig-bob {
     0%, 100% { transform: scaleX(var(--flip, 1)) translateY(0); }
     50%      { transform: scaleX(var(--flip, 1)) translateY(-1.8px); }
   }
-  .figure.walker .fig-body { animation: walk-step 0.46s ease-in-out infinite; }
-  .figure.walker.pausing .fig-body { animation: fig-bob 3.4s ease-in-out infinite; }
+  .figure.walker .fig-body { animation: walk-step var(--loop-walk-step) var(--ease-ambient) infinite; }
+  .figure.walker.pausing .fig-body { animation: fig-bob var(--loop-bob) var(--ease-ambient) infinite; }
   @keyframes walk-step {
     0%, 100% { transform: scaleX(var(--flip, 1)) translateY(0); }
     50%      { transform: scaleX(var(--flip, 1)) translateY(-1.4px); }
   }
-  .figure.walker.on .fig-pulse { animation: road-pulse 1.4s ease-out infinite; }
+  .figure.walker.on .fig-pulse { animation: road-pulse var(--loop-road-pulse) var(--ease-ripple) infinite; }
   @keyframes road-pulse {
     0%   { transform: scale(0.6); opacity: 0.5; }
     100% { transform: scale(1.6); opacity: 0; }
@@ -700,7 +786,7 @@ button:hover {
 
   /* Working: the instrument swings. Transform only, about the hand. */
   .figure.act-active .fig-arm {
-    animation: tool-swing 1.2s ease-in-out infinite alternate;
+    animation: tool-swing var(--loop-tool-swing) var(--ease-ambient) infinite alternate;
   }
   @keyframes tool-swing {
     from { transform: translate(4.6px, -11.5px) rotate(-14deg); }
@@ -709,7 +795,7 @@ button:hover {
 
   /* Lit windows breathe on active buildings. */
   .structure.act-active .windows {
-    animation: window-pulse 2.8s ease-in-out infinite;
+    animation: window-pulse var(--loop-window-pulse) var(--ease-ambient) infinite;
     animation-delay: var(--pulse-delay, 0ms);
   }
   @keyframes window-pulse {
@@ -719,7 +805,7 @@ button:hover {
 
   /* Banners wave: a small skew about the pole. */
   .banner-flag {
-    animation: banner-wave 2.6s ease-in-out infinite;
+    animation: banner-wave var(--loop-banner-wave) var(--ease-ambient) infinite;
     animation-delay: var(--wave-delay, 0ms);
   }
   @keyframes banner-wave {
@@ -729,7 +815,7 @@ button:hover {
 
   /* Explore is a construct: it hovers and turns, slowly. */
   .figure.is-construct .fig-body {
-    animation: construct-spin 9s linear infinite;
+    animation: construct-spin var(--loop-construct-spin) var(--ease-mechanical) infinite;
     transform-origin: 0px -13px;
   }
   @keyframes construct-spin {
@@ -793,15 +879,48 @@ button:hover {
 
 .static-district, .roster-district {
   border-top: 1px solid var(--border-subtle);
-  padding-top: 0.5rem;
+  padding-top: var(--space-2);
 }
 .static-district-flagged {
   background: var(--warn-bg);
   border-radius: var(--radius);
-  padding: 0.5rem 0.9rem;
+  padding: var(--space-2) var(--space-4);
 }
-.static-district-flagged > h3 {
+.static-district-flagged summary h3 {
   color: var(--warn);
+}
+
+/* Districts are disclosure widgets, closed at rest. Uncollapsed, this roster
+   was ~22,000px of a 23,500px page — the whole document was the list, and the
+   map was a stripe inside it. Nothing is removed: <details> is native, needs
+   no script, and keeps every citizen one click away with JavaScript off. */
+.static-district > details > summary,
+.roster-district > details > summary {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  cursor: pointer;
+  padding: var(--space-2) 0;
+  list-style: none;
+}
+.static-district > details > summary::-webkit-details-marker { display: none; }
+.static-district > details > summary::before,
+.roster-district > details > summary::before {
+  content: "\25B8";
+  color: var(--ink-muted);
+  font-size: 0.8em;
+  line-height: 1;
+}
+.static-district > details[open] > summary::before,
+.roster-district > details[open] > summary::before { content: "\25BE"; }
+.static-district > details > summary h3,
+.roster-district > details > summary h3 { margin: 0; }
+.static-district > details > summary:hover h3,
+.roster-district > details > summary:hover h3 { color: var(--accent); }
+.static-district > details > summary:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: 2px;
 }
 .static-count, .roster-count {
   font-family: var(--font-mono);
@@ -812,6 +931,11 @@ button:hover {
 .static-note {
   color: var(--ink-muted);
   font-size: 0.89rem;
+}
+.static-district-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
 }
 
 .static-agent-list, .roster-agent-list {

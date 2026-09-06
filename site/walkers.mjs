@@ -155,7 +155,16 @@ export function createWalkers({
       const t = now - w.startedAt;
       if (t >= w.timing.total) { finish(w); continue; }
       const pr = walkProgress(w.timing, t);
-      const p = pointAlong(w.path, pr.s * w.path.length);
+      // Ease the walk, not just the state changes. `walkProgress` returns
+      // linear arc-length time — constant speed, instant stop, which is the
+      // tell of a 2010 CSS animation rather than a 2026 one. Smoothstep is
+      // applied HERE, at the point of consumption, and not inside
+      // `walkProgress`: tests/life.test.mjs pins its exact linear values at
+      // t=0, t=leg, t=leg+pause/2 and t=total, and those are the timing
+      // contract, not the velocity curve. Safe in all three phases — pausing
+      // holds s=1, returning has already computed 1-back/leg.
+      const eased = pr.s * pr.s * (3 - 2 * pr.s);
+      const p = pointAlong(w.path, eased * w.path.length);
       w.el.setAttribute('transform', `translate(${p.x.toFixed(2)} ${p.y.toFixed(2)})`);
       const dx = p.x - w.lastX;
       if (Math.abs(dx) > 0.08) {
