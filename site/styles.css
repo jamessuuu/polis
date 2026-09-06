@@ -849,6 +849,9 @@ button:hover {
 }
 .map-toolbar button:hover { border-color: var(--accent); }
 .map-toolbar label { display: flex; align-items: center; gap: 0.35em; }
+/* The bypass link rides in the toolbar rather than on its own row: same
+   target, same reading order, one less block of chrome above the hero. */
+.map-toolbar .map-skip { font-weight: 600; }
 
 .map-hint {
   font-size: 0.89rem;
@@ -1073,10 +1076,32 @@ footer.site-footer {
 }
 footer.site-footer p { margin: 0 0 0.5em; }
 
-/* ---------- responsive ---------- */
+/* ---------- responsive ----------
 
-@media (max-width: 560px) {
+   Below 600px the chrome above the map is the thing competing with the map.
+   Nothing here removes a word; it takes the air out of the header, lets the
+   headline strip run as one sentence instead of three stacked rows, and
+   steps the map's own hint text down — the map itself keeps every pixel it
+   was given. */
+
+@media (max-width: 599px) {
   h1 { font-size: 1.60rem; }
   .stats-grid dd { font-size: 1.42rem; }
-  .page { padding: 1rem 0.85rem 2.5rem; }
+  .page { padding: 0.85rem 0.85rem 2.5rem; }
+  header.site-header {
+    padding: var(--space-2) 0 var(--space-3);
+    margin-bottom: var(--space-4);
+    gap: var(--space-2) var(--space-4);
+  }
+  .tagline { font-size: 0.94rem; }
+  .finding-strip {
+    display: block;
+    padding: var(--space-2) var(--space-3);
+    margin-bottom: var(--space-4);
+    font-size: 0.94rem;
+  }
+  .finding-strip a { margin-left: 0; }
+  .hero-section h2 { margin-bottom: var(--space-2); }
+  .map-toolbar { font-size: 0.84rem; gap: var(--space-2) var(--space-3); }
+  .map-toolbar .map-hint { font-size: 0.79rem; }
 }
