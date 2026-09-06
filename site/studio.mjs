@@ -31,7 +31,7 @@
 
 import { computeCity } from './layout.mjs';
 import { renderCity, attachCamera, refreshNamePlates, NAME_POOL } from './city-view.mjs';
-import { importFiles, findRoot, classify, IMPORT_LIMITS } from './lib/import.mjs';
+import { importFiles, findRoot, classify, prepare, IMPORT_LIMITS } from './lib/import.mjs';
 import {
   buildBundle, bundleFromEcosystem, bundleZip, validateBundle, normaliseSkillName,
 } from './lib/export.mjs';
@@ -71,16 +71,45 @@ const plural = (n, one, many) => (n === 1 ? one : many);
  */
 const stage = {
   kind: null,        // 'import' | 'template'
-  title: '',
   ecosystem: null,
-  bodies: null,      // for an import
+  bodies: null,      // for an import: path key to charter text
   template: null,    // for a template: the preview record
-  free: null,        // for a free template: the full record with bodies
-  scene: null,
 };
 
 let libraryIndex = null;   // { catalog, cities }
 let libraryFree = null;    // { free }
+
+/**
+ * Which stage change is the current one.
+ *
+ * Both routes onto the stage await something: an import reads thousands of
+ * files, and a template waits on `library.json`. Reading a large `~/.claude`
+ * takes about nine seconds here, which is long enough for a visitor to give
+ * up, open the library and pick a template. Without this counter the import
+ * would finish afterwards and quietly replace what they chose, leaving the
+ * card marked selected, a different city on the map, and a download button
+ * that exports neither of the two things on screen.
+ *
+ * So every entry point takes a number, and a completion that no longer holds
+ * the latest one does nothing at all. It is not a lock: the visitor is never
+ * blocked from changing their mind, the stale result is simply dropped.
+ */
+let stageToken = 0;
+const claimStage = () => ++stageToken;
+const stillCurrent = (token) => token === stageToken;
+/**
+ * Give the claim back when nothing was put on the stage.
+ *
+ * A claim taken and then abandoned outranks a slower attempt that is still
+ * running, so a visitor who starts a large folder import and then picks a file
+ * that is not a zip would lose BOTH: the zip fails with its own message, and
+ * the folder finishes into a token that is no longer current and says nothing
+ * at all. Only the newest claim can be released, so this cannot resurrect a
+ * result somebody has already replaced on purpose.
+ */
+function releaseStage(token) {
+  if (token === stageToken) stageToken -= 1;
+}
 
 // --------------------------------------------------------------- the map ---
 
@@ -107,7 +136,6 @@ function drawStage(ecosystem, title) {
     ecosystem.skills, ecosystem.unreachable, ecosystem.guilds,
   );
   const scene = renderCity({ svg, data: ecosystem, city, workforce: null, idPrefix: 'studio-' });
-  stage.scene = scene;
 
   const cam = attachCamera(svg, scene.camera, {
     onZoom: (k) => {
@@ -141,8 +169,9 @@ function drawStage(ecosystem, title) {
  * The hero map rations plates because 59 citizens at once was a pile of white
  * boxes; a template is four people and an import is somebody looking for their
  * own names, so here the whole roster is offered in one tier and the placement
- * pass drops whatever will not fit. Nobody is hidden by a rule: the members
- * list beside the map names every one of them as text.
+ * pass drops whatever will not fit. Nobody is hidden by a rule: the disclosure
+ * under the map (`membersDetails`) names every member of whatever is on the
+ * stage, template and import alike.
  */
 function nameThem(scene) {
   const ids = [...scene.citizenEls.keys()].slice(0, NAME_POOL);
@@ -187,9 +216,28 @@ const isCharterCandidate = (path) => /\.md$/i.test(path);
 
 const MAX_READ = IMPORT_LIMITS.maxFiles;
 
+/** Why one file could not be opened, without pretending to know more. */
+const reasonFor = (err) => (err && err.name === 'NotFoundError'
+  ? 'it was gone by the time it was read'
+  : `it could not be read (${(err && err.name) || 'unknown error'})`);
+
+/**
+ * ONE UNREADABLE FILE IS ONE SKIPPED FILE, in all three readers below.
+ *
+ * A `.claude` directory is live: Claude Code writes into it while a visitor
+ * is browsing, and a file can be removed, renamed or locked between the walk
+ * finding it and the read reaching it. An unguarded read rejected the whole
+ * walk, so four thousand files that had been read successfully were thrown
+ * away for one that was not, and the visitor was told the folder could not
+ * be read. That is the opposite of the rule lib/import.mjs states for
+ * itself: counted and skipped, never fatal. The failures come back with the
+ * files and are folded into the same disclosure as every other drop.
+ */
+
 /** Walk a File System Access API directory handle. Chromium today. */
 async function readDirectoryHandle(handle, onCount) {
   const files = [];
+  const unread = [];
   let looked = 0;
   async function walk(dir, prefix) {
     for await (const [name, child] of dir.entries()) {
@@ -200,19 +248,25 @@ async function readDirectoryHandle(handle, onCount) {
       } else {
         looked += 1;
         if (!isCharterCandidate(path)) continue;
-        const file = await child.getFile();
-        files.push({ path, text: await file.text() });
+        try {
+          const file = await child.getFile();
+          files.push({ path, text: await file.text() });
+        } catch (err) {
+          unread.push({ path, reason: reasonFor(err) });
+          continue;
+        }
         onCount(files.length, looked);
       }
     }
   }
   await walk(handle, handle.name || '');
-  return { files, looked };
+  return { files, looked, unread };
 }
 
 /** Walk a dropped directory entry. The path every browser still supports. */
 async function readDirectoryEntry(entry, onCount) {
   const files = [];
+  const unread = [];
   let looked = 0;
   async function readEntries(reader) {
     const out = [];
@@ -233,29 +287,40 @@ async function readDirectoryEntry(entry, onCount) {
         looked += 1;
         const path = child.fullPath.replace(/^\//, '');
         if (!isCharterCandidate(path)) continue;
-        const file = await new Promise((res, rej) => child.file(res, rej));
-        files.push({ path, text: await file.text() });
+        try {
+          const file = await new Promise((res, rej) => child.file(res, rej));
+          files.push({ path, text: await file.text() });
+        } catch (err) {
+          unread.push({ path, reason: reasonFor(err) });
+          continue;
+        }
         onCount(files.length, looked);
       }
     }
   }
   await walk(entry);
-  return { files, looked };
+  return { files, looked, unread };
 }
 
 /** A `<input webkitdirectory>` FileList. The fallback that works everywhere. */
 async function readFileList(list, onCount) {
   const files = [];
+  const unread = [];
   let looked = 0;
   for (const file of list) {
     if (files.length >= MAX_READ) break;
     looked += 1;
     const path = file.webkitRelativePath || file.name;
     if (!isCharterCandidate(path)) continue;
-    files.push({ path, text: await file.text() });
+    try {
+      files.push({ path, text: await file.text() });
+    } catch (err) {
+      unread.push({ path, reason: reasonFor(err) });
+      continue;
+    }
     onCount(files.length, looked);
   }
-  return { files, looked };
+  return { files, looked, unread };
 }
 
 /**
@@ -274,16 +339,24 @@ function collectBodies(files) {
     const seg = String(file.path).replace(/\\/g, '/').split('/').filter((s) => s && s !== '.');
     const hit = classify(seg.slice(root));
     if (!hit || hit.kind === 'constitution') continue;
-    let data = {};
-    let body = '';
-    try {
-      ({ data, body } = parseFrontmatter(file.text));
-    } catch {
-      continue;
-    }
+    // The SAME text the importer parsed. `prepare` strips a byte order mark
+    // and a leading blank line, both ordinary in a file that has been through
+    // a Windows editor and both enough to defeat a `^---` match. Reading the
+    // raw text here would derive a different id from the same file, and the
+    // body would then be filed under a name no charter carries.
+    const { data, body } = parseFrontmatter(prepare(file.text));
     const id = String(data.name ?? '').trim() || hit.stem.trim();
     if (!id) continue;
-    bodies[`${hit.kind === 'agent' ? 'agents' : 'skills'}/${id}`] = body;
+    const key = `${hit.kind === 'agent' ? 'agents' : 'skills'}/${id}`;
+    // FIRST wins, because `lib/import.mjs` keeps the first file with an id and
+    // counts every later one as a duplicate. Last-wins here paired the first
+    // file's frontmatter with the last file's prose, and a real `~/.claude`
+    // with a plugin cache in it has 443 duplicate ids: 25 exported charters
+    // were a description from one file over a body from another, a document
+    // that existed nowhere on the visitor's disk, while the report above the
+    // map said those files had been dropped.
+    if (key in bodies) continue;
+    bodies[key] = body;
   }
   return bodies;
 }
@@ -340,7 +413,24 @@ function renderReport(report, ecosystem) {
   box.hidden = false;
 }
 
+/**
+ * Take down a "Reading ..." line whose read no longer matters.
+ *
+ * A dropped result must not leave the panel saying it is still reading, which
+ * would be the page describing work that stopped. It is replaced only if the
+ * line is still THIS read's: a newer import has already overwritten the text
+ * with its own label, and clobbering that would be the same defect in the
+ * other direction.
+ */
+function abandon(label) {
+  const node = $('studio-import-status');
+  if (node.textContent.startsWith(`Reading ${label}`) || node.textContent.startsWith(`Opening ${label}`)) {
+    node.textContent = 'That read was dropped when you put something else on the stage.';
+  }
+}
+
 async function runImport(reader, label) {
+  const token = claimStage();
   setImportStatus(`Reading ${label}`);
   $('studio-report').hidden = true;
   let result;
@@ -349,15 +439,21 @@ async function runImport(reader, label) {
       // A real count of real files, updated as they are read. Not a spinner,
       // not a bar with an invented percentage: the only honest progress signal
       // available here is how many files have actually been opened.
-      if (kept % 25 === 0) setImportStatus(`Reading ${label}: ${looked} files seen, ${kept} read`);
+      if (stillCurrent(token) && kept % 25 === 0) {
+        setImportStatus(`Reading ${label}: ${looked} files seen, ${kept} read`);
+      }
     });
   } catch (err) {
+    if (!stillCurrent(token)) { abandon(label); return; }
+    releaseStage(token);
     setImportStatus(`That could not be read: ${err && err.message ? err.message : 'unknown error'}`);
     return;
   }
+  if (!stillCurrent(token)) { abandon(label); return; }
 
-  const { files, looked } = result;
+  const { files, looked, unread } = result;
   if (!files.length) {
+    releaseStage(token);
     setImportStatus(
       `${looked} ${plural(looked, 'file', 'files')} seen and none of them was markdown. ` +
       'This reads agents/*.md and skills/<name>/SKILL.md, so point it at a .claude directory.',
@@ -366,16 +462,20 @@ async function runImport(reader, label) {
   }
 
   const { ecosystem, report } = importFiles(files, { source: 'directory' });
+  // The files the walk could not open, counted with everything else that was
+  // dropped rather than in a category of their own.
+  for (const u of unread ?? []) report.skipped.push(u);
   finishImport(ecosystem, report, files, looked);
 }
 
 function finishImport(ecosystem, report, files, looked) {
+  // The stage is the import's now, so no template card may still read as the
+  // thing on screen.
+  markSelected(null);
   stage.kind = 'import';
-  stage.title = 'Your ecosystem';
   stage.ecosystem = ecosystem;
   stage.bodies = files ? collectBodies(files) : {};
   stage.template = null;
-  stage.free = null;
 
   // The whole funnel, in order, because each number answers a different
   // question: how big is the tree, how much of it could be a charter, how much
@@ -413,12 +513,21 @@ function finishImport(ecosystem, report, files, looked) {
     `${ecosystem.stats.skills} ${plural(ecosystem.stats.skills, 'skill', 'skills')} on the stage`,
     'The bundle is written in this tab from the files you chose.',
   );
+  // The map can only label 24, and an import is often larger than that. This
+  // is where the rest are named.
+  $('studio-summary').append(membersDetails(
+    ecosystem.agents,
+    ecosystem.skills.map((s) => ({ name: s.id, description: s.description })),
+    'Everyone it found',
+  ));
 }
 
 function showDownload(summary, note) {
   $('studio-gate').hidden = true;
   $('studio-actions').hidden = false;
-  $('studio-summary').textContent = summary;
+  const box = $('studio-summary');
+  clear(box);
+  box.append(el('p', { class: 'studio-summary-text' }, [summary]));
   $('studio-download').hidden = false;
   $('studio-download-note').textContent = note;
 }
@@ -484,35 +593,49 @@ async function openLibrary() {
   for (const t of index.catalog) list.append(templateCard(t));
 }
 
+/**
+ * Every member on the stage, as text, in a disclosure.
+ *
+ * The map's plate pool holds 24. A four-member template fits; an import of a
+ * hundred and twenty five does not, and 101 of them would otherwise be drawn
+ * as an unlabelled box and named nowhere on the page. The list is closed by
+ * default, native, and needs no script to open, which is the same treatment
+ * the roster above the studio already gets.
+ *
+ * @param {{id: string, description?: string, director?: boolean}[]} agents
+ * @param {{name: string, description?: string}[]} skills
+ * @param {string} heading
+ */
+function membersDetails(agents, skills, heading) {
+  const members = el('ul', { class: 'studio-members' });
+  for (const a of agents) {
+    members.append(el('li', {}, [
+      el('strong', {}, [a.id]),
+      a.director ? el('span', { class: 'tag tag-director' }, ['Director']) : null,
+      a.description ? el('span', { class: 'studio-member-desc' }, [a.description]) : null,
+    ]));
+  }
+  for (const s of skills) {
+    members.append(el('li', { class: 'studio-member-skill' }, [
+      el('strong', {}, [s.name]),
+      s.description ? el('span', { class: 'studio-member-desc' }, [s.description]) : null,
+    ]));
+  }
+  const total = agents.length + skills.length;
+  return el('details', { class: 'studio-members-detail' }, [
+    el('summary', {}, [el('h3', {}, [
+      `${heading} `,
+      el('span', { class: 'static-count' }, [`(${total} ${plural(total, 'member', 'members')})`]),
+    ])]),
+    members,
+  ]);
+}
+
 function renderTemplateDetail(t) {
   const box = $('studio-summary');
   clear(box);
   box.append(el('p', { class: 'studio-summary-text' }, [t.summary]));
-
-  const members = el('ul', { class: 'studio-members' });
-  for (const a of t.agents) {
-    members.append(el('li', {}, [
-      el('strong', {}, [a.id]),
-      a.director ? el('span', { class: 'tag tag-director' }, ['Director']) : null,
-      el('span', { class: 'studio-member-desc' }, [a.description]),
-    ]));
-  }
-  for (const s of t.skills) {
-    members.append(el('li', { class: 'studio-member-skill' }, [
-      el('strong', {}, [s.name]),
-      el('span', { class: 'studio-member-desc' }, [s.description]),
-    ]));
-  }
-  const detail = el('details', { class: 'studio-members-detail' }, [
-    el('summary', {}, [el('h3', {}, [
-      `What is in it `,
-      el('span', { class: 'static-count' }, [
-        `(${t.counts.agents + t.counts.skills} ${plural(t.counts.agents + t.counts.skills, 'file', 'files')})`,
-      ]),
-    ])]),
-    members,
-  ]);
-  box.append(detail);
+  box.append(membersDetails(t.agents, t.skills, 'What is in it'));
 
   const why = el('ul', { class: 'studio-why' });
   for (const line of t.why) why.append(el('li', {}, [line]));
@@ -520,17 +643,25 @@ function renderTemplateDetail(t) {
 }
 
 async function selectTemplate(id) {
-  const index = await loadLibraryIndex();
+  const token = claimStage();
+  let index;
+  try {
+    index = await loadLibraryIndex();
+  } catch (err) {
+    if (stillCurrent(token)) {
+      $('studio-library-status').textContent = `The library did not load: ${err.message}.`;
+    }
+    return;
+  }
+  if (!stillCurrent(token)) return;
   const t = index.catalog.find((x) => x.id === id);
   if (!t) return;
   markSelected(id);
 
   stage.kind = 'template';
-  stage.title = t.name;
   stage.ecosystem = index.cities[id];
   stage.template = t;
   stage.bodies = null;
-  stage.free = null;
 
   putOnStage(index.cities[id], t.name);
   $('studio-actions').hidden = false;
@@ -659,8 +790,15 @@ async function downloadStage() {
       return;
     }
     if (stage.kind === 'template' && stage.template && !stage.template.locked) {
+      // Read the template BEFORE the await and check it is still the one on
+      // the stage after it. `library-free.json` is a real fetch, and a visitor
+      // who drops a folder while it is in flight would otherwise reach
+      // `stage.template.id` on a null, or download a different template than
+      // the one whose button they pressed.
+      const chosen = stage.template;
       const lib = await loadLibraryFree();
-      const full = lib.free[stage.template.id];
+      if (stage.template !== chosen) return;
+      const full = lib.free[chosen.id];
       if (!full) {
         note.textContent = 'That template is not in the free set.';
         return;
@@ -862,14 +1000,21 @@ function wireImportControls() {
  * nothing and gives the zip path the same export as the folder path.
  */
 async function importZipFile(file) {
+  const token = claimStage();
   setImportStatus(`Opening ${file.name}`);
   try {
     const { files, skipped } = await readZipAsText(await file.arrayBuffer());
+    if (!stillCurrent(token)) { abandon(file.name); return; }
     const { ecosystem, report } = importFiles(files, { source: 'zip' });
     for (const s of skipped) report.skipped.push({ path: s.name, reason: s.reason });
-    report.filesSeen = files.length + skipped.length;
-    finishImport(ecosystem, report, files, report.filesSeen);
+    // Seen is every entry in the archive; read is the ones that came out of it.
+    // Setting both to the same total made the status line say "10 files seen,
+    // 10 read" for an archive with an entry that failed its checksum.
+    report.filesSeen = files.length;
+    finishImport(ecosystem, report, files, files.length + skipped.length);
   } catch (err) {
+    if (!stillCurrent(token)) { abandon(file.name); return; }
+    releaseStage(token);
     setImportStatus(`That zip could not be opened: ${err && err.message ? err.message : 'unknown error'}`);
   }
 }

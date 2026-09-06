@@ -377,7 +377,7 @@ const r2 = (n) => Math.round(n * 100) / 100;
  * the second map's defs its own; the default is empty, so the hero map's
  * markup is byte for byte what it was.
  */
-export function renderCity({ svg, data, city, workforce = null, onSelect, idPrefix = '' }) {
+export function renderCity({ svg, data, city, workforce = null, onSelect = null, idPrefix = '' }) {
   doc = svg.ownerDocument || globalThis.document;
   svg.textContent = '';
   const gid = (name) => `${idPrefix}${name}`;
@@ -636,13 +636,23 @@ export function renderCity({ svg, data, city, workforce = null, onSelect, idPref
     }
 
     if (item.kind === 'citizen') {
-      g.setAttribute('tabindex', '0');
-      g.setAttribute('role', 'button');
       g.setAttribute('aria-label', ariaLabel(item, wfById.get(item.id), activity));
-      g.addEventListener('click', () => onSelect(item.id));
-      g.addEventListener('keydown', (ev) => {
-        if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); onSelect(item.id); }
-      });
+      // A citizen is a BUTTON only where there is somewhere for the button to
+      // go. The hero map opens a panel; the studio map has none, and calling
+      // it a button there would put every building in the tab order, announce
+      // it to a screen reader as actionable, and then throw on click because
+      // there is no handler. Advertising an interaction that does not exist is
+      // worse than not offering it.
+      if (typeof onSelect === 'function') {
+        g.setAttribute('tabindex', '0');
+        g.setAttribute('role', 'button');
+        g.addEventListener('click', () => onSelect(item.id));
+        g.addEventListener('keydown', (ev) => {
+          if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); onSelect(item.id); }
+        });
+      } else {
+        g.setAttribute('role', 'img');
+      }
       citizenEls.set(item.id, g);
     } else {
       g.setAttribute('role', 'img');

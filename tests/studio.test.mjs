@@ -350,3 +350,43 @@ test('the studio does the rebuild rather than refusing outright', () => {
   assert.match(src, /bundle = make\(dropped\);/, 'the bundle is never rebuilt without the refused member');
   assert.match(src, /left out/, 'the page never says what it left out');
 });
+
+/**
+ * Two lines whose absence produced a document that existed nowhere.
+ *
+ * `collectBodies` in site/studio.mjs walks the same files the importer walked
+ * and must make the same two decisions about each one, or the export pairs one
+ * file's frontmatter with another file's prose:
+ *
+ *   - FIRST wins. `lib/import.mjs` keeps the first file carrying an id and
+ *     counts every later one as a duplicate. Last-wins here produced 80 hybrid
+ *     charters out of 301 when run over this machine's real ~/.claude, which
+ *     has 453 duplicate ids from its plugin cache. Zero after.
+ *   - The same `prepare()`. A byte order mark or a leading blank line defeats a
+ *     `^---` match, so raw text derives a different id from the same file and
+ *     files the body under a name no charter carries.
+ *
+ * The behaviour itself is gated in the browser, where a fixture with a
+ * duplicated id is imported and exported and the archive is opened; Chromium
+ * and WebKit enumerate the two files in opposite orders, which is what makes
+ * that gate worth having. This test pins the two lines so the browser gate
+ * cannot be the only thing standing between a refactor and 80 hybrids.
+ */
+test('the body map makes the same two decisions the importer makes', () => {
+  const src = read('site/studio.mjs');
+  assert.match(src, /if \(key in bodies\) continue;/, 'collectBodies is not first-wins');
+  assert.match(src, /parseFrontmatter\(prepare\(file\.text\)\)/, 'collectBodies does not prepare the text');
+  // And the importer still is first-wins, which is the half this depends on.
+  assert.match(read('lib/import.mjs'), /if \(seenAgents\.has\(id\)\) \{/);
+  assert.match(read('lib/import.mjs'), /^export function prepare\(/m, 'prepare is not shared, so the two paths can diverge again');
+});
+
+test('a map with no select handler does not call its citizens buttons', () => {
+  // The studio draws a city with no panel to open. renderCity destructured
+  // `onSelect` with no default and wired a click handler regardless, so every
+  // building in the studio was announced to a screen reader as a button, was
+  // in the tab order, and threw TypeError on Enter or click.
+  const src = read('site/city-view.mjs');
+  assert.match(src, /onSelect = null/, 'onSelect has no default, so a map without one throws');
+  assert.match(src, /if \(typeof onSelect === 'function'\) \{/, 'the button role is not conditional on there being a handler');
+});

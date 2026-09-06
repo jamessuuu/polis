@@ -135,10 +135,18 @@ writeFileSync(LIBRARY_FREE_JSON, `${JSON.stringify(libraryFree, null, 2)}\n`);
 // that silently ships a locked body is worse than a build that fails.
 const shipped = readFileSync(LIBRARY_JSON, 'utf8') + readFileSync(LIBRARY_FREE_JSON, 'utf8');
 for (const t of TEMPLATES.filter((x) => x.locked)) {
-  for (const a of t.agents) {
-    const probe = JSON.stringify(String(a.body).split('\n')[0]).slice(1, -1);
-    if (probe && shipped.includes(probe)) {
-      throw new Error(`build-site: locked charter ${t.id}/${a.id} leaked into the shipped library`);
+  // Agents AND skills. The two locked templates hold eight charters and six
+  // skill procedures of around a thousand characters each, and the skills were
+  // not being probed at all, so the guard covered eight of fourteen members
+  // while its comment claimed it covered a leak.
+  for (const member of [...t.agents, ...t.skills]) {
+    const name = member.id ?? member.name;
+    const lines = String(member.body ?? '').split('\n').map((l) => l.trim()).filter((l) => l.length > 40);
+    for (const probe of [lines[0], lines[lines.length - 1]]) {
+      if (!probe) continue;
+      if (shipped.includes(JSON.stringify(probe).slice(1, -1))) {
+        throw new Error(`build-site: locked charter ${t.id}/${name} leaked into the shipped library`);
+      }
     }
   }
 }
