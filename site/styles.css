@@ -44,12 +44,15 @@ h1, h2, h3, h4 {
   color: var(--ink);
 }
 
-h1 { font-size: 2.2rem; margin: 0 0 0.2em; }
-h2 { font-size: 1.5rem; margin: 0 0 0.6em; border-bottom: 1px solid var(--border-subtle); padding-bottom: 0.35em; }
-h3 { font-size: 1.15rem; margin: 1.4em 0 0.4em; }
+h1 { font-size: 2.03rem; margin: 0 0 0.2em; }
+h2 { font-size: 1.42rem; margin: 0 0 0.6em; border-bottom: 1px solid var(--border-subtle); padding-bottom: 0.35em; }
+h3 { font-size: 1.125rem; margin: 1.4em 0 0.4em; }
 h4 { font-size: 1rem; margin: 1em 0 0.3em; }
 
-p { margin: 0 0 0.8em; }
+/* readable measure: prose in an unconstrained .page (1180px) column was
+   wrapping to 150-165 characters at wide viewports — well past the 45-85ch
+   band. 66ch sits in the middle of that band regardless of font-size. */
+p { margin: 0 0 0.8em; max-width: 66ch; }
 
 a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 0.15em; }
 a:hover { text-decoration-thickness: 2px; }
@@ -137,7 +140,7 @@ header.site-header {
 
 .tagline {
   color: var(--ink-muted);
-  font-size: 1.02rem;
+  font-size: 1rem;
   margin: 0;
 }
 
@@ -149,7 +152,7 @@ header.site-header {
 
 .theme-toggle {
   font-family: var(--font-mono);
-  font-size: 0.85rem;
+  font-size: 0.89rem;
 }
 
 main section, main aside {
@@ -160,7 +163,7 @@ main section, main aside {
 
 button, select, input[type="search"], input[type="text"] {
   font-family: var(--font-body);
-  font-size: 0.95rem;
+  font-size: 1rem;
   color: var(--ink);
   background: var(--bg-elevated);
   border: 1.5px solid var(--border-strong);
@@ -202,7 +205,7 @@ button:hover {
   padding: 0.7rem 0.85rem;
 }
 .stats-grid dt {
-  font-size: 0.78rem;
+  font-size: 0.79rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--ink-muted);
@@ -211,7 +214,7 @@ button:hover {
 .stats-grid dd {
   margin: 0;
   font-family: var(--font-mono);
-  font-size: 1.7rem;
+  font-size: 1.80rem;
   font-weight: 600;
 }
 
@@ -226,8 +229,9 @@ button:hover {
   margin-bottom: 1rem;
 }
 .finding h3 {
+  /* no own size: this IS an h3, it inherits the global h3 step (1.125rem)
+     instead of carrying a bespoke near-duplicate of it */
   margin-top: 0;
-  font-size: 1.05rem;
 }
 .finding-warn {
   border-color: var(--warn);
@@ -244,7 +248,7 @@ button:hover {
 
 .jump-to-citizen {
   font-family: var(--font-mono);
-  font-size: 0.9rem;
+  font-size: 0.89rem;
   background: none;
   border: none;
   padding: 0;
@@ -258,7 +262,7 @@ button:hover {
 .tag {
   display: inline-block;
   font-family: var(--font-mono);
-  font-size: 0.7rem;
+  font-size: 0.70rem;
   letter-spacing: 0.03em;
   text-transform: uppercase;
   padding: 0.12em 0.45em;
@@ -289,7 +293,7 @@ button:hover {
   gap: 0.3rem;
 }
 .field label {
-  font-size: 0.8rem;
+  font-size: 0.79rem;
   color: var(--ink-muted);
 }
 .field-checkbox {
@@ -297,11 +301,11 @@ button:hover {
   align-items: center;
   gap: 0.45rem;
 }
-.field-checkbox label { font-size: 0.95rem; color: var(--ink); }
+.field-checkbox label { font-size: 1rem; color: var(--ink); }
 
 #filter-summary {
   font-family: var(--font-mono);
-  font-size: 0.88rem;
+  font-size: 0.89rem;
   color: var(--ink-muted);
   margin: 0.4rem 0 0;
 }
@@ -741,7 +745,7 @@ button:hover {
   align-items: center;
   gap: 0.5rem 0.9rem;
   margin: 0 0 0.6rem;
-  font-size: 0.85rem;
+  font-size: 0.89rem;
 }
 .map-toolbar button {
   font: inherit;
@@ -756,7 +760,7 @@ button:hover {
 .map-toolbar label { display: flex; align-items: center; gap: 0.35em; }
 
 .map-hint {
-  font-size: 0.88rem;
+  font-size: 0.89rem;
   color: var(--ink-muted);
 }
 
@@ -769,7 +773,7 @@ button:hover {
   list-style: none;
   padding: 0;
   margin: 0.75rem 0 0;
-  font-size: 0.85rem;
+  font-size: 0.89rem;
 }
 .legend li { display: flex; align-items: center; gap: 0.4em; }
 .legend .swatch {
@@ -796,13 +800,13 @@ button:hover {
 }
 .static-count, .roster-count {
   font-family: var(--font-mono);
-  font-size: 0.8rem;
+  font-size: 0.79rem;
   font-weight: 400;
   color: var(--ink-muted);
 }
 .static-note {
   color: var(--ink-muted);
-  font-size: 0.9rem;
+  font-size: 0.89rem;
 }
 
 .static-agent-list, .roster-agent-list {
@@ -829,7 +833,7 @@ button:hover {
   border-radius: var(--radius);
   padding: 0.6rem 0.85rem;
   font-family: var(--font-mono);
-  font-size: 0.95rem;
+  font-size: 1rem;
   color: var(--ink);
 }
 .roster-agent-button:hover {
@@ -840,7 +844,7 @@ button:hover {
   font-family: var(--font-body);
   font-weight: 400;
   color: var(--ink-muted);
-  font-size: 0.85rem;
+  font-size: 0.89rem;
   margin-top: 0.25em;
   white-space: normal;
 }
@@ -850,7 +854,7 @@ button:hover {
 }
 
 .static-meta, .static-edges {
-  font-size: 0.87rem;
+  font-size: 0.89rem;
   color: var(--ink-muted);
   margin: 0.25em 0;
 }
@@ -859,6 +863,7 @@ button:hover {
 
 .static-skill {
   margin-bottom: 0.5em;
+  max-width: 66ch;
 }
 #skills-list, .static-skill-list {
   padding-left: 1.2em;
@@ -883,7 +888,7 @@ button:hover {
   width: 2.1rem;
   height: 2.1rem;
   line-height: 1;
-  font-size: 1.1rem;
+  font-size: 1.125rem;
   border-radius: 50%;
 }
 
@@ -897,7 +902,7 @@ button:hover {
   grid-template-columns: auto 1fr;
   gap: 0.2rem 0.8rem;
   font-family: var(--font-mono);
-  font-size: 0.92rem;
+  font-size: 0.89rem;
   margin: 0.6rem 0 1rem;
 }
 .panel-meta dt { color: var(--ink-muted); }
@@ -913,7 +918,7 @@ button:hover {
 }
 .panel-list li {
   font-family: var(--font-mono);
-  font-size: 0.85rem;
+  font-size: 0.89rem;
   background: var(--bg);
   border: 1px solid var(--border-subtle);
   border-radius: 3px;
@@ -925,7 +930,7 @@ button:hover {
 .panel-empty {
   color: var(--ink-muted);
   font-style: italic;
-  font-size: 0.9rem;
+  font-size: 0.89rem;
 }
 
 /* ---------- footer ---------- */
@@ -934,7 +939,7 @@ footer.site-footer {
   border-top: 1px solid var(--border-strong);
   margin-top: 3rem;
   padding-top: 1.25rem;
-  font-size: 0.9rem;
+  font-size: 0.89rem;
   color: var(--ink-muted);
 }
 footer.site-footer p { margin: 0 0 0.5em; }
@@ -942,7 +947,7 @@ footer.site-footer p { margin: 0 0 0.5em; }
 /* ---------- responsive ---------- */
 
 @media (max-width: 560px) {
-  h1 { font-size: 1.7rem; }
-  .stats-grid dd { font-size: 1.35rem; }
+  h1 { font-size: 1.60rem; }
+  .stats-grid dd { font-size: 1.42rem; }
   .page { padding: 1rem 0.85rem 2.5rem; }
 }
