@@ -424,12 +424,17 @@ button:hover {
      reads as more sky rather than an empty bar. */
   height: min(72vh, 620px);
   min-height: 430px;
-  /* The toolbar, the caption and the help disclosure are positioned against
-     this box, so the map is the first thing on the page and its controls are
-     subordinate to it rather than stacked above it. */
+  /* The controls live INSIDE the map's own frame rather than in the page
+     above it, so the city is the first thing a visitor sees. They are a
+     strip in normal flow, not an overlay: an overlay floating on the city
+     could cover a citizen that keyboard focus had just landed on, which is
+     WCAG 2.2 SC 2.4.11 (Focus Not Obscured) failing quietly. */
   position: relative;
   isolation: isolate;
+  display: flex;
+  flex-direction: column;
 }
+#city-map { flex: 1 1 auto; min-height: 0; }
 @media (min-width: 600px) {
   .hero-map { height: min(78vh, 700px); min-height: 480px; }
 }
@@ -884,10 +889,7 @@ button:hover {
 #city-map.life-off .figure.is-construct .fig-body { transform: translateY(-3px); }
 
 .map-toolbar {
-  position: absolute;
-  top: 0.6rem;
-  left: 0.6rem;
-  right: 0.6rem;
+  position: relative;
   z-index: 2;
   display: flex;
   flex-wrap: wrap;
@@ -896,11 +898,9 @@ button:hover {
   font-size: 0.84rem;
   /* A control bar on glass: it belongs to the map, so it is drawn on the map,
      tinted by the sky underneath rather than sitting on the page background. */
-  padding: 0.35rem 0.5rem;
-  border-radius: var(--radius);
-  border: 1px solid var(--border-subtle);
-  background: color-mix(in oklab, var(--bg-elevated) 94%, transparent);
-  box-shadow: 0 1px 2px color-mix(in oklab, var(--shadow-ink) 18%, transparent);
+  padding: 0.4rem 0.55rem;
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--bg-elevated);
 }
 .map-toolbar .tool-group {
   display: inline-flex;

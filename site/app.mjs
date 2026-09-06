@@ -234,7 +234,10 @@ async function main() {
   // screen anyone might have. A phone gets the plaza, a tablet gets the
   // plaza and its neighbours, a desktop gets the plan. Switching is a hard
   // cut — viewBox is not a transform and must never be tweened.
-  const heroBox = svg.parentElement;
+  // The frame is computed for the box the SVG itself is given. It used to be
+  // the hero box, which is the same thing only while the hero holds nothing
+  // but the map; it now also holds the control strip.
+  const heroBox = svg;
   let frameName = null;
   function applyFrame(force = false) {
     const r = heroBox.getBoundingClientRect();
