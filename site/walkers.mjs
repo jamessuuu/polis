@@ -31,9 +31,13 @@ const INSTRUMENT_D = {
 };
 
 export const WALKER_CAP = 12;
-// Per slot, pre-created and counted in the budget test: one route path plus
-// the eight-element walker kit plus its hit rect.
-export const WALKER_ELEMENTS = 10;
+// Per slot, pre-created once and never churned: one route path plus the
+// ten-element walker group (its own <g>, the hit rect, the road pulse, the
+// contact shadow, the body group, and the mantle/torso/head/arm/tool inside
+// it). tests/budget.test.mjs no longer takes this on trust — it renders a
+// real slot and asserts the number, because this constant was quietly one
+// short of the truth for as long as it has existed.
+export const WALKER_ELEMENTS = 11;
 
 export function createWalkers({
   svg, pairs, cap = WALKER_CAP, buildingsById, agentsById, router,

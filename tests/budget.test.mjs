@@ -17,7 +17,7 @@ import { fileURLToPath } from 'node:url';
 
 import { computeCity } from '../site/layout.mjs';
 import { renderCity, mountNamePlate, unmountNamePlate } from '../site/city-view.mjs';
-import { WALKER_CAP, WALKER_ELEMENTS } from '../site/walkers.mjs';
+import { WALKER_CAP, WALKER_ELEMENTS, createWalkers } from '../site/walkers.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const snap = JSON.parse(readFileSync(join(ROOT, 'data', 'ecosystem.json'), 'utf8'));
@@ -87,6 +87,27 @@ function renderOnce() {
   const scene = renderCity({ svg, data: snap, city, workforce, onSelect: () => {} });
   return { doc, svg, scene, city };
 }
+
+test('the walker allowance is the number of elements a walker actually costs', () => {
+  // WALKER_ELEMENTS is an allowance the budget below is built on, so it is
+  // measured rather than declared. It was one short of the truth from the day
+  // it was written, which is exactly the drift a constant with no gate does.
+  const { doc, svg, scene } = renderOnce();
+  const before = doc.created;
+  createWalkers({
+    svg,
+    pairs: [],
+    buildingsById: scene.buildingsById,
+    agentsById: scene.agentsById,
+    router: scene.router,
+    buildLayer: scene.buildLayer,
+    buildingOrder: scene.buildingOrder,
+    walkLayer: scene.walkLayer,
+    figures: scene.figures,
+  });
+  const perSlot = (doc.created - before) / WALKER_CAP;
+  assert.equal(perSlot, WALKER_ELEMENTS, `a walker slot costs ${perSlot} elements, not ${WALKER_ELEMENTS}`);
+});
 
 test('the rendered city stays under the element budget, walkers included', () => {
   const { doc } = renderOnce();
