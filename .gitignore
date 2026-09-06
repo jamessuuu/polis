@@ -1,5 +1,7 @@
 node_modules/
 *.local
+.env
+.env.local
 
 .vercel
 .shot-*.png

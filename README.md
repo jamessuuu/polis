@@ -40,6 +40,52 @@ are not.
   `ecosystem.json` (a copy of `data/ecosystem.json`, so the deployed site
   never depends on anything outside its own folder).
 
+## The library engine (`lib/`, `api/`)
+
+A second half of the project, built to be wired into the page later: read
+somebody *else's* ecosystem, hand them a working one back, and let them take
+a starter set away. None of it is loaded by `site/` yet.
+
+```
+a visitor's .claude tree, a zip of one, or one pasted file
+                    │
+                    ▼  lib/import.mjs   (100% in the tab, no network at all)
+            the same ecosystem.json shape site/ already renders
+                    │
+                    ▼  lib/export.mjs + lib/zip.mjs
+      agents/*.md + skills/<name>/SKILL.md + README.md, zipped in the browser
+                    ▲
+                    │  lib/library.mjs   (8 starter ecosystems, 6 free)
+                    │
+             api/lead.mjs  ── emails James, and only then releases a locked one
+```
+
+- **`lib/import.mjs`** parses agent charters and `SKILL.md` files into
+  `ecosystem.json`. A malformed charter is counted and skipped, never fatal,
+  the same way `src/workforce.mjs` treats a malformed log line. It makes **no
+  network call of any kind** and `tests/import.test.mjs` reads the module's
+  own source to keep that true: a visitor's charters are their intellectual
+  property and the offer is only acceptable if the drop is local.
+- **`lib/export.mjs`** writes bundles that work when unzipped into `~/.claude/`.
+  Skills follow the [Agent Skills](https://agentskills.io/specification) open
+  standard; every free-text frontmatter field is quoted, because real charter
+  descriptions contain `": "` in ordinary prose and a plain YAML scalar may not.
+- **`lib/zip.mjs`** reads and writes ZIP archives with no dependency, using the
+  runtime's own `CompressionStream`/`DecompressionStream` for deflate.
+- **`lib/library.mjs`** holds eight starter ecosystems. Each carries `claims`
+  paired with verbatim quotes from its own charters, and `verifyClaims` (run
+  over every template by `tests/library.test.mjs`) fails if a template
+  advertises something its charters do not say.
+- **`lib/lead.mjs` + `api/lead.mjs`** are the lead form's decision ladder and
+  its Vercel binding. See `.env.example`; with the mail settings missing the
+  function answers `not-configured` and never claims to have sent.
+
+```
+npm run validate:export     # writes real bundles to a temp dir, runs the
+                            # Agent Skills reference validator over each skill,
+                            # and opens each zip with the platform's own extractor
+```
+
 ## Regenerating the snapshot
 
 ```
@@ -167,6 +213,26 @@ publish carelessly, so:
   design working as intended (id-or-description matching, deliberately not
   a body scan — see the comments in that file), but it does mean the one
   withheld member in this snapshot is a slightly noisy hit, not a clean one.
+- **`api/lead.mjs` has never been deployed.** Vercel builds functions found in
+  a top level `api/` directory for static projects as well as framework ones,
+  which is why the file sits there, but that has not been confirmed against a
+  real deployment of *this* project. The first thing to check on the first
+  deploy is that `POST /api/lead` is reachable at all. The ladder itself is
+  covered by 38 tests against stubs, which is a different claim.
+- **No email provider is chosen.** `api/lead.mjs` posts JSON to whatever
+  endpoint `POLIS_LEAD_EMAIL_ENDPOINT` names, with the body shape defined by
+  `mailBody` in `lib/lead.mjs`. Whether a given provider accepts that shape has
+  not been tested against a live provider, only against a stub.
+- **The `lib/` modules are not wired into `site/` yet.** They are tested and
+  they work in Node; nothing in `site/index.html` imports them. Note also that
+  `src/extract.mjs` is imported by `lib/import.mjs` and lives outside `site/`,
+  so shipping the importer to the browser needs that file copied into `site/`
+  the way `build:site` already copies `data/ecosystem.json`.
+- **The importer reads any `<name>/agents/*.md` as a guild called `<name>`.**
+  Run against this machine's real `~/.claude` it turned a test fixture
+  directory into a guild named "clean". That is discovery working as designed
+  and the trade is deliberate: an allowlist of directory names would silently
+  drop a real guild instead.
 - **No automated a11y test run was performed against a live browser** (no
   screen-reader pass, no axe/Lighthouse run) as part of building this —
   verification here was a manual keyboard-only pass plus the computed
