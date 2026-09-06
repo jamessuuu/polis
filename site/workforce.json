@@ -1,13 +1,14 @@
 {
-  "generatedAt": "2026-09-05T20:19:21.058Z",
+  "generatedAt": "2026-09-06T12:33:25.646Z",
   "activeHours": 48,
-  "assignments": 233,
+  "assignments": 300,
   "agents": [
     {
       "id": "general-purpose",
       "namespace": null,
-      "assignments": 133,
+      "assignments": 179,
       "projects": [
+        ".aj-release",
         "aeo-lab",
         "agentjames",
         "carillon",
@@ -16,10 +17,14 @@
         "claude-code-boundary-guard",
         "clubscope-application",
         "dogwatch",
+        "guilds",
         "home",
         "judge-audit",
+        "kedge",
         "lead-response-demo",
         "learning-app",
+        "org-transition",
+        "overture",
         "pitman",
         "polis",
         "proofpage",
@@ -32,23 +37,24 @@
         "tiltmeter",
         "workshop"
       ],
-      "lastAt": "2026-09-05T20:12:45.885Z",
+      "lastAt": "2026-09-06T12:29:35.510Z",
       "active": true
     },
     {
       "id": "market-researcher",
       "namespace": null,
-      "assignments": 16,
+      "assignments": 17,
       "projects": [
         "agentjames",
         "chaff",
         "claude-code-boundary-guard",
         "guilds",
         "home",
+        "klik",
         "polis",
         "proofpage"
       ],
-      "lastAt": "2026-09-05T19:45:11.344Z",
+      "lastAt": "2026-09-05T20:33:19.210Z",
       "active": true
     },
     {
@@ -77,7 +83,7 @@
         "the ecosystem itself"
       ],
       "lastAt": "2026-09-04T03:51:26.301Z",
-      "active": true
+      "active": false
     },
     {
       "id": "code-reviewer",
@@ -105,6 +111,35 @@
         "the ecosystem itself"
       ],
       "lastAt": "2026-09-04T03:49:31.916Z",
+      "active": false
+    },
+    {
+      "id": "prompt-engineer",
+      "namespace": null,
+      "assignments": 7,
+      "projects": [
+        "chaff",
+        "home",
+        "sluice",
+        "the ecosystem itself",
+        "workshop"
+      ],
+      "lastAt": "2026-09-06T04:57:08.401Z",
+      "active": true
+    },
+    {
+      "id": "product-strategist",
+      "namespace": null,
+      "assignments": 6,
+      "projects": [
+        "agentjames",
+        "clarifier",
+        "claude-code-boundary-guard",
+        "guilds",
+        "home",
+        "the ecosystem itself"
+      ],
+      "lastAt": "2026-09-06T06:08:06.791Z",
       "active": true
     },
     {
@@ -116,6 +151,17 @@
         "the ecosystem itself"
       ],
       "lastAt": "2026-09-04T04:04:03.300Z",
+      "active": false
+    },
+    {
+      "id": "design-director",
+      "namespace": "design-guild",
+      "assignments": 5,
+      "projects": [
+        "home",
+        "kedge"
+      ],
+      "lastAt": "2026-09-06T12:30:28.303Z",
       "active": true
     },
     {
@@ -130,33 +176,6 @@
       "active": false
     },
     {
-      "id": "product-strategist",
-      "namespace": null,
-      "assignments": 5,
-      "projects": [
-        "clarifier",
-        "claude-code-boundary-guard",
-        "guilds",
-        "home",
-        "the ecosystem itself"
-      ],
-      "lastAt": "2026-09-03T07:50:05.841Z",
-      "active": false
-    },
-    {
-      "id": "prompt-engineer",
-      "namespace": null,
-      "assignments": 5,
-      "projects": [
-        "chaff",
-        "home",
-        "sluice",
-        "workshop"
-      ],
-      "lastAt": "2026-08-28T17:07:03.984Z",
-      "active": false
-    },
-    {
       "id": "ai-engineer",
       "namespace": null,
       "assignments": 3,
@@ -167,6 +186,28 @@
       "active": false
     },
     {
+      "id": "creative-dev",
+      "namespace": "design-guild",
+      "assignments": 3,
+      "projects": [
+        "chaff",
+        "polis",
+        "the ecosystem itself"
+      ],
+      "lastAt": "2026-09-06T12:20:30.382Z",
+      "active": true
+    },
+    {
+      "id": "cto",
+      "namespace": null,
+      "assignments": 3,
+      "projects": [
+        "the ecosystem itself"
+      ],
+      "lastAt": "2026-09-05T20:51:22.988Z",
+      "active": true
+    },
+    {
       "id": "security-auditor",
       "namespace": null,
       "assignments": 3,
@@ -174,6 +215,28 @@
         "agentjames"
       ],
       "lastAt": "2026-09-04T03:15:57.707Z",
+      "active": false
+    },
+    {
+      "id": "seo-specialist",
+      "namespace": null,
+      "assignments": 3,
+      "projects": [
+        "agentjames",
+        "the ecosystem itself"
+      ],
+      "lastAt": "2026-09-06T06:05:54.092Z",
+      "active": true
+    },
+    {
+      "id": "ui-designer",
+      "namespace": null,
+      "assignments": 3,
+      "projects": [
+        "polis",
+        "the ecosystem itself"
+      ],
+      "lastAt": "2026-09-06T08:28:41.635Z",
       "active": true
     },
     {
@@ -184,7 +247,7 @@
         "agentjames"
       ],
       "lastAt": "2026-09-04T04:08:19.557Z",
-      "active": true
+      "active": false
     },
     {
       "id": "computational-linguist",
@@ -198,34 +261,45 @@
       "active": false
     },
     {
-      "id": "cto",
-      "namespace": null,
-      "assignments": 2,
-      "projects": [
-        "the ecosystem itself"
-      ],
-      "lastAt": "2026-09-03T07:56:35.768Z",
-      "active": false
-    },
-    {
-      "id": "design-director",
+      "id": "design-strategist",
       "namespace": "design-guild",
       "assignments": 2,
       "projects": [
-        "home"
+        "klik",
+        "the ecosystem itself"
       ],
-      "lastAt": "2026-09-05T20:10:07.758Z",
+      "lastAt": "2026-09-06T05:36:40.369Z",
       "active": true
     },
     {
-      "id": "seo-specialist",
+      "id": "growth-director",
+      "namespace": "growth-guild",
+      "assignments": 2,
+      "projects": [
+        "home",
+        "polis"
+      ],
+      "lastAt": "2026-09-06T07:24:05.315Z",
+      "active": true
+    },
+    {
+      "id": "ux-researcher",
       "namespace": null,
       "assignments": 2,
       "projects": [
-        "agentjames",
         "the ecosystem itself"
       ],
-      "lastAt": "2026-09-04T03:49:51.852Z",
+      "lastAt": "2026-09-06T08:16:31.546Z",
+      "active": true
+    },
+    {
+      "id": "aeo-specialist",
+      "namespace": "growth-guild",
+      "assignments": 1,
+      "projects": [
+        "agentjames"
+      ],
+      "lastAt": "2026-09-06T06:06:18.156Z",
       "active": true
     },
     {
@@ -269,16 +343,6 @@
       "active": false
     },
     {
-      "id": "creative-dev",
-      "namespace": "design-guild",
-      "assignments": 1,
-      "projects": [
-        "chaff"
-      ],
-      "lastAt": "2026-08-08T23:35:34.256Z",
-      "active": false
-    },
-    {
       "id": "debugger",
       "namespace": null,
       "assignments": 1,
@@ -299,6 +363,16 @@
       "active": true
     },
     {
+      "id": "game-designer",
+      "namespace": "game-guild",
+      "assignments": 1,
+      "projects": [
+        "the ecosystem itself"
+      ],
+      "lastAt": "2026-09-06T08:16:06.642Z",
+      "active": true
+    },
+    {
       "id": "game-director",
       "namespace": "game-guild",
       "assignments": 1,
@@ -309,14 +383,14 @@
       "active": false
     },
     {
-      "id": "growth-director",
-      "namespace": "growth-guild",
+      "id": "interaction-designer",
+      "namespace": null,
       "assignments": 1,
       "projects": [
-        "home"
+        "polis"
       ],
-      "lastAt": "2026-08-28T11:03:37.261Z",
-      "active": false
+      "lastAt": "2026-09-06T05:51:46.298Z",
+      "active": true
     },
     {
       "id": "mcp-engineer",
@@ -347,22 +421,12 @@
       ],
       "lastAt": "2026-08-28T11:02:55.612Z",
       "active": false
-    },
-    {
-      "id": "ux-researcher",
-      "namespace": null,
-      "assignments": 1,
-      "projects": [
-        "the ecosystem itself"
-      ],
-      "lastAt": "2026-09-04T03:51:45.330Z",
-      "active": true
     }
   ],
   "projects": [
     {
       "id": "home",
-      "assignments": 50,
+      "assignments": 65,
       "crew": [
         "Explore",
         "agentic-director",
@@ -380,46 +444,67 @@
         "prompt-engineer",
         "sales-engineer"
       ],
-      "lastAt": "2026-09-05T20:12:45.885Z",
+      "lastAt": "2026-09-06T05:42:29.330Z",
       "active": true
     },
     {
       "id": "agentjames",
-      "assignments": 31,
+      "assignments": 44,
       "crew": [
         "accessibility-engineer",
+        "aeo-specialist",
         "architect",
         "copywriter",
         "design-reviewer",
         "general-purpose",
         "market-researcher",
         "mcp-engineer",
+        "product-strategist",
         "qa-engineer",
         "security-auditor",
         "seo-specialist"
       ],
-      "lastAt": "2026-09-05T19:36:33.139Z",
+      "lastAt": "2026-09-06T08:40:04.579Z",
       "active": true
     },
     {
       "id": "the ecosystem itself",
-      "assignments": 21,
+      "assignments": 30,
       "crew": [
         "Explore",
         "architect",
         "code-reviewer",
         "controller",
         "copywriter",
+        "creative-dev",
         "cto",
         "design-reviewer",
+        "design-strategist",
         "fork",
+        "game-designer",
         "general-purpose",
         "product-strategist",
+        "prompt-engineer",
         "qa-engineer",
         "seo-specialist",
+        "ui-designer",
         "ux-researcher"
       ],
-      "lastAt": "2026-09-05T20:14:37.693Z",
+      "lastAt": "2026-09-06T08:28:41.635Z",
+      "active": true
+    },
+    {
+      "id": "chaff",
+      "assignments": 20,
+      "crew": [
+        "architect",
+        "code-reviewer",
+        "creative-dev",
+        "general-purpose",
+        "market-researcher",
+        "prompt-engineer"
+      ],
+      "lastAt": "2026-09-05T20:53:13.132Z",
       "active": true
     },
     {
@@ -435,20 +520,6 @@
       "active": false
     },
     {
-      "id": "chaff",
-      "assignments": 18,
-      "crew": [
-        "architect",
-        "code-reviewer",
-        "creative-dev",
-        "general-purpose",
-        "market-researcher",
-        "prompt-engineer"
-      ],
-      "lastAt": "2026-08-09T01:30:14.938Z",
-      "active": false
-    },
-    {
       "id": "dogwatch",
       "assignments": 17,
       "crew": [
@@ -458,6 +529,20 @@
       ],
       "lastAt": "2026-08-28T17:34:29.242Z",
       "active": false
+    },
+    {
+      "id": "polis",
+      "assignments": 16,
+      "crew": [
+        "creative-dev",
+        "general-purpose",
+        "growth-director",
+        "interaction-designer",
+        "market-researcher",
+        "ui-designer"
+      ],
+      "lastAt": "2026-09-06T12:25:19.509Z",
+      "active": true
     },
     {
       "id": "clarifier",
@@ -516,6 +601,26 @@
       "active": false
     },
     {
+      "id": ".aj-release",
+      "assignments": 5,
+      "crew": [
+        "copywriter",
+        "design-reviewer",
+        "general-purpose"
+      ],
+      "lastAt": "2026-09-06T11:36:20.160Z",
+      "active": true
+    },
+    {
+      "id": "overture",
+      "assignments": 5,
+      "crew": [
+        "general-purpose"
+      ],
+      "lastAt": "2026-09-05T21:16:45.506Z",
+      "active": true
+    },
+    {
       "id": "pitman",
       "assignments": 5,
       "crew": [
@@ -544,22 +649,23 @@
     },
     {
       "id": "guilds",
-      "assignments": 3,
+      "assignments": 4,
       "crew": [
+        "general-purpose",
         "market-researcher",
         "product-strategist"
       ],
-      "lastAt": "2026-09-05T19:45:11.344Z",
+      "lastAt": "2026-09-06T04:43:50.011Z",
       "active": true
     },
     {
-      "id": "polis",
+      "id": "kedge",
       "assignments": 3,
       "crew": [
-        "general-purpose",
-        "market-researcher"
+        "design-director",
+        "general-purpose"
       ],
-      "lastAt": "2026-09-05T17:50:02.944Z",
+      "lastAt": "2026-09-06T12:30:28.303Z",
       "active": true
     },
     {
@@ -582,22 +688,22 @@
       "active": false
     },
     {
-      "id": ".aj-release",
-      "assignments": 2,
-      "crew": [
-        "copywriter",
-        "design-reviewer"
-      ],
-      "lastAt": "2026-08-28T16:33:57.951Z",
-      "active": false
-    },
-    {
       "id": "aeo-lab",
       "assignments": 2,
       "crew": [
         "general-purpose"
       ],
       "lastAt": "2026-09-05T15:19:16.784Z",
+      "active": true
+    },
+    {
+      "id": "klik",
+      "assignments": 2,
+      "crew": [
+        "design-strategist",
+        "market-researcher"
+      ],
+      "lastAt": "2026-09-05T20:34:03.373Z",
       "active": true
     },
     {
@@ -637,6 +743,15 @@
       "active": false
     },
     {
+      "id": "org-transition",
+      "assignments": 1,
+      "crew": [
+        "general-purpose"
+      ],
+      "lastAt": "2026-09-06T04:24:44.033Z",
+      "active": true
+    },
+    {
       "id": "showcase-program",
       "assignments": 1,
       "crew": [
@@ -651,6 +766,16 @@
       "a": "general-purpose",
       "b": "market-researcher",
       "sessions": 8
+    },
+    {
+      "a": "general-purpose",
+      "b": "product-strategist",
+      "sessions": 5
+    },
+    {
+      "a": "general-purpose",
+      "b": "prompt-engineer",
+      "sessions": 5
     },
     {
       "a": "architect",
@@ -673,13 +798,13 @@
       "sessions": 4
     },
     {
-      "a": "design-reviewer",
+      "a": "design-director",
       "b": "general-purpose",
       "sessions": 4
     },
     {
-      "a": "general-purpose",
-      "b": "product-strategist",
+      "a": "design-reviewer",
+      "b": "general-purpose",
       "sessions": 4
     },
     {
@@ -713,8 +838,13 @@
       "sessions": 3
     },
     {
+      "a": "creative-dev",
+      "b": "general-purpose",
+      "sessions": 3
+    },
+    {
       "a": "general-purpose",
-      "b": "prompt-engineer",
+      "b": "seo-specialist",
       "sessions": 3
     },
     {
@@ -763,8 +893,23 @@
       "sessions": 2
     },
     {
-      "a": "design-director",
+      "a": "creative-dev",
+      "b": "prompt-engineer",
+      "sessions": 2
+    },
+    {
+      "a": "creative-dev",
+      "b": "ui-designer",
+      "sessions": 2
+    },
+    {
+      "a": "cto",
       "b": "general-purpose",
+      "sessions": 2
+    },
+    {
+      "a": "design-director",
+      "b": "prompt-engineer",
       "sessions": 2
     },
     {
@@ -789,12 +934,22 @@
     },
     {
       "a": "general-purpose",
+      "b": "growth-director",
+      "sessions": 2
+    },
+    {
+      "a": "general-purpose",
       "b": "qa-engineer",
       "sessions": 2
     },
     {
       "a": "general-purpose",
-      "b": "seo-specialist",
+      "b": "ui-designer",
+      "sessions": 2
+    },
+    {
+      "a": "general-purpose",
+      "b": "ux-researcher",
       "sessions": 2
     },
     {
@@ -805,6 +960,11 @@
     {
       "a": "market-researcher",
       "b": "prompt-engineer",
+      "sessions": 2
+    },
+    {
+      "a": "product-strategist",
+      "b": "seo-specialist",
       "sessions": 2
     },
     {
@@ -849,6 +1009,21 @@
     },
     {
       "a": "accessibility-engineer",
+      "b": "seo-specialist",
+      "sessions": 1
+    },
+    {
+      "a": "aeo-specialist",
+      "b": "general-purpose",
+      "sessions": 1
+    },
+    {
+      "a": "aeo-specialist",
+      "b": "product-strategist",
+      "sessions": 1
+    },
+    {
+      "a": "aeo-specialist",
       "b": "seo-specialist",
       "sessions": 1
     },
@@ -1144,7 +1319,22 @@
     },
     {
       "a": "creative-dev",
-      "b": "general-purpose",
+      "b": "design-strategist",
+      "sessions": 1
+    },
+    {
+      "a": "creative-dev",
+      "b": "game-designer",
+      "sessions": 1
+    },
+    {
+      "a": "creative-dev",
+      "b": "growth-director",
+      "sessions": 1
+    },
+    {
+      "a": "creative-dev",
+      "b": "interaction-designer",
       "sessions": 1
     },
     {
@@ -1154,7 +1344,7 @@
     },
     {
       "a": "creative-dev",
-      "b": "prompt-engineer",
+      "b": "ux-researcher",
       "sessions": 1
     },
     {
@@ -1164,7 +1354,7 @@
     },
     {
       "a": "cto",
-      "b": "general-purpose",
+      "b": "fork",
       "sessions": 1
     },
     {
@@ -1224,11 +1414,6 @@
     },
     {
       "a": "design-director",
-      "b": "prompt-engineer",
-      "sessions": 1
-    },
-    {
-      "a": "design-director",
       "b": "sales-engineer",
       "sessions": 1
     },
@@ -1264,6 +1449,36 @@
     },
     {
       "a": "design-reviewer",
+      "b": "ux-researcher",
+      "sessions": 1
+    },
+    {
+      "a": "design-strategist",
+      "b": "game-designer",
+      "sessions": 1
+    },
+    {
+      "a": "design-strategist",
+      "b": "general-purpose",
+      "sessions": 1
+    },
+    {
+      "a": "design-strategist",
+      "b": "market-researcher",
+      "sessions": 1
+    },
+    {
+      "a": "design-strategist",
+      "b": "prompt-engineer",
+      "sessions": 1
+    },
+    {
+      "a": "design-strategist",
+      "b": "ui-designer",
+      "sessions": 1
+    },
+    {
+      "a": "design-strategist",
       "b": "ux-researcher",
       "sessions": 1
     },
@@ -1328,6 +1543,26 @@
       "sessions": 1
     },
     {
+      "a": "game-designer",
+      "b": "general-purpose",
+      "sessions": 1
+    },
+    {
+      "a": "game-designer",
+      "b": "prompt-engineer",
+      "sessions": 1
+    },
+    {
+      "a": "game-designer",
+      "b": "ui-designer",
+      "sessions": 1
+    },
+    {
+      "a": "game-designer",
+      "b": "ux-researcher",
+      "sessions": 1
+    },
+    {
       "a": "game-director",
       "b": "general-purpose",
       "sessions": 1
@@ -1359,7 +1594,7 @@
     },
     {
       "a": "general-purpose",
-      "b": "growth-director",
+      "b": "interaction-designer",
       "sessions": 1
     },
     {
@@ -1383,8 +1618,8 @@
       "sessions": 1
     },
     {
-      "a": "general-purpose",
-      "b": "ux-researcher",
+      "a": "growth-director",
+      "b": "interaction-designer",
       "sessions": 1
     },
     {
@@ -1405,6 +1640,16 @@
     {
       "a": "growth-director",
       "b": "sales-engineer",
+      "sessions": 1
+    },
+    {
+      "a": "growth-director",
+      "b": "ui-designer",
+      "sessions": 1
+    },
+    {
+      "a": "interaction-designer",
+      "b": "ui-designer",
       "sessions": 1
     },
     {
@@ -1464,17 +1709,22 @@
     },
     {
       "a": "product-strategist",
-      "b": "seo-specialist",
-      "sessions": 1
-    },
-    {
-      "a": "product-strategist",
       "b": "ux-researcher",
       "sessions": 1
     },
     {
       "a": "prompt-engineer",
       "b": "sales-engineer",
+      "sessions": 1
+    },
+    {
+      "a": "prompt-engineer",
+      "b": "ui-designer",
+      "sessions": 1
+    },
+    {
+      "a": "prompt-engineer",
+      "b": "ux-researcher",
       "sessions": 1
     },
     {
@@ -1496,23 +1746,28 @@
       "a": "seo-specialist",
       "b": "ux-researcher",
       "sessions": 1
+    },
+    {
+      "a": "ui-designer",
+      "b": "ux-researcher",
+      "sessions": 1
     }
   ],
   "excluded": {
-    "otherWorlds": 164,
+    "otherWorlds": 161,
     "unparseable": 0,
     "noProject": 0
   },
   "stats": {
-    "assignments": 233,
-    "agentsEverDispatched": 30,
-    "projectsTouched": 25,
-    "workUnits": 40,
-    "collaborationPairs": 170,
-    "excludedOtherWorlds": 164,
+    "assignments": 300,
+    "agentsEverDispatched": 35,
+    "projectsTouched": 29,
+    "workUnits": 51,
+    "collaborationPairs": 198,
+    "excludedOtherWorlds": 161,
     "rosterSize": 59,
-    "neverDispatched": 33,
-    "rosterEverDispatched": 26,
+    "neverDispatched": 28,
+    "rosterEverDispatched": 31,
     "dispatchedOutsideRoster": [
       "claude-code-guide",
       "fork",
@@ -1521,7 +1776,6 @@
     ]
   },
   "dormant": [
-    "aeo-specialist",
     "api-designer",
     "backend-director",
     "chief-of-staff",
@@ -1530,14 +1784,11 @@
     "counsel",
     "creative-director",
     "data-engineer",
-    "design-strategist",
     "devops",
     "educator",
     "eval-engineer",
-    "game-designer",
     "growth-engineer",
     "incident-commander",
-    "interaction-designer",
     "knowledge-librarian",
     "localization-specialist",
     "mentor",
@@ -1552,7 +1803,6 @@
     "support-community",
     "technical-writer",
     "trust-safety",
-    "ui-designer",
     "user-researcher"
   ]
 }
