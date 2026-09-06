@@ -404,10 +404,14 @@ function finishImport(ecosystem, report, files, looked) {
   }
 
   putOnStage(ecosystem, 'Your ecosystem');
+  // What is ON THE STAGE, not what the download will contain. The export can
+  // still leave a member out if the specification refuses it, and it says so
+  // when it does; promising the count here would make that correction look
+  // like a contradiction.
   showDownload(
     `${ecosystem.stats.agents} ${plural(ecosystem.stats.agents, 'charter', 'charters')} and ` +
-    `${ecosystem.stats.skills} ${plural(ecosystem.stats.skills, 'skill', 'skills')}, ready to unzip`,
-    'Written in this tab from the files you chose.',
+    `${ecosystem.stats.skills} ${plural(ecosystem.stats.skills, 'skill', 'skills')} on the stage`,
+    'The bundle is written in this tab from the files you chose.',
   );
 }
 
