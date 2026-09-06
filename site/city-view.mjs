@@ -918,7 +918,7 @@ export function computeFocusFrame(city, container, cityFrame) {
  * promises: a PLACE is always named, a PERSON is named when you are close
  * enough to be looking at people. Seven director plates permanently mounted
  * over the middle of the city was most of the pile of white boxes, and no
- * placement algorithm fixes "there are too many labels" — only a rule about
+ * placement algorithm fixes "there are too many labels"; only a rule about
  * how many labels a frame may carry does. So directors appear above
  * `DIRECTOR_NAME_ZOOM`, and at any zoom for whoever is hovered, focused,
  * selected, or standing next to them. Nobody becomes unreachable: the roster

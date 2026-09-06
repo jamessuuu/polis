@@ -370,7 +370,7 @@ export function footingBands(col, row, height, footprint = 0.74, band = 3.5) {
  * The doorway, at the south corner where the citizen is already standing.
  *
  * Drawn as extra subpaths of the footing band, so a building gains an
- * entrance and a human scale reference for ZERO extra elements — the budget
+ * entrance and a human scale reference for ZERO extra elements. The budget
  * for this map is 2,400 and one node per citizen is not spare change. The
  * footing tone is what a recessed opening looks like anyway.
  */

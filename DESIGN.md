@@ -234,7 +234,7 @@ and no placement algorithm fixes "there are too many labels". A map declutters
 by zoom. So: a PLACE is named at every zoom, a PERSON is named above
 `DIRECTOR_NAME_ZOOM` (1.3x) or whenever they are hovered, focused, selected,
 or standing next to whoever is. The page copy says so in those words. Nobody
-becomes unreachable — the roster and the panel name all 59 at every zoom,
+becomes unreachable: the roster and the panel name all 59 at every zoom,
 with JavaScript off included.
 
 The placement pass itself is `site/labels.mjs` now: pure, no DOM, and gated by

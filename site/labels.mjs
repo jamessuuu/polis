@@ -17,7 +17,7 @@
  *   2. Each label proposes a fan of CANDIDATE positions around its anchor:
  *      eight compass directions at several radii, plus the natural spot.
  *   3. Every candidate is SCORED, not first-fit. A candidate that overlaps an
- *      already-placed label is rejected outright — labels never overlap, that
+ *      already-placed label is rejected outright. Labels never overlap; that
  *      is the whole point. Everything else is a cost: how much of a building
  *      silhouette it hides, how far it sits from its subject, whether it
  *      leaves the frame, and how much it fights the preferred direction.
