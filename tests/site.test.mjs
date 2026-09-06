@@ -64,6 +64,21 @@ test('the site copy of the snapshot matches the source snapshot', () => {
   assert.equal(readFileSync(SITE_JSON, 'utf8'), readFileSync(SNAPSHOT, 'utf8'));
 });
 
+test('the site copy of the telemetry matches the source telemetry', () => {
+  const src = join(ROOT, 'data', 'workforce.json');
+  const dst = join(ROOT, 'site', 'workforce.json');
+  assert.ok(existsSync(dst), 'site/workforce.json missing; run build:site');
+  assert.equal(readFileSync(dst, 'utf8'), readFileSync(src, 'utf8'));
+});
+
+test('the shipped palette is the generated palette', async () => {
+  const { paletteCSS } = await import('../site/palette.mjs');
+  const css = join(ROOT, 'site', 'palette.css');
+  assert.ok(existsSync(css), 'site/palette.css missing; run build:site');
+  assert.equal(readFileSync(css, 'utf8'), paletteCSS());
+  assert.ok(html().includes('href="./palette.css"'), 'index.html does not link the palette');
+});
+
 test('the page carries no charter body text', () => {
   // extract.mjs never puts bodies in the snapshot; this asserts the site did
   // not reintroduce them from somewhere else.

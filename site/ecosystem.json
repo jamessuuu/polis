@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-05T19:57:24.861Z",
+  "generatedAt": "2026-09-05T20:35:57.122Z",
   "scope": "personal",
   "divisions": [
     {
@@ -1018,6 +1018,11 @@
       "kind": "upstream"
     },
     {
+      "from": "product-manager",
+      "to": "accessibility-engineer",
+      "kind": "upstream"
+    },
+    {
       "from": "ui-designer",
       "to": "accessibility-engineer",
       "kind": "upstream"
@@ -1038,13 +1043,38 @@
       "kind": "upstream"
     },
     {
+      "from": "ondevice-ml-engineer",
+      "to": "ai-engineer",
+      "kind": "upstream"
+    },
+    {
       "from": "product-strategist",
       "to": "ai-engineer",
       "kind": "upstream"
     },
     {
       "from": "ai-engineer",
+      "to": "computational-linguist",
+      "kind": "downstream"
+    },
+    {
+      "from": "ai-engineer",
+      "to": "metrics-analyst",
+      "kind": "downstream"
+    },
+    {
+      "from": "ai-engineer",
+      "to": "ondevice-ml-engineer",
+      "kind": "downstream"
+    },
+    {
+      "from": "ai-engineer",
       "to": "qa-engineer",
+      "kind": "downstream"
+    },
+    {
+      "from": "ai-engineer",
+      "to": "security-auditor",
       "kind": "downstream"
     },
     {
@@ -1053,8 +1083,23 @@
       "kind": "upstream"
     },
     {
+      "from": "product-manager",
+      "to": "api-designer",
+      "kind": "upstream"
+    },
+    {
       "from": "api-designer",
       "to": "code-reviewer",
+      "kind": "downstream"
+    },
+    {
+      "from": "api-designer",
+      "to": "qa-engineer",
+      "kind": "downstream"
+    },
+    {
+      "from": "api-designer",
+      "to": "security-auditor",
       "kind": "downstream"
     },
     {
@@ -1068,14 +1113,74 @@
       "kind": "upstream"
     },
     {
+      "from": "refactor-specialist",
+      "to": "architect",
+      "kind": "upstream"
+    },
+    {
+      "from": "architect",
+      "to": "data-engineer",
+      "kind": "downstream"
+    },
+    {
+      "from": "architect",
+      "to": "performance-engineer",
+      "kind": "downstream"
+    },
+    {
+      "from": "architect",
+      "to": "qa-engineer",
+      "kind": "downstream"
+    },
+    {
+      "from": "architect",
+      "to": "refactor-specialist",
+      "kind": "downstream"
+    },
+    {
+      "from": "chief-of-staff",
+      "to": "controller",
+      "kind": "downstream"
+    },
+    {
+      "from": "architect",
+      "to": "code-reviewer",
+      "kind": "upstream"
+    },
+    {
+      "from": "code-reviewer",
+      "to": "data-engineer",
+      "kind": "downstream"
+    },
+    {
       "from": "code-reviewer",
       "to": "refactor-specialist",
       "kind": "downstream"
     },
     {
+      "from": "chief-of-staff",
+      "to": "competitive-analyst",
+      "kind": "upstream"
+    },
+    {
       "from": "market-researcher",
       "to": "competitive-analyst",
       "kind": "upstream"
+    },
+    {
+      "from": "product-strategist",
+      "to": "competitive-analyst",
+      "kind": "upstream"
+    },
+    {
+      "from": "competitive-analyst",
+      "to": "growth-engineer",
+      "kind": "downstream"
+    },
+    {
+      "from": "competitive-analyst",
+      "to": "metrics-analyst",
+      "kind": "downstream"
     },
     {
       "from": "competitive-analyst",
@@ -1088,7 +1193,17 @@
       "kind": "downstream"
     },
     {
+      "from": "localization-specialist",
+      "to": "computational-linguist",
+      "kind": "upstream"
+    },
+    {
       "from": "market-researcher",
+      "to": "computational-linguist",
+      "kind": "upstream"
+    },
+    {
+      "from": "ondevice-ml-engineer",
       "to": "computational-linguist",
       "kind": "upstream"
     },
@@ -1099,11 +1214,46 @@
     },
     {
       "from": "computational-linguist",
+      "to": "ai-engineer",
+      "kind": "downstream"
+    },
+    {
+      "from": "computational-linguist",
+      "to": "copywriter",
+      "kind": "downstream"
+    },
+    {
+      "from": "computational-linguist",
       "to": "ondevice-ml-engineer",
       "kind": "downstream"
     },
     {
+      "from": "computational-linguist",
+      "to": "qa-engineer",
+      "kind": "downstream"
+    },
+    {
+      "from": "computational-linguist",
+      "to": "technical-writer",
+      "kind": "downstream"
+    },
+    {
       "from": "growth-engineer",
+      "to": "content-strategist",
+      "kind": "upstream"
+    },
+    {
+      "from": "market-researcher",
+      "to": "content-strategist",
+      "kind": "upstream"
+    },
+    {
+      "from": "metrics-analyst",
+      "to": "content-strategist",
+      "kind": "upstream"
+    },
+    {
+      "from": "user-researcher",
       "to": "content-strategist",
       "kind": "upstream"
     },
@@ -1113,7 +1263,17 @@
       "kind": "downstream"
     },
     {
-      "from": "chief-of-staff",
+      "from": "content-strategist",
+      "to": "seo-specialist",
+      "kind": "downstream"
+    },
+    {
+      "from": "data-engineer",
+      "to": "controller",
+      "kind": "upstream"
+    },
+    {
+      "from": "devops",
       "to": "controller",
       "kind": "upstream"
     },
@@ -1123,14 +1283,49 @@
       "kind": "downstream"
     },
     {
+      "from": "creative-director",
+      "to": "copywriter",
+      "kind": "upstream"
+    },
+    {
+      "from": "product-manager",
+      "to": "copywriter",
+      "kind": "upstream"
+    },
+    {
+      "from": "copywriter",
+      "to": "counsel",
+      "kind": "downstream"
+    },
+    {
       "from": "copywriter",
       "to": "localization-specialist",
       "kind": "downstream"
     },
     {
+      "from": "copywriter",
+      "to": "ui-designer",
+      "kind": "downstream"
+    },
+    {
+      "from": "chief-of-staff",
+      "to": "counsel",
+      "kind": "upstream"
+    },
+    {
+      "from": "growth-engineer",
+      "to": "counsel",
+      "kind": "upstream"
+    },
+    {
       "from": "trust-safety",
       "to": "counsel",
       "kind": "upstream"
+    },
+    {
+      "from": "counsel",
+      "to": "devops",
+      "kind": "downstream"
     },
     {
       "from": "counsel",
@@ -1149,6 +1344,16 @@
     },
     {
       "from": "creative-director",
+      "to": "interaction-designer",
+      "kind": "downstream"
+    },
+    {
+      "from": "creative-director",
+      "to": "sound-designer",
+      "kind": "downstream"
+    },
+    {
+      "from": "creative-director",
       "to": "ui-designer",
       "kind": "downstream"
     },
@@ -1158,19 +1363,44 @@
       "kind": "upstream"
     },
     {
+      "from": "product-strategist",
+      "to": "cto",
+      "kind": "upstream"
+    },
+    {
+      "from": "cto",
+      "to": "ai-engineer",
+      "kind": "downstream"
+    },
+    {
+      "from": "cto",
+      "to": "architect",
+      "kind": "downstream"
+    },
+    {
       "from": "cto",
       "to": "educator",
       "kind": "downstream"
     },
     {
-      "from": "architect",
+      "from": "metrics-analyst",
       "to": "data-engineer",
       "kind": "upstream"
     },
     {
       "from": "data-engineer",
+      "to": "code-reviewer",
+      "kind": "downstream"
+    },
+    {
+      "from": "data-engineer",
       "to": "devops",
       "kind": "downstream"
+    },
+    {
+      "from": "incident-commander",
+      "to": "debugger",
+      "kind": "upstream"
     },
     {
       "from": "qa-engineer",
@@ -1183,13 +1413,33 @@
       "kind": "downstream"
     },
     {
+      "from": "debugger",
+      "to": "qa-engineer",
+      "kind": "downstream"
+    },
+    {
       "from": "architect",
       "to": "devops",
       "kind": "upstream"
     },
     {
+      "from": "security-auditor",
+      "to": "devops",
+      "kind": "upstream"
+    },
+    {
+      "from": "devops",
+      "to": "incident-commander",
+      "kind": "downstream"
+    },
+    {
       "from": "devops",
       "to": "performance-engineer",
+      "kind": "downstream"
+    },
+    {
+      "from": "devops",
+      "to": "technical-writer",
       "kind": "downstream"
     },
     {
@@ -1203,7 +1453,37 @@
       "kind": "upstream"
     },
     {
+      "from": "educator",
+      "to": "ai-engineer",
+      "kind": "downstream"
+    },
+    {
+      "from": "educator",
+      "to": "architect",
+      "kind": "downstream"
+    },
+    {
+      "from": "educator",
+      "to": "counsel",
+      "kind": "downstream"
+    },
+    {
+      "from": "educator",
+      "to": "knowledge-librarian",
+      "kind": "downstream"
+    },
+    {
+      "from": "chief-of-staff",
+      "to": "growth-engineer",
+      "kind": "upstream"
+    },
+    {
       "from": "metrics-analyst",
+      "to": "growth-engineer",
+      "kind": "upstream"
+    },
+    {
+      "from": "product-strategist",
       "to": "growth-engineer",
       "kind": "upstream"
     },
@@ -1213,12 +1493,22 @@
       "kind": "downstream"
     },
     {
-      "from": "devops",
+      "from": "growth-engineer",
+      "to": "seo-specialist",
+      "kind": "downstream"
+    },
+    {
+      "from": "metrics-analyst",
       "to": "incident-commander",
       "kind": "upstream"
     },
     {
-      "from": "metrics-analyst",
+      "from": "security-auditor",
+      "to": "incident-commander",
+      "kind": "upstream"
+    },
+    {
+      "from": "support-community",
       "to": "incident-commander",
       "kind": "upstream"
     },
@@ -1233,9 +1523,24 @@
       "kind": "downstream"
     },
     {
+      "from": "product-manager",
+      "to": "interaction-designer",
+      "kind": "upstream"
+    },
+    {
+      "from": "sound-designer",
+      "to": "interaction-designer",
+      "kind": "upstream"
+    },
+    {
       "from": "ui-designer",
       "to": "interaction-designer",
       "kind": "upstream"
+    },
+    {
+      "from": "interaction-designer",
+      "to": "accessibility-engineer",
+      "kind": "downstream"
     },
     {
       "from": "interaction-designer",
@@ -1259,7 +1564,17 @@
     },
     {
       "from": "localization-specialist",
+      "to": "chief-of-staff",
+      "kind": "downstream"
+    },
+    {
+      "from": "localization-specialist",
       "to": "copywriter",
+      "kind": "downstream"
+    },
+    {
+      "from": "localization-specialist",
+      "to": "counsel",
       "kind": "downstream"
     },
     {
@@ -1268,9 +1583,29 @@
       "kind": "upstream"
     },
     {
+      "from": "market-researcher",
+      "to": "pricing-strategist",
+      "kind": "downstream"
+    },
+    {
+      "from": "market-researcher",
+      "to": "product-strategist",
+      "kind": "downstream"
+    },
+    {
+      "from": "growth-engineer",
+      "to": "metrics-analyst",
+      "kind": "upstream"
+    },
+    {
       "from": "performance-engineer",
       "to": "metrics-analyst",
       "kind": "upstream"
+    },
+    {
+      "from": "metrics-analyst",
+      "to": "chief-of-staff",
+      "kind": "downstream"
     },
     {
       "from": "architect",
@@ -1283,9 +1618,39 @@
       "kind": "upstream"
     },
     {
-      "from": "architect",
-      "to": "performance-engineer",
+      "from": "creative-dev",
+      "to": "ondevice-ml-engineer",
       "kind": "upstream"
+    },
+    {
+      "from": "ondevice-ml-engineer",
+      "to": "code-reviewer",
+      "kind": "downstream"
+    },
+    {
+      "from": "ondevice-ml-engineer",
+      "to": "counsel",
+      "kind": "downstream"
+    },
+    {
+      "from": "ondevice-ml-engineer",
+      "to": "metrics-analyst",
+      "kind": "downstream"
+    },
+    {
+      "from": "ondevice-ml-engineer",
+      "to": "performance-engineer",
+      "kind": "downstream"
+    },
+    {
+      "from": "ondevice-ml-engineer",
+      "to": "security-auditor",
+      "kind": "downstream"
+    },
+    {
+      "from": "ondevice-ml-engineer",
+      "to": "technical-writer",
+      "kind": "downstream"
     },
     {
       "from": "performance-engineer",
@@ -1293,12 +1658,12 @@
       "kind": "downstream"
     },
     {
-      "from": "controller",
-      "to": "pricing-strategist",
-      "kind": "upstream"
+      "from": "performance-engineer",
+      "to": "devops",
+      "kind": "downstream"
     },
     {
-      "from": "market-researcher",
+      "from": "controller",
       "to": "pricing-strategist",
       "kind": "upstream"
     },
@@ -1319,11 +1684,26 @@
     },
     {
       "from": "pricing-strategist",
+      "to": "controller",
+      "kind": "downstream"
+    },
+    {
+      "from": "pricing-strategist",
       "to": "copywriter",
       "kind": "downstream"
     },
     {
+      "from": "pricing-strategist",
+      "to": "growth-engineer",
+      "kind": "downstream"
+    },
+    {
       "from": "chief-of-staff",
+      "to": "product-manager",
+      "kind": "upstream"
+    },
+    {
+      "from": "metrics-analyst",
       "to": "product-manager",
       "kind": "upstream"
     },
@@ -1333,14 +1713,24 @@
       "kind": "upstream"
     },
     {
+      "from": "product-manager",
+      "to": "technical-writer",
+      "kind": "downstream"
+    },
+    {
+      "from": "product-manager",
+      "to": "ux-researcher",
+      "kind": "downstream"
+    },
+    {
       "from": "chief-of-staff",
       "to": "product-strategist",
       "kind": "upstream"
     },
     {
-      "from": "architect",
-      "to": "qa-engineer",
-      "kind": "upstream"
+      "from": "product-strategist",
+      "to": "architect",
+      "kind": "downstream"
     },
     {
       "from": "product-manager",
@@ -1348,7 +1738,17 @@
       "kind": "upstream"
     },
     {
-      "from": "architect",
+      "from": "qa-engineer",
+      "to": "code-reviewer",
+      "kind": "downstream"
+    },
+    {
+      "from": "qa-engineer",
+      "to": "performance-engineer",
+      "kind": "downstream"
+    },
+    {
+      "from": "qa-engineer",
       "to": "refactor-specialist",
       "kind": "upstream"
     },
@@ -1358,6 +1758,11 @@
       "kind": "downstream"
     },
     {
+      "from": "refactor-specialist",
+      "to": "qa-engineer",
+      "kind": "downstream"
+    },
+    {
       "from": "architect",
       "to": "sales-engineer",
       "kind": "upstream"
@@ -1368,9 +1773,24 @@
       "kind": "upstream"
     },
     {
+      "from": "counsel",
+      "to": "sales-engineer",
+      "kind": "upstream"
+    },
+    {
       "from": "cto",
       "to": "sales-engineer",
       "kind": "upstream"
+    },
+    {
+      "from": "sales-engineer",
+      "to": "controller",
+      "kind": "downstream"
+    },
+    {
+      "from": "sales-engineer",
+      "to": "pricing-strategist",
+      "kind": "downstream"
     },
     {
       "from": "chief-of-staff",
@@ -1378,12 +1798,32 @@
       "kind": "upstream"
     },
     {
+      "from": "devops",
+      "to": "security-auditor",
+      "kind": "upstream"
+    },
+    {
+      "from": "security-auditor",
+      "to": "architect",
+      "kind": "downstream"
+    },
+    {
+      "from": "security-auditor",
+      "to": "supabase-rls-auditor",
+      "kind": "downstream"
+    },
+    {
       "from": "security-auditor",
       "to": "trust-safety",
       "kind": "downstream"
     },
     {
-      "from": "growth-engineer",
+      "from": "architect",
+      "to": "seo-specialist",
+      "kind": "upstream"
+    },
+    {
+      "from": "market-researcher",
       "to": "seo-specialist",
       "kind": "upstream"
     },
@@ -1398,9 +1838,19 @@
       "kind": "downstream"
     },
     {
-      "from": "creative-director",
-      "to": "sound-designer",
-      "kind": "upstream"
+      "from": "seo-specialist",
+      "to": "counsel",
+      "kind": "downstream"
+    },
+    {
+      "from": "seo-specialist",
+      "to": "growth-engineer",
+      "kind": "downstream"
+    },
+    {
+      "from": "sound-designer",
+      "to": "creative-director",
+      "kind": "downstream"
     },
     {
       "from": "chief-of-staff",
@@ -1419,6 +1869,16 @@
     },
     {
       "from": "support-community",
+      "to": "debugger",
+      "kind": "downstream"
+    },
+    {
+      "from": "support-community",
+      "to": "product-manager",
+      "kind": "downstream"
+    },
+    {
+      "from": "support-community",
       "to": "trust-safety",
       "kind": "downstream"
     },
@@ -1433,7 +1893,27 @@
       "kind": "upstream"
     },
     {
+      "from": "technical-writer",
+      "to": "devops",
+      "kind": "downstream"
+    },
+    {
+      "from": "technical-writer",
+      "to": "qa-engineer",
+      "kind": "downstream"
+    },
+    {
+      "from": "technical-writer",
+      "to": "support-community",
+      "kind": "downstream"
+    },
+    {
       "from": "chief-of-staff",
+      "to": "trust-safety",
+      "kind": "upstream"
+    },
+    {
+      "from": "product-manager",
       "to": "trust-safety",
       "kind": "upstream"
     },
@@ -1445,6 +1925,16 @@
     {
       "from": "trust-safety",
       "to": "architect",
+      "kind": "downstream"
+    },
+    {
+      "from": "trust-safety",
+      "to": "copywriter",
+      "kind": "downstream"
+    },
+    {
+      "from": "trust-safety",
+      "to": "incident-commander",
       "kind": "downstream"
     },
     {
@@ -1473,6 +1963,11 @@
       "kind": "upstream"
     },
     {
+      "from": "market-researcher",
+      "to": "user-researcher",
+      "kind": "upstream"
+    },
+    {
       "from": "product-manager",
       "to": "user-researcher",
       "kind": "upstream"
@@ -1481,6 +1976,21 @@
       "from": "product-strategist",
       "to": "user-researcher",
       "kind": "upstream"
+    },
+    {
+      "from": "user-researcher",
+      "to": "copywriter",
+      "kind": "downstream"
+    },
+    {
+      "from": "user-researcher",
+      "to": "creative-director",
+      "kind": "downstream"
+    },
+    {
+      "from": "user-researcher",
+      "to": "metrics-analyst",
+      "kind": "downstream"
     },
     {
       "from": "user-researcher",
@@ -1499,11 +2009,6 @@
     },
     {
       "from": "metrics-analyst",
-      "to": "ux-researcher",
-      "kind": "upstream"
-    },
-    {
-      "from": "product-manager",
       "to": "ux-researcher",
       "kind": "upstream"
     },
@@ -1563,9 +2068,34 @@
       "kind": "upstream"
     },
     {
+      "from": "game-designer",
+      "to": "playtest-engineer",
+      "kind": "downstream"
+    },
+    {
+      "from": "chief-of-staff",
+      "to": "game-director",
+      "kind": "upstream"
+    },
+    {
+      "from": "game-director",
+      "to": "counsel",
+      "kind": "downstream"
+    },
+    {
+      "from": "game-director",
+      "to": "mentor",
+      "kind": "downstream"
+    },
+    {
+      "from": "game-director",
+      "to": "sound-designer",
+      "kind": "downstream"
+    },
+    {
       "from": "game-director",
       "to": "playtest-engineer",
-      "kind": "upstream"
+      "kind": "downstream"
     },
     {
       "from": "playtest-engineer",
@@ -2015,14 +2545,12 @@
     "skills": 86,
     "divisions": 8,
     "guilds": 6,
-    "edges": 113,
+    "edges": 219,
     "directors": 7,
-    "unreachable": 10,
+    "unreachable": 8,
     "withheld": 2
   },
   "unreachable": [
-    "knowledge-librarian",
-    "mentor",
     "agentic-director",
     "eval-engineer",
     "mcp-engineer",

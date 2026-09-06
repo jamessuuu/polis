@@ -1,104 +1,24 @@
 /*
  * Polis — styles.
  *
- * Palette is picked and verified for WCAG AA, not assumed: every text/bg and
- * fill/bg pair below was run through the relative-luminance contrast formula
- * (see the project notes) before being used here. Light mode reads like a
- * paper city-planning map (muted ink); dark mode reads like the same city at
- * night (the same hues, lifted to full saturation, like lit windows).
+ * Colour tokens live in palette.css, GENERATED from site/palette.mjs so the
+ * audited palette (tools/contrast.mjs) and the shipped palette are the same
+ * bytes. This file owns type, layout, the isometric city's materials, and
+ * motion. DESIGN.md is the art direction; where a rule here looks odd, the
+ * reason is usually there.
  *
- * Typography is three purposeful system-font roles, no webfonts:
- *   --font-display  civic serif, for headings (the "plaque" register)
- *   --font-body     system sans, for prose
- *   --font-mono     system mono, for citizen IDs, tools, models, numbers
+ * Type: no serif anywhere. Three roles —
+ *   --font-display  the sans display face, headings and precinct titles
+ *   --font-body     system sans, prose
+ *   --font-mono     system mono, ids, numbers, plates
  */
 
 :root {
-  --font-display: ui-serif, Georgia, "Iowan Old Style", "Palatino Linotype", "Times New Roman", serif;
-  --font-body: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  --font-mono: ui-monospace, "Cascadia Code", "Consolas", "SF Mono", Menlo, "Liberation Mono", monospace;
-
-  --bg: #f6f1e6;
-  --bg-elevated: #fffdf8;
-  --ink: #201d17;
-  --ink-muted: #4b463c;
-  --border-subtle: #c9c0aa;
-  --border-strong: #6b6455;
-  --focus: #10306b;
-  --accent: #0d4d55;
-  --warn: #8a2f12;
-  --warn-bg: #f3e2d8;
-
-  --div-00: #8a6d1d;
-  --div-01: #0072b2;
-  --div-02: #d55e00;
-  --div-03: #00946c;
-  --div-04: #c86ea0;
-  --div-05: #b87f00;
-  --div-06: #1c93d7;
-  --div-07: #978e0c;
-
-  /* The ground the city stands on. Warm and low-contrast on purpose: it
-     is the one large area on the page and it must not compete with the
-     precinct hues, which are the only thing on the map carrying meaning. */
-  --ground-top: #e6dcc6;
-  --ground-bottom: #d3c6ab;
-  --ground-edge: #b6a888;
-
+  --font-display: "Segoe UI Variable Display", ui-sans-serif, -apple-system, "SF Pro Display", system-ui, "Segoe UI", Roboto, sans-serif;
+  --font-body: "Segoe UI Variable Text", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: ui-monospace, "Cascadia Mono", Consolas, "SF Mono", Menlo, "Liberation Mono", monospace;
   --radius: 6px;
   color-scheme: light dark;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #14181d;
-    --bg-elevated: #1d232b;
-    --ink: #eef1f4;
-    --ink-muted: #b7c0c9;
-    --border-subtle: #333c46;
-    --border-strong: #6b7684;
-    --focus: #ffd166;
-    --accent: #7fd8e2;
-    --warn: #ff8a5b;
-    --warn-bg: #3a2018;
-
-    --div-00: #e8c565;
-    --div-01: #0072b2;
-    --div-02: #d55e00;
-    --div-03: #009e73;
-    --div-04: #cc79a7;
-    --div-05: #e69f00;
-    --div-06: #56b4e9;
-    --div-07: #f0e442;
-  --ground-top: #2b333d;
-  --ground-bottom: #1b2128;
-  --ground-edge: #3c4550;
-  }
-}
-
-:root[data-theme="dark"] {
-  --bg: #14181d;
-  --bg-elevated: #1d232b;
-  --ink: #eef1f4;
-  --ink-muted: #b7c0c9;
-  --border-subtle: #333c46;
-  --border-strong: #6b7684;
-  --focus: #ffd166;
-  --accent: #7fd8e2;
-  --warn: #ff8a5b;
-  --warn-bg: #3a2018;
-
-  --div-00: #e8c565;
-  --div-01: #0072b2;
-  --div-02: #d55e00;
-  --div-03: #009e73;
-  --div-04: #cc79a7;
-  --div-05: #e69f00;
-  --div-06: #56b4e9;
-  --div-07: #f0e442;
-  --ground-top: #2b333d;
-  --ground-bottom: #1b2128;
-  --ground-edge: #3c4550;
 }
 
 * { box-sizing: border-box; }
@@ -118,7 +38,8 @@ body {
 
 h1, h2, h3, h4 {
   font-family: var(--font-display);
-  font-weight: 600;
+  font-weight: 620;
+  letter-spacing: -0.008em;
   line-height: 1.2;
   color: var(--ink);
 }
@@ -140,6 +61,15 @@ code {
   border-radius: 3px;
   padding: 0.05em 0.35em;
   font-size: 0.9em;
+}
+
+kbd {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  border: 1px solid var(--border-subtle);
+  border-bottom-width: 2px;
+  border-radius: 3px;
+  padding: 0 0.3em;
 }
 
 .visually-hidden {
@@ -192,7 +122,7 @@ svg :focus-visible {
 
 header.site-header {
   padding: 1.5rem 0 1rem;
-  border-bottom: 3px double var(--border-strong);
+  border-bottom: 1px solid var(--border-strong);
   margin-bottom: 1.75rem;
   display: flex;
   flex-wrap: wrap;
@@ -287,9 +217,7 @@ button:hover {
 
 /* No side-tab accent bar. A thick coloured border down one edge of a card is
    the most recognisable tell of generated UI, and this panel is the one that
-   reports honest findings, so it is the last place that should look generated.
-   The emphasis comes from the tinted background and the heading colour below,
-   which carry the same meaning without the tell. */
+   reports honest findings, so it is the last place that should look generated. */
 .finding {
   border: 1.5px solid var(--border-strong);
   border-radius: var(--radius);
@@ -339,7 +267,7 @@ button:hover {
   vertical-align: 0.1em;
 }
 .tag-director {
-  color: var(--div-00);
+  color: var(--hue-00-text);
 }
 .tag-warn {
   color: var(--warn);
@@ -381,10 +309,19 @@ button:hover {
 /* ---------- the map ---------- */
 
 .map-scroll {
-  overflow-x: auto;
+  overflow: hidden;
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius);
-  background: var(--bg-elevated);
+  background: var(--sky-bottom);
+  /* The map is the subject of this page and was being drawn inside a text
+     column, at roughly half a CSS pixel per user unit. Breaking it out is a
+     ~33% linear gain for one declaration — more than any shading change buys. */
+  width: min(100vw - 2rem, 1480px);
+  /* Centred on the parent rather than offset from it. margin-inline with vw
+     units resolves against the parent box, so in a narrow column it shoved the
+     toolbar off the left edge instead of widening the map. */
+  margin-left: 50%;
+  transform: translateX(-50%);
 }
 
 #city-map {
@@ -394,169 +331,303 @@ button:hover {
   min-width: 640px;
 }
 
+#city-map { cursor: grab; touch-action: none; }
+#city-map.grabbing { cursor: grabbing; }
+
 /* ---------- the isometric city ----------
 
    Depth in a flat vector drawing comes from exactly one thing: three faces of
    the same solid painted three different values, with a consistent light
-   direction. The light here comes from the upper right, so every roof is the
-   base hue, every right wall is a step down, and every left wall is a step
-   down again. That one rule is doing nearly all of the 3D.
+   direction. The key light is upper right, travelling down-left along +row,
+   so every roof is the base hue, every right wall a step down, every left
+   wall a step down again, and every cast shadow lies on the tile grid.
 
    Colour still carries meaning, not decoration: hue = precinct, height =
-   how many other citizens a member exchanges work with, banner = Director,
-   dashed footprint with nothing on it = unreachable. Nothing on this map is
-   drawn that is not in ecosystem.json. */
+   degree (and storeys, and windows — the same fact three ways), roof form =
+   can this member change the repository, footprint = declared model, banner
+   = Director, dashed lot with nothing on it = unreachable, lit windows and a
+   working pose = real telemetry. Nothing on this map is drawn that is not in
+   ecosystem.json or workforce.json. */
 
-.ground-plane {
-  stroke: var(--ground-edge);
-  stroke-width: 2;
+/* ---- environment: sky, board, streets ---- */
+
+.sky { pointer-events: none; }
+
+.board-outer {
+  fill: var(--board-outer);
+  stroke: var(--board-edge);
+  stroke-width: 1.5;
+  stroke-linejoin: round;
 }
+.board-inner { fill: var(--street); }
+.plinth-right { fill: var(--plinth-right); }
+.plinth-left { fill: var(--plinth-left); }
 
-.wall-face {
-  fill: var(--ground-edge);
-  fill-opacity: 0.85;
+/* Streets for free: plot ground is lighter than the street in light theme
+   and darker in dark, so the one-tile gaps between plots read as pavement
+   with zero new nodes. */
+.plot-ground {
+  fill: color-mix(in oklab, var(--hue) var(--plot-mix), var(--board));
   stroke: none;
 }
-.wall-cap {
-  stroke: var(--border-strong);
-  stroke-width: 2.5;
-  opacity: 0.85;
-}
-
-.plot-ground {
-  fill-opacity: 0.14;
-  stroke-opacity: 0.5;
-  stroke-width: 1.2;
-}
-.plot-inner {
-  fill: none;
-  stroke-opacity: 0.28;
-  stroke-width: 1;
-  stroke-dasharray: 3 3;
-}
-/* Precincts outside the wall are drawn as ground the city does not own. */
 .plot-ground.kind-holding {
-  fill: var(--ink-muted);
-  stroke: var(--border-strong);
-  fill-opacity: 0.05;
-  stroke-dasharray: 6 4;
+  fill: color-mix(in oklab, var(--hue) 5%, var(--board));
 }
-.plot-ground.kind-guild {
-  fill-opacity: 0.09;
-  stroke-dasharray: 8 3;
+.tile-grid {
+  fill: none;
+  stroke: var(--shadow-ink);
+  stroke-width: 0.5;
+  stroke-opacity: 0.35;
+  pointer-events: none;
 }
-
-.plot-label { pointer-events: none; }
-/* Only drawn when a label had to be lifted clear of another one. A hairline
-   is enough — it has one job, which is to answer "this names what?" */
-.label-leader {
-  stroke: var(--hue);
-  stroke-width: 1.4;
-  opacity: 0.5;
-  stroke-dasharray: 4 3;
-}
-.plot-label-title {
-  font-family: var(--font-display);
-  font-weight: 600;
-  font-size: 27px;
-  fill: var(--ink);
-  paint-order: stroke;
-  stroke: var(--bg-elevated);
-  stroke-width: 6;
-  stroke-linejoin: round;
-}
-.plot-label-sub {
+.numeral {
   font-family: var(--font-mono);
-  font-size: 18px;
-  fill: var(--ink-muted);
-  paint-order: stroke;
-  stroke: var(--bg-elevated);
-  stroke-width: 5;
-  stroke-linejoin: round;
+  font-weight: 700;
+  fill: var(--numeral);
+  dominant-baseline: central;
+  pointer-events: none;
+  user-select: none;
 }
 
-/* ---- the palette, per precinct ---- */
+.wall-face { fill: var(--wall-face); }
+.wall-north { fill: color-mix(in oklab, var(--wall-face) 82%, var(--shadow-ink)); }
+@supports (color: oklch(from red l c h)) {
+  .wall-north { fill: oklch(from var(--wall-face) calc(l - 0.09) c h); }
+}
+.wall-cap {
+  stroke: var(--wall-cap);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+.wall-kerb { fill: var(--wall-face); fill-opacity: 0.9; }
 
-.hue-00 { --hue: var(--div-00); }
-.hue-01 { --hue: var(--div-01); }
-.hue-02 { --hue: var(--div-02); }
-.hue-03 { --hue: var(--div-03); }
-.hue-04 { --hue: var(--div-04); }
-.hue-05 { --hue: var(--div-05); }
-.hue-06 { --hue: var(--div-06); }
-.hue-07 { --hue: var(--div-07); }
-.hue-guild { --hue: var(--accent); }
-.hue-skill { --hue: var(--ink-muted); }
-.hue-system,
-.hue-none { --hue: var(--ink-muted); }
+.haze { pointer-events: none; }
 
-.plot-ground, .plot-inner { fill: var(--hue); stroke: var(--hue); }
-.plot-label-title { fill: var(--ink); }
-
-.legend .swatch.hue-00 { background: var(--div-00); }
-.legend .swatch.hue-01 { background: var(--div-01); }
-.legend .swatch.hue-02 { background: var(--div-02); }
-.legend .swatch.hue-03 { background: var(--div-03); }
-.legend .swatch.hue-04 { background: var(--div-04); }
-.legend .swatch.hue-05 { background: var(--div-05); }
-.legend .swatch.hue-06 { background: var(--div-06); }
-.legend .swatch.hue-07 { background: var(--div-07); }
-.legend .swatch.hue-guild { background: var(--accent); }
-.legend .swatch.hue-skill,
-.legend .swatch.hue-none { background: var(--ink-muted); }
-
-/* ---- roads ---- */
+/* ---- roads and routes ---- */
 
 .road {
   fill: none;
-  stroke: var(--border-strong);
-  stroke-width: 1.1;
+  stroke: var(--road);
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+  stroke-linecap: round;
   opacity: 0;
   pointer-events: none;
 }
-/* All 113 at once is a hairball, so they are off until you ask — by hovering
+/* All 219 at once is a hairball, so they are off until you ask — by hovering
    somebody, or by ticking "show all roads". */
-#city-map.roads-on .road { opacity: 0.16; }
+#city-map.roads-on .road { opacity: 0.18; }
 .road.highlight {
-  stroke: var(--accent);
-  stroke-width: 2;
-  opacity: 0.9;
+  stroke: var(--road-lit);
+  opacity: 0.95;
 }
-#city-map.roads-on .road.dimmed { opacity: 0.05; }
+#city-map.roads-on .road.dimmed { opacity: 0.06; }
+
+.walk-route {
+  fill: none;
+  stroke: var(--road-lit);
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  stroke-dasharray: 5 6;
+  opacity: 0;
+  pointer-events: none;
+}
+.walk-route.on { opacity: 0.42; }
 
 /* ---- structures ---- */
 
 .structure { cursor: pointer; }
 .structure.kind-skill { cursor: default; }
 
-.face { stroke: var(--bg-elevated); stroke-width: 0.6; stroke-linejoin: round; }
-.face-top   { fill: var(--hue); }
-/* Two flat multiplies of the roof colour. colour-mix keeps them derived from
-   the hue instead of hand-picked, so adding a precinct needs no new values. */
-.face-right { fill: color-mix(in srgb, var(--hue) 74%, #000); }
-.face-left  { fill: color-mix(in srgb, var(--hue) 52%, #000); }
+/* One fixed key light from the upper right, expressed as perceptual lightness
+   steps. Hue is held; only L and a little C move. No hue rotation anywhere. */
+.structure, .figure {
+  --face-top:        var(--hue);
+  --face-gable-lit:  color-mix(in oklab, var(--hue) 96%, white);
+  --face-gable-shade:color-mix(in oklab, var(--hue) 90%, var(--shadow-ink));
+  --face-right:      color-mix(in oklab, var(--hue) 86%, var(--shadow-ink));
+  --face-left:       color-mix(in oklab, var(--hue) 71%, var(--shadow-ink));
+  --face-foot:       color-mix(in oklab, var(--hue) 58%, var(--shadow-ink));
+  --tunic-lit:       color-mix(in oklab, var(--hue) 70%, white);
+}
+@supports (color: oklch(from red l c h)) {
+  .structure, .figure {
+    --face-top:        oklch(from var(--hue) l                c              h);
+    --face-gable-lit:  oklch(from var(--hue) calc(l + 0.020)  c              h);
+    --face-gable-shade:oklch(from var(--hue) calc(l - 0.055)  calc(c * 0.98) h);
+    --face-right:      oklch(from var(--hue) calc(l - 0.085)  calc(c * 0.96) h);
+    --face-left:       oklch(from var(--hue) calc(l - 0.170)  calc(c * 0.88) h);
+    --face-foot:       oklch(from var(--hue) calc(l - 0.265)  calc(c * 0.78) h);
+    --tunic-lit:       oklch(from var(--hue) calc(l + 0.180)  calc(c * 0.90) h);
+  }
+}
 
-.structure.kind-skill .face { stroke-width: 0.4; }
-.structure.kind-skill .face-top { fill: color-mix(in srgb, var(--hue) 58%, var(--bg-elevated)); }
+/* Self-stroked in its own fill: closes the antialiasing seam between adjacent
+   polygons without drawing the pale line that made every solid look like a
+   sticker. Never stroke a face in the background colour. */
+.face { stroke-width: 0.5; stroke-linejoin: round; }
+.face-top         { fill: var(--face-top);         stroke: var(--face-top); }
+.face-gable-lit   { fill: var(--face-gable-lit);   stroke: var(--face-gable-lit); }
+.face-gable-shade { fill: var(--face-gable-shade); stroke: var(--face-gable-shade); }
+.face-gable-end   { fill: var(--face-right);       stroke: var(--face-right); }
+.face-right       { fill: var(--face-right);       stroke: var(--face-right); }
+.face-left        { fill: var(--face-left);        stroke: var(--face-left); }
+.face-foot        { fill: var(--face-foot);        stroke: var(--face-foot); }
+
+.storeys {
+  fill: none;
+  stroke: var(--face-foot);
+  stroke-width: 0.6;
+  stroke-opacity: 0.55;
+}
+
+/* Windows: dark glass unless telemetry says someone is home. */
+.windows { fill: var(--window-off); stroke: none; }
+.structure.act-recent .windows { fill: var(--window); opacity: 0.8; }
+.structure.act-active .windows { fill: var(--window); opacity: 1; }
+
+/* The silhouette. Opacity only. In the dark theme it is the compliant
+   boundary of every wall and stays on; in light it appears on hover. */
+.edge {
+  fill: none;
+  stroke: var(--rim);
+  stroke-width: var(--rim-width);
+  stroke-linejoin: round;
+  opacity: var(--rim-alpha);
+  pointer-events: none;
+}
+.structure.active .edge,
+.structure:focus-visible .edge { opacity: 1; }
+.structure.neighbor .edge,
+.structure.crew .edge { opacity: max(var(--rim-alpha), 0.75); }
+
+/* Contact. The cheapest thing on the map that stops a box reading as a decal.
+   fill-opacity per element, never opacity on the layer — a group opacity
+   forces one offscreen composite over ~290 shapes and re-rasterises it on
+   every wheel-zoom tick, which is the jank class this repo already hit once. */
+.cast-shadow {
+  fill: var(--shadow-ink);
+  fill-opacity: var(--shadow-alpha);
+  stroke: none;
+  pointer-events: none;
+}
+.ao-patch { stroke: none; pointer-events: none; }
 
 /* A citizen nobody names has a foundation and nothing built on it. */
-.structure.is-ruin .face-top {
+.ruin-lot {
   fill: none;
   stroke: var(--warn);
   stroke-width: 1.6;
-  stroke-dasharray: 3 2.5;
+  stroke-dasharray: 4 3;
+  stroke-linejoin: round;
 }
-.structure.is-ruin .face-left,
-.structure.is-ruin .face-right { fill-opacity: 0.18; }
 
-.banner-pole { stroke: var(--ink); stroke-width: 1.2; opacity: 0.75; }
-.banner-flag { fill: var(--hue); stroke: var(--ink); stroke-width: 0.7; }
+.banner-pole { stroke: var(--ink); stroke-width: 1.2; opacity: 0.8; }
+.banner-flag {
+  fill: var(--hue);
+  stroke: var(--face-foot);
+  stroke-width: 0.5;
+  stroke-linejoin: round;
+  transform-box: fill-box;
+  transform-origin: 0% 50%;
+}
 
 /* ---- citizens ---- */
 
-.fig-shadow { fill: #000; opacity: 0.2; }
-.fig-body { fill: var(--hue); stroke: var(--ink); stroke-width: 0.55; }
-.fig-head { fill: color-mix(in srgb, var(--hue) 45%, #fff); stroke: var(--ink); stroke-width: 0.55; }
+.figure { pointer-events: none; }
+.figure {
+  --tunic: var(--face-right);
+  --tunic-shade: var(--face-left);
+}
+.fig-shadow { fill: var(--shadow-ink); fill-opacity: 0.26; }
+.fig-torso {
+  fill: var(--tunic);
+  stroke: var(--tunic);
+  stroke-width: 0.4;
+  stroke-linejoin: round;
+}
+.fig-mantle { fill: var(--tunic-shade); }
+.fig-head { fill: var(--figure-head); stroke: var(--figure-head); stroke-width: 0.3; }
+.fig-insignia { fill: var(--tunic-lit); }
+.fig-arm { transform: translate(4.6px, -11.5px); }
+.fig-tool { fill: var(--ink); }
+.fig-belt, .fig-chip { fill: var(--ink); }
+.fig-lamp { fill: var(--lamp); opacity: 0.7; }
+.figure.act-active .fig-lamp { opacity: 1; }
+.fig-ring { fill: var(--tunic-lit); }
+.fig-pulse { fill: var(--lamp); opacity: 0; transform-box: view-box; }
+
+/* Two LODs, rendered once. Detail earns its nodes above zoom 1.5x only. */
+.fig-detail { display: none; }
+#city-map.lod-1 .fig-detail { display: inline; }
+
+/* Working pose: the torso pitches toward the instrument. A pose, not a loop. */
+.figure.act-active .fig-torso,
+.figure.act-active .fig-mantle,
+.figure.act-active .fig-head,
+.figure.act-active .fig-insignia,
+.figure.act-active .fig-detail {
+  transform: rotate(6deg);
+  transform-origin: 0px -7px;
+}
+
+/* The person left their door; they were not copied. */
+.figure.away { opacity: 0; }
+.figure.walker { opacity: 0; }
+.figure.walker.on { opacity: 1; }
+
+/* Crew: the collaborators of whoever you are looking at, from telemetry. */
+.figure.crew .fig-shadow { fill: var(--lamp); fill-opacity: 0.7; }
+
+/* ---- plates ---- */
+
+.precinct-plate { pointer-events: none; }
+.plate-bg {
+  fill: var(--plate);
+  fill-opacity: var(--plate-alpha);
+  stroke: var(--border-strong);
+  stroke-opacity: 0.55;
+  stroke-width: 1;
+}
+.precinct-plate .plate-bg { stroke: var(--hue-text); stroke-opacity: 0.6; }
+.plate-line1 { font-size: 27px; }
+.plate-num {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  fill: var(--hue-text);
+}
+.plate-title {
+  font-family: var(--font-display);
+  font-weight: 620;
+  letter-spacing: -0.005em;
+  fill: var(--ink);
+}
+.plate-sub {
+  font-family: var(--font-mono);
+  font-size: 19px;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  fill: var(--ink-muted);
+}
+.plate-leader {
+  stroke: var(--hue-text);
+  stroke-width: 1.2;
+  opacity: 0.55;
+  stroke-dasharray: 4 3;
+  pointer-events: none;
+}
+
+.name-plate { pointer-events: none; }
+.name-plate-in { opacity: 0; transform: translateY(3px); }
+.name-plate.on .name-plate-in { opacity: 1; transform: none; }
+.plate-name {
+  font-family: var(--font-mono);
+  font-size: 20px;
+  font-weight: 500;
+  fill: var(--ink);
+}
 
 /* ---- focus and hover ----
 
@@ -565,37 +636,104 @@ button:hover {
    hovering one citizen touches ~150 elements at once — repeated on every
    arrow-key move through the keyboard list, not only on mouse hover. */
 
-.structure.dimmed { opacity: 0.2; }
-.structure.active { --lift: -7px; }
-.structure.neighbor { --lift: -3px; }
-.structure.active .face-top { stroke: var(--ink); stroke-width: 1.4; }
-.structure.neighbor .face-top { stroke: var(--ink); stroke-width: 1; }
-.structure { transform: translateY(var(--lift, 0)); }
-
+.structure { transform: translateY(var(--lift, 0px)); }
+.structure.dimmed { opacity: 0.22; }
+.structure.active { --lift: -5px; }
+.structure.neighbor,
+.structure.crew { --lift: -2px; }
 .structure:focus { outline: none; }
-.structure:focus-visible .face-top {
-  stroke: var(--accent);
-  stroke-width: 2;
-}
 .structure.hidden-by-filter { display: none; }
 
+/* ---- motion ----
+
+   Only opacity and transform ever animate. Every loop is disabled under
+   prefers-reduced-motion and by the Life toggle; every state is reachable
+   without motion. */
+
 @media (prefers-reduced-motion: no-preference) {
-  .structure { transition: opacity 0.15s ease, transform 0.15s ease; }
-  .road { transition: opacity 0.15s ease; }
-  /* A city with nobody moving in it is a diagram of a city. The bob is 2px
+  .structure { transition: opacity 0.14s cubic-bezier(0.2, 0, 0, 1), transform 0.14s cubic-bezier(0.2, 0, 0, 1); }
+  .road, .walk-route, .edge { transition: opacity 0.16s ease; }
+  .figure.away, .figure.walker { transition: opacity 0.3s ease; }
+  .name-plate-in { transition: opacity 0.12s ease, transform 0.12s ease; }
+
+  /* A one-time settle as the city arrives. Then nothing idles on the camera. */
+  .settle {
+    animation: settle 900ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+    transform-box: view-box;
+    transform-origin: 50% 50%;
+  }
+  @keyframes settle {
+    from { opacity: 0; transform: translateY(14px) scale(0.985); }
+    to { opacity: 1; transform: none; }
+  }
+
+  /* A city with nobody moving in it is a diagram of a city. The bob is 1.8u
      and staggered so the crowd never pulses in unison. */
-  .figure {
+  .figure .fig-body {
     animation: fig-bob 3.4s ease-in-out infinite;
     animation-delay: var(--bob-delay, 0ms);
   }
   @keyframes fig-bob {
-    0%, 100% { transform: translateY(0); }
-    50%      { transform: translateY(-1.8px); }
+    0%, 100% { transform: scaleX(var(--flip, 1)) translateY(0); }
+    50%      { transform: scaleX(var(--flip, 1)) translateY(-1.8px); }
+  }
+  .figure.walker .fig-body { animation: walk-step 0.46s ease-in-out infinite; }
+  .figure.walker.pausing .fig-body { animation: fig-bob 3.4s ease-in-out infinite; }
+  @keyframes walk-step {
+    0%, 100% { transform: scaleX(var(--flip, 1)) translateY(0); }
+    50%      { transform: scaleX(var(--flip, 1)) translateY(-1.4px); }
+  }
+  .figure.walker.on .fig-pulse { animation: road-pulse 1.4s ease-out infinite; }
+  @keyframes road-pulse {
+    0%   { transform: scale(0.6); opacity: 0.5; }
+    100% { transform: scale(1.6); opacity: 0; }
+  }
+
+  /* Working: the instrument swings. Transform only, about the hand. */
+  .figure.act-active .fig-arm {
+    animation: tool-swing 1.2s ease-in-out infinite alternate;
+  }
+  @keyframes tool-swing {
+    from { transform: translate(4.6px, -11.5px) rotate(-14deg); }
+    to   { transform: translate(4.6px, -11.5px) rotate(12deg); }
+  }
+
+  /* Lit windows breathe on active buildings. */
+  .structure.act-active .windows {
+    animation: window-pulse 2.8s ease-in-out infinite;
+    animation-delay: var(--pulse-delay, 0ms);
+  }
+  @keyframes window-pulse {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.68; }
+  }
+
+  /* Banners wave: a small skew about the pole. */
+  .banner-flag {
+    animation: banner-wave 2.6s ease-in-out infinite;
+    animation-delay: var(--wave-delay, 0ms);
+  }
+  @keyframes banner-wave {
+    0%, 100% { transform: skewY(-3deg) scaleX(1); }
+    50%      { transform: skewY(4deg) scaleX(0.94); }
+  }
+
+  /* Explore is a construct: it hovers and turns, slowly. */
+  .figure.is-construct .fig-body {
+    animation: construct-spin 9s linear infinite;
+    transform-origin: 0px -13px;
+  }
+  @keyframes construct-spin {
+    from { transform: translateY(-3px) rotate(0deg); }
+    to   { transform: translateY(-3px) rotate(360deg); }
   }
 }
 
-#city-map { cursor: grab; touch-action: none; }
-#city-map.grabbing { cursor: grabbing; }
+@media (prefers-reduced-motion: reduce) {
+  #city-map *, #city-map { animation: none !important; transition: none !important; }
+}
+#city-map.life-off * { animation-play-state: paused !important; }
+#city-map.life-off .figure.is-construct .fig-body { transform: translateY(-3px); }
 
 .map-toolbar {
   display: flex;
@@ -636,7 +774,8 @@ button:hover {
 .legend li { display: flex; align-items: center; gap: 0.4em; }
 .legend .swatch {
   width: 0.85em; height: 0.85em;
-  border-radius: 50%;
+  border-radius: 2px;
+  background: var(--hue);
   border: 1px solid var(--border-strong);
   flex: none;
 }
@@ -647,8 +786,6 @@ button:hover {
   border-top: 1px solid var(--border-subtle);
   padding-top: 0.5rem;
 }
-/* Same reasoning as .finding: a tint and a coloured heading say "look here"
-   without the side-tab tell. The district's own <h3> carries the emphasis. */
 .static-district-flagged {
   background: var(--warn-bg);
   border-radius: var(--radius);
@@ -794,7 +931,7 @@ button:hover {
 /* ---------- footer ---------- */
 
 footer.site-footer {
-  border-top: 3px double var(--border-strong);
+  border-top: 1px solid var(--border-strong);
   margin-top: 3rem;
   padding-top: 1.25rem;
   font-size: 0.9rem;

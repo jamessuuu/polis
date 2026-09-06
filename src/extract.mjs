@@ -154,10 +154,37 @@ export function parseSystemAgents(ecosystemMd) {
 export function parseEdges(agentId, body, knownIds) {
   const edges = [];
   const lines = String(body ?? '').split(/\r?\n/);
-  for (const line of lines) {
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
     const m = /\b(UPSTREAM|DOWNSTREAM)\b\s*:?\s*(.*)$/.exec(line);
     if (!m) continue;
     const dir = m[1].toLowerCase();
+
+    // Read the whole DECLARATION, not just the line the keyword sits on.
+    //
+    // This was line-only until 2026-09-06 and it was silently wrong: charters
+    // wrap their declaration lists across indented continuation lines, e.g.
+    //
+    //   - UPSTREAM: product-manager / chief-of-staff (the approved ask),
+    //     refactor-specialist (flags when a design does not fit the code).
+    //
+    // and every name after the first line was invisible. That under-counted
+    // the edge total and inflated the "unreachable" list — a member named
+    // only on a continuation line looked like a member nobody names, which
+    // is precisely the finding this tool exists to report. A parser bug that
+    // manufactures the finding it is looking for is the worst kind.
+    let block = m[2];
+    for (let j = i + 1; j < lines.length; j++) {
+      const next = lines[j];
+      if (!next.trim()) break;                       // blank line ends it
+      if (!/^\s/.test(next)) break;                  // dedent ends it
+      if (/^\s*(?:[-*+]|\d+\.)\s/.test(next)) break; // a new list item ends it
+      if (/\b(UPSTREAM|DOWNSTREAM)\b/.test(next)) break;
+      block += ` ${next.trim()}`;
+      i = j;
+    }
+    m[2] = block;
+
     for (const other of knownIds) {
       if (other === agentId) continue;
       // Word-boundary match so `cto` does not match inside `director`.

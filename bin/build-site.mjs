@@ -15,13 +15,17 @@
  * that step. It is deterministic, idempotent, and has no model in the loop.
  */
 
-import { readFileSync, writeFileSync, copyFileSync } from 'node:fs';
+import { readFileSync, writeFileSync, copyFileSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { paletteCSS } from '../site/palette.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const SNAPSHOT = join(ROOT, 'data', 'ecosystem.json');
 const SITE_JSON = join(ROOT, 'site', 'ecosystem.json');
+const WORKFORCE = join(ROOT, 'data', 'workforce.json');
+const SITE_WORKFORCE = join(ROOT, 'site', 'workforce.json');
+const PALETTE_CSS = join(ROOT, 'site', 'palette.css');
 const INDEX = join(ROOT, 'site', 'index.html');
 
 const esc = (s) => String(s ?? '')
@@ -40,6 +44,12 @@ function replaceRegion(html, startPattern, endTag, inner, label) {
 
 const snap = JSON.parse(readFileSync(SNAPSHOT, 'utf8'));
 copyFileSync(SNAPSHOT, SITE_JSON);
+
+// Telemetry, when it exists. The map stands still without it, honestly.
+if (existsSync(WORKFORCE)) copyFileSync(WORKFORCE, SITE_WORKFORCE);
+
+// The palette the page ships is the palette the contrast audit measured.
+writeFileSync(PALETTE_CSS, paletteCSS());
 
 // --- stats -----------------------------------------------------------------
 const s = snap.stats;
@@ -164,5 +174,6 @@ writeFileSync(INDEX, html);
 
 process.stdout.write(
   `build-site: ${s.agents} citizens, ${s.skills} skills, ${s.divisions} districts, ${s.edges} roads\n` +
-  `            stats and roster regenerated from the snapshot; nothing hand-copied\n`
+  `            stats and roster regenerated from the snapshot; nothing hand-copied\n` +
+  `            palette.css generated from site/palette.mjs; workforce ${existsSync(WORKFORCE) ? 'copied' : 'absent'}\n`
 );

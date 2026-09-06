@@ -17,9 +17,11 @@
     "LICENSE"
   ],
   "scripts": {
-    "test": "node --test tests/extract.test.mjs tests/site.test.mjs tests/layout.test.mjs tests/workforce.test.mjs",
+    "test": "node --test tests/extract.test.mjs tests/site.test.mjs tests/layout.test.mjs tests/workforce.test.mjs tests/life.test.mjs tests/contrast.test.mjs tests/budget.test.mjs",
     "snapshot": "node bin/snapshot.mjs",
     "build:site": "node bin/build-site.mjs",
-    "workforce": "node bin/workforce.mjs"
+    "workforce": "node bin/workforce.mjs",
+    "contrast": "node tools/contrast.mjs --print --table",
+    "shoot": "node tools/shoot.mjs"
   }
 }

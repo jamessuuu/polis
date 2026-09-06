@@ -212,3 +212,37 @@ test('stats are derived from the data, not asserted', () => {
   assert.equal(snap.stats.directors, snap.agents.filter((a) => a.director).length);
   assert.equal(snap.agents.find((a) => a.id === 'architect').division, '03 Engineering');
 });
+
+test('an UPSTREAM declaration that wraps across lines is read whole', () => {
+  // Regression, 2026-09-06. The parser read only the line the keyword sat on,
+  // so every name after the first line was invisible. Against the real
+  // ecosystem that hid 106 of 219 edges and inflated the unreachable list
+  // from 8 to 10 — a parser bug manufacturing the exact finding the tool
+  // exists to report.
+  const body = [
+    '## Interface',
+    '- UPSTREAM: product-manager / chief-of-staff (the approved feature ask),',
+    '  refactor-specialist (flags when a shipped target design does not fit',
+    '  the real code).',
+    '- DOWNSTREAM: code-reviewer.',
+    '',
+    'Some later prose that mentions qa-engineer and must NOT become an edge.',
+  ].join('\n');
+  const known = ['product-manager', 'chief-of-staff', 'refactor-specialist', 'code-reviewer', 'qa-engineer'];
+  const edges = parseEdges('architect', body, known);
+  const up = edges.filter((e) => e.kind === 'upstream').map((e) => e.from).sort();
+  const down = edges.filter((e) => e.kind === 'downstream').map((e) => e.to).sort();
+  assert.deepEqual(up, ['chief-of-staff', 'product-manager', 'refactor-specialist']);
+  assert.deepEqual(down, ['code-reviewer']);
+  assert.equal(edges.some((e) => e.to === 'qa-engineer' || e.from === 'qa-engineer'), false,
+    'prose after the declaration block leaked into the graph');
+});
+
+test('a new list item ends the declaration block', () => {
+  const body = [
+    '- UPSTREAM: architect.',
+    '- Some other bullet naming copywriter, which is not an edge.',
+  ].join('\n');
+  const edges = parseEdges('x', body, ['architect', 'copywriter']);
+  assert.deepEqual(edges.map((e) => e.from), ['architect']);
+});

@@ -43,13 +43,27 @@ const STREET = 1; // tiles of clear space between neighbouring plots
 const SIDEWALK = 1; // tiles of clear space inside a plot, before buildings
 const WALL_MARGIN = 2; // tiles between the outermost district and the wall
 
-/** Building heights, in pixels of extrusion. Height encodes real degree. */
-const BASE_HEIGHT = 14;
-const HEIGHT_PER_LINK = 3.4;
-const MAX_HEIGHT = 82;
-const DIRECTOR_BONUS = 10;
-const RUIN_HEIGHT = 5; // a citizen no one names has nothing built on it
-const SKILL_HEIGHT = 11;
+/**
+ * Building heights, in user units of extrusion. Height encodes real degree.
+ *
+ * Raised 2026-09-06 per CHARACTERS.md §2.1: a citizen is 22u tall, and a
+ * person as tall as a median building is wrong. The median building is now
+ * roughly two storeys beside a one-storey person.
+ */
+export const HEIGHTS = {
+  BASE: 20,
+  PER_LINK: 4.2,
+  MAX: 110,
+  DIRECTOR_BONUS: 12,
+  RUIN: 0, // a citizen no one names has nothing built on it — no volume at all
+  SKILL: 11,
+};
+const BASE_HEIGHT = HEIGHTS.BASE;
+const HEIGHT_PER_LINK = HEIGHTS.PER_LINK;
+const MAX_HEIGHT = HEIGHTS.MAX;
+const DIRECTOR_BONUS = HEIGHTS.DIRECTOR_BONUS;
+const RUIN_HEIGHT = HEIGHTS.RUIN;
+const SKILL_HEIGHT = HEIGHTS.SKILL;
 
 export function divisionKey(d) {
   return `${d.number} ${d.name}`;
@@ -229,6 +243,14 @@ export function computeCity(divisions, agents, edges, skills = [], unreachable =
   // status. They get their own named precincts in a ring beyond the wall —
   // outside the eight districts, which is exactly where the constitution
   // puts them, and visibly still part of the city.
+  const skillIds = skills.map((s) => s.id).sort();
+  // The Archive is placed FIRST among the precincts outside the wall, before
+  // the guild halls, because it is the largest by a wide margin. Placed last it
+  // could not find a contiguous 13x10 block behind the city and got pushed to
+  // the FRONT of the scene — 86 sheds standing between the camera and the eight
+  // districts that are the subject. Biggest claims its ground first.
+  if (skillIds.length) outside.push({ key: '__archive__', label: 'The Archive', sub: 'skills any citizen may invoke', kind: 'archive', ids: skillIds, bearing: (-3 * Math.PI) / 4 });
+
   const guildNames = [...new Set(agents.map((a) => a.guild).filter(Boolean))].sort();
   const orderedGuilds = guilds.length ? guilds.filter((g) => guildNames.includes(g)) : guildNames;
   orderedGuilds.forEach((g, i) => {
@@ -247,9 +269,12 @@ export function computeCity(divisions, agents, edges, skills = [], unreachable =
 
   const noDivision = agents.filter((a) => !a.division && !a.system && !a.guild).map((a) => a.id).sort();
   const systemUtilities = agents.filter((a) => a.system).map((a) => a.id).sort();
-  const skillIds = skills.map((s) => s.id).sort();
 
-  if (skillIds.length) outside.push({ key: '__archive__', label: 'The Archive', sub: 'skills any citizen may invoke', kind: 'archive', ids: skillIds, bearing: Math.PI / 2 });
+  // Bearing matters more here than anywhere else on the map. +PI/2 is the
+  // FRONT of the scene in this projection, and the Archive is the largest
+  // precinct there is — 86 sheds standing between the camera and the eight
+  // districts that are the subject. Behind and to the left, it becomes a
+  // backdrop instead of an obstruction.
   if (noDivision.length) outside.push({ key: '__nodivision__', label: 'No division declared', sub: 'stated, not filed away', kind: 'holding', ids: noDivision, bearing: Math.PI });
   if (systemUtilities.length) outside.push({ key: '__system__', label: 'System utilities', sub: 'exempt from the admission standard', kind: 'holding', ids: systemUtilities, bearing: 0 });
 
@@ -272,6 +297,9 @@ export function computeCity(divisions, agents, edges, skills = [], unreachable =
       division: a ? a.division : null,
       guild: a ? a.guild || null : null,
       number: a && a.division ? a.division.split(' ')[0] : null,
+      system: Boolean(a && a.system),
+      model: a ? a.model || null : null,
+      tools: a ? a.tools || [] : [],
     };
   };
 
@@ -281,11 +309,15 @@ export function computeCity(divisions, agents, edges, skills = [], unreachable =
     if (!plot) continue;
     buildings.push(...fillPlot(plot, membersOf(key), agentMeta).map((b) => ({ ...b, plotKey: key })));
   }
+  // A skill owned by a guild takes that guild's hue in the Archive, so the
+  // Archive reads as a library with six visible collections rather than one
+  // grey slab. Ownership is a real field on the skill record.
+  const skillGuild = new Map(skills.map((s) => [s.id, s.guild || null]));
   for (const o of outside) {
     const plot = plots.get(o.key);
     if (!plot) continue;
     const meta = o.kind === 'archive'
-      ? (id) => ({ kind: 'skill', height: SKILL_HEIGHT, id })
+      ? (id) => ({ kind: 'skill', height: SKILL_HEIGHT, id, guild: skillGuild.get(id) || null })
       : agentMeta;
     buildings.push(...fillPlot(plot, o.ids, meta).map((b) => ({ ...b, plotKey: o.key })));
   }

@@ -205,11 +205,14 @@ test('screen bounds enclose the whole diamond', () => {
   assert.equal(b.maxY, 128);
 });
 
-test('a shadow is a six-point hull that grows with height and falls down-left', () => {
+test('a shadow is a five-point hull that grows with height and falls down-left', () => {
   const short = shadowPolygon(0, 0, 10).split(' ').map((p) => p.split(',').map(Number));
   const tall = shadowPolygon(0, 0, 60).split(' ').map((p) => p.split(',').map(Number));
-  assert.equal(short.length, 6, 'shadow should be the swept hull, six points');
-  assert.equal(tall.length, 6);
+  // Five, not six: the light travels along +row, which is collinear with the
+  // footprint's own e->s edge, so the south corner lies ON the hull rather
+  // than being a vertex of it. One wasted point per building on the map.
+  assert.equal(short.length, 5, 'shadow should be the swept hull, five points');
+  assert.equal(tall.length, 5);
   const spread = (pts) => Math.max(...pts.map((p) => p[0])) - Math.min(...pts.map((p) => p[0]));
   assert.ok(spread(tall) > spread(short), 'a taller box should cast a longer shadow');
   // The light is fixed upper-right, so the shadow must extend LEFT and DOWN.
