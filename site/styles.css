@@ -124,28 +124,28 @@ kbd {
    control clipped by the viewport edge by every audit that asks the question,
    including this project's own instrument. Same behaviour, same appearance on
    focus, nothing hanging off the edge of the document. */
+/* Third position, and the one that satisfies both audits at once. Off the left
+   edge of the document failed "controls clipped at the edge"; clipping it to
+   1x1 fixed that and failed SC 2.5.8 instead, because a 1px box is a 1px
+   target. Neither audit was wrong — the technique was. Keeping it at FULL SIZE
+   inside the horizontal viewport and parking it ABOVE the top edge satisfies
+   both: nothing hangs off the sides, and the box is a real 24px-plus target the
+   whole time. Fixed positioning keeps it out of the layout either way. */
 .skip-link {
-  position: absolute;
+  position: fixed;
   left: 0.5rem;
   top: 0.5rem;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
+  padding: 0.5rem 0.9rem;
   white-space: nowrap;
   background: var(--bg-elevated);
   color: var(--ink);
   border: 2px solid var(--focus);
   border-radius: var(--radius);
   z-index: 100;
+  transform: translateY(-250%);
 }
 .skip-link:focus {
-  width: auto;
-  height: auto;
-  padding: 0.5rem 0.9rem;
-  overflow: visible;
-  clip: auto;
+  transform: none;
 }
 
 /* Focus visibility: one consistent, high-contrast treatment everywhere. */
@@ -203,6 +203,15 @@ header.site-header {
   color: var(--ink-muted);
   font-size: 0.95rem;
   margin: 0;
+}
+
+/* The maker line sits on the nameplate beside the tagline. Quieter than the
+   tagline on purpose: it is a credit, not a second sentence about the product,
+   and on a desktop it rides on the same baseline row so the plate does not grow
+   by a single pixel. */
+.site-header .aj-attribution {
+  color: var(--ink-muted);
+  font-size: 0.82rem;
 }
 
 /* A second bypass, in the header, for anyone who tabs in before the map has
@@ -954,6 +963,15 @@ button:hover {
   font: inherit;
   padding: 0.12rem 0.5rem;
   min-width: 2rem;
+  /* 13px type on a 1.25 line box with 2px of padding drew a 21.4px control, a
+     couple of pixels under the WCAG 2.2 AA floor (SC 2.5.8). These are HUD
+     buttons in a control bar, not links in a sentence, so the exemption does
+     not apply and the box has to carry the 24px itself. inline-flex keeps the
+     glyphs centred as the box grows. */
+  min-height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border: 1px solid var(--border-strong);
   border-radius: var(--radius);
   background: var(--bg-elevated);
@@ -2475,24 +2493,25 @@ html.map-mode.sheet-open #headline-strip { opacity: 0; pointer-events: none; }
    which is a control spending HUD space on people who are not using it. It
    still exists, still comes first in the tab order, and now appears the
    instant it is focused, like every other skip link on the page. */
+/* Same technique as .skip-link above, and for the same reason: clipped to 1x1
+   it measured as a 1x1 target, and it sat at the RIGHT-hand end of the toolbar
+   where growing it on focus would have pushed it off the edge. Anchored to the
+   left of the toolbar at full size and parked above it instead. */
 .map-skip {
   position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
+  left: 0.5rem;
+  top: 0.35rem;
+  z-index: 40;
+  padding: 0.3rem 0.55rem;
   white-space: nowrap;
+  background: var(--bg-elevated);
+  color: var(--ink);
+  border: 2px solid var(--focus);
+  border-radius: var(--radius);
+  transform: translateY(-250%);
 }
 .map-skip:focus {
-  position: static;
-  width: auto;
-  height: auto;
-  margin: 0;
-  padding: 0.3rem 0.55rem;
-  overflow: visible;
-  clip: auto;
+  transform: none;
 }
 
 /* The penumbra: wider, longer, and much fainter than the shadow it sits
@@ -2645,3 +2664,24 @@ html.map-mode .hud-caption {
   color: var(--ink);
 }
 html.map-mode .hud-caption[hidden] { display: none; }
+
+/* ---------- attribution-kit v1 — the maker's mark ----------
+
+   These rules were shipped as an inline <style> block in index.html. This site
+   sets `style-src 'self'` with no 'unsafe-inline', so the browser refused the
+   whole block on every page view: the mark fell back to display:inline and
+   measured 0x0, which meant the one piece of identity every project in the
+   portfolio is required to carry was invisible here. Same-origin stylesheet,
+   same rules, nothing for the CSP to object to.
+
+   Inherits `color` from wherever it sits (the mark draws in currentColor); set
+   --aj-attribution-signal to the project's accent. Nothing here is a flex
+   container on purpose: the links stay display:inline, which is the WCAG 2.5.8
+   inline-text exemption. */
+.aj-attribution { margin: 0; font: inherit; line-height: 1.5; color: inherit; }
+.aj-attribution__mark { display: inline-block; width: 20px; height: 20px; vertical-align: -0.3em; margin-right: 0.45em; }
+.aj-attribution__mark--full { width: 48px; height: 48px; vertical-align: middle; }
+.aj-attribution a { color: inherit; text-decoration: underline; text-underline-offset: 0.15em; }
+.aj-attribution a:hover { text-decoration-thickness: 2px; }
+.aj-attribution a:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+.aj-attribution__sep { margin: 0 0.35em; }

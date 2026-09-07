@@ -1040,7 +1040,14 @@ export const FIGURE_UNITS = 22;
  * box: a director's banner pole above the roof, and the precinct plate that
  * hangs in the street in front of the nearest plot.
  */
-const EDGE_SIDE = 10;
+/* 10 until an audit measured a citizen's hit area crossing the right-hand
+   viewport edge by a pixel at 390px. subjectBox is built from each citizen's
+   SILHOUETTE, but the thing the visitor clicks is wider than the ink, so the
+   clear space has to hold the target and not just the drawing. At the phone
+   scale (0.381 px per unit, measured) 8 extra units a side is about 3px of
+   headroom, and it costs 1.6% of the zoom — below the threshold of noticing,
+   and the alternative is a citizen you can see but cannot fully reach. */
+const EDGE_SIDE = 18;
 const EDGE_TOP = 4;
 const EDGE_BOTTOM = 10;
 
