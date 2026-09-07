@@ -46,11 +46,22 @@ function pushMap(map, key, val) {
 
 const THEME_KEY = 'polis-theme';
 
+/**
+ * Dusk is the default.
+ *
+ * This page used to open on whatever the operating system asked for, which
+ * on most machines is the cream daylight palette. Daylight is the right
+ * lighting for a document and the wrong one for a city: the lit windows, the
+ * warm road highlight and the lamp a working citizen carries are all signals
+ * that only exist against a dark sky, and at noon the map spends them on
+ * nothing. So the resting state is dusk, and both other lightings stay one
+ * click away in the same toggle that has always offered them.
+ */
 function readStoredTheme() {
   try {
-    return localStorage.getItem(THEME_KEY) || 'system';
+    return localStorage.getItem(THEME_KEY) || 'dark';
   } catch {
-    return 'system';
+    return 'dark';
   }
 }
 
@@ -72,7 +83,7 @@ function initTheme() {
   const btn = document.getElementById('theme-toggle');
   if (!btn) return;
   btn.addEventListener('click', () => {
-    const order = ['system', 'light', 'dark'];
+    const order = ['dark', 'light', 'system'];
     const next = order[(order.indexOf(readStoredTheme()) + 1) % order.length];
     try { localStorage.setItem(THEME_KEY, next); } catch { /* private mode etc — theme just won't persist */ }
     applyTheme(next);
@@ -203,8 +214,59 @@ async function main() {
     g.addEventListener('blur', () => { hoverId = null; refreshHighlight(); });
   }
 
+  /**
+   * How big a citizen's tap target is, in world units.
+   *
+   * The sprite is correctly tiny — fifty-nine people in 390 pixels — and a
+   * tiny sprite is not a defensible target. So the target is sized in SCREEN
+   * pixels and converted back into the units the circle is drawn in, which
+   * means it grows as the view zooms out and shrinks as it zooms in, and
+   * stays about the same size under a thumb either way. Capped at 34 units,
+   * a little under one tile, so a target can never swallow its neighbours.
+   */
+  const HIT_PX = 40;
+  function updateHitRadius(k = 1) {
+    const f = scene.frame;
+    const r = svg.getBoundingClientRect();
+    if (!f || !r.width || !r.height) return;
+    const perUnit = Math.min(r.width / f.w, r.height / f.h) * k;
+    if (!(perUnit > 0)) return;
+    const units = Math.min(34, Math.max(9, (HIT_PX / 2) / perUnit));
+    svg.style.setProperty('--hit-r', `${Math.round(units * 10) / 10}px`);
+  }
+
+  /**
+   * What is actually on screen for a LABEL: the frame, undone by the camera,
+   * minus the strips the HUD is sitting on.
+   *
+   * The plain frame was the right rectangle while the map was a figure in a
+   * document with its controls above it. In map mode the readouts, the
+   * headline and the panel bar are opaque plates lying on the city, and a
+   * district title drawn under one of them is not information — it is the
+   * same debris the off-frame rule already exists to remove, one layer in.
+   * The numbers are the HUD's own CSS box heights, converted from screen
+   * pixels into frame units through the `meet` scale.
+   */
+  const HUD_INSET = { top: 58, right: 16, bottom: 104, left: 16 };
+  function visibleRect(view, k) {
+    const f = scene.frame;
+    if (!f) return null;
+    const r = svg.getBoundingClientRect();
+    const scale = Math.min(r.width / f.w, r.height / f.h);
+    const u = (document.documentElement.classList.contains('map-mode') && scale > 0)
+      ? 1 / scale : 0;
+    return {
+      x: (f.x + HUD_INSET.left * u - view.x) / k,
+      y: (f.y + HUD_INSET.top * u - view.y) / k,
+      w: (f.w - (HUD_INSET.left + HUD_INSET.right) * u) / k,
+      h: (f.h - (HUD_INSET.top + HUD_INSET.bottom) * u) / k,
+    };
+  }
+
   let namingPeople = false;
+  const reduced = prefersReducedMotion();
   const cam = attachCamera(svg, camera, {
+    reduced,
     // Two LODs, rendered once, toggled by one class on the root.
     onZoom: (k, view) => {
       svg.classList.toggle('lod-1', k >= 1.5);
@@ -212,20 +274,22 @@ async function main() {
       // you are close enough to be looking at people. Crossing the threshold
       // is the only thing that re-runs the pass, so panning stays free.
       scene.zoom = k;
+      scene.setCamera(view.x, view.y);
       const naming = k >= DIRECTOR_NAME_ZOOM;
+      // Two reasons to re-run the label pass, and both of them are real
+      // changes to what a label has to be: crossing the naming threshold
+      // changes WHICH labels exist, and a 6% zoom step changes how big they
+      // are drawn. Neither runs on an ordinary pan.
+      const rescaled = scene.applyZoomScale(k);
       if (naming !== namingPeople) {
         namingPeople = naming;
         svg.classList.toggle('naming-people', naming);
         refreshHighlight();
+      } else if (rescaled) {
+        refreshHighlight();
       }
-      // What is actually on screen, in world units: the frame, undone by the
-      // camera transform. Labels for anything outside it are switched off.
-      const f = scene.frame;
-      if (f) {
-        scene.cullLabels({
-          x: (f.x - view.x) / k, y: (f.y - view.y) / k, w: f.w / k, h: f.h / k,
-        });
-      }
+      scene.cullLabels(visibleRect(view, k));
+      updateHitRadius(k);
     },
   });
 
@@ -247,13 +311,16 @@ async function main() {
     if (!force && f.name === frameName) return;
     frameName = f.name;
     scene.setFrame(f, container);
+    cam.setLimits(scene.view, f);
     cam.reset();
+    updateHitRadius(cam.k);
     refreshHighlight();
   }
   function showWholeCity() {
     const r = heroBox.getBoundingClientRect();
     frameName = 'city';
     scene.setFrame(scene.view, { width: r.width, height: r.height });
+    cam.setLimits(scene.view, scene.view);
     cam.reset();
     refreshHighlight();
   }
@@ -280,9 +347,13 @@ async function main() {
     + `${darkCounts.both ? `, and ${darkCounts.both} are both` : ''}. `
     + `The other ${darkCounts.lit} are the city you normally see.`;
   if (darkNote) darkNote.textContent = darkSentence;
+  const darkCaption = document.getElementById('map-dark-caption');
+  if (darkCaption) darkCaption.textContent = darkSentence;
   function setDarkHalf(on, refresh = true) {
     darkHalf = on;
     svg.classList.toggle('dark-half', on);
+    // The finding belongs on the map while the map is showing it.
+    if (darkCaption) darkCaption.hidden = !on;
     if (darkToggle) {
       darkToggle.setAttribute('aria-pressed', String(on));
       darkToggle.textContent = on ? 'Leave dark half' : 'Dark half';
@@ -332,7 +403,6 @@ async function main() {
     },
   });
   const lifeToggle = document.getElementById('map-life');
-  const reduced = prefersReducedMotion();
   function setLife(on) {
     svg.classList.toggle('life-off', !on);
     if (on) { if (walkers.running) walkers.resume(); else walkers.start(); } else walkers.pause();
@@ -522,6 +592,44 @@ async function main() {
    * is the size of the set the map just lit — the same union, never a second
    * number with its own opinion.
    */
+  /**
+   * Ease the camera onto somebody, allowing for the drawer about to cover
+   * part of the frame.
+   *
+   * Selection used to leave the view exactly where it was. On a phone that
+   * regularly meant opening a full record for a building that was not on
+   * screen, which is the clearest possible way to tell a visitor that the
+   * map and the panel are two different products. The target zoom is nudged
+   * past DIRECTOR_NAME_ZOOM so the person being read about is also the
+   * person whose name is now printed on the map.
+   */
+  function flyToCitizen(id) {
+    const g = citizenEls.get(id);
+    const f = scene.frame;
+    if (!g || !f) return;
+    let bb;
+    try { bb = g.getBBox(); } catch { return; }
+    if (!bb || (!bb.width && !bb.height)) return;
+    const r = svg.getBoundingClientRect();
+    if (!r.width || !r.height) return;
+    let offsetX = 0;
+    let offsetY = 0;
+    if (document.documentElement.classList.contains('map-mode')) {
+      if (window.matchMedia('(min-width: 720px)').matches) {
+        // The inspector takes the right edge; aim at the middle of the rest.
+        const panelPx = Math.min(380, r.width * 0.6);
+        offsetX = -(panelPx / 2) * (f.w / r.width);
+      } else {
+        // The inspector takes the bottom; the free strip is the top ~28%.
+        offsetY = -0.36 * f.h;
+      }
+    }
+    cam.flyTo(bb.x + bb.width / 2, bb.y + bb.height * 0.55, {
+      k: Math.max(cam.targetK, DIRECTOR_NAME_ZOOM + 0.05),
+      offsetX, offsetY,
+    });
+  }
+
   function selectCitizen(id, walk = null) {
     const a = byId.get(id);
     if (!a) return;
@@ -530,6 +638,8 @@ async function main() {
     hoverId = null;
     if (!walk) { following = null; walkers.unfollow?.(); }
     refreshHighlight();
+    scene.markSelection(buildingsById.get(id) || null);
+    flyToCitizen(id);
 
     panelHeading.textContent = a.id;
     const roleBits = [];
@@ -600,6 +710,7 @@ async function main() {
     }
 
     panel.hidden = false;
+    document.documentElement.classList.add('panel-open');
     panelHeading.focus();
 
     const rosterLi = rosterButtons.get(id);
@@ -614,6 +725,8 @@ async function main() {
 
   function closePanel() {
     panel.hidden = true;
+    document.documentElement.classList.remove('panel-open');
+    scene.markSelection(null);
     selectedId = null;
     following = null;
     walkers.unfollow();
@@ -623,8 +736,58 @@ async function main() {
   }
 
   panelClose.addEventListener('click', closePanel);
+
+  // ---- sheets ------------------------------------------------------------
+  //
+  // The rest of the site, as four drawers over the city. In the document this
+  // page still is without JavaScript, these are plain stacked sections and
+  // none of the code below has anything to attach to; in map mode they are
+  // the only way to reach the roster, the findings, the studio and the key,
+  // because there is no longer a below for them to sit in.
+  const sheetEls = new Map();
+  for (const el of document.querySelectorAll('.sheet')) sheetEls.set(el.id, el);
+  const sheetTriggers = [...document.querySelectorAll('.sheet-open')];
+  const scrim = document.getElementById('sheet-scrim');
+  let openSheetId = null;
+
+  function setSheet(id) {
+    const next = id && sheetEls.has(id) ? id : null;
+    openSheetId = next;
+    for (const [key, el] of sheetEls) el.classList.toggle('is-open', key === next);
+    for (const t of sheetTriggers) t.setAttribute('aria-expanded', String(t.dataset.sheet === next));
+    document.documentElement.classList.toggle('sheet-open', Boolean(next));
+    if (scrim) {
+      scrim.hidden = false;
+      scrim.classList.toggle('is-on', Boolean(next));
+    }
+    if (next) {
+      // On a phone the inspector and a sheet are the same piece of screen.
+      if (!window.matchMedia('(min-width: 720px)').matches && !panel.hidden) closePanel();
+      const el = sheetEls.get(next);
+      const first = el.querySelector('.sheet-close');
+      if (first) first.focus();
+    }
+  }
+
+  for (const t of sheetTriggers) {
+    t.addEventListener('click', () => setSheet(openSheetId === t.dataset.sheet ? null : t.dataset.sheet));
+  }
+  for (const b of document.querySelectorAll('.sheet-close')) {
+    b.addEventListener('click', () => {
+      const id = b.closest('.sheet')?.id;
+      setSheet(null);
+      const trigger = sheetTriggers.find((t) => t.dataset.sheet === id);
+      if (trigger) trigger.focus();
+    });
+  }
+  scrim?.addEventListener('click', () => setSheet(null));
+
   document.addEventListener('keydown', (ev) => {
-    if (ev.key === 'Escape' && !panel.hidden) closePanel();
+    if (ev.key !== 'Escape') return;
+    // One layer at a time, top down: the sheet a visitor just opened, then
+    // the inspector under it.
+    if (openSheetId) { setSheet(null); return; }
+    if (!panel.hidden) closePanel();
   });
 
   // ---- interactive roster list --------------------------------------------
@@ -757,8 +920,13 @@ async function main() {
   for (const btn of document.querySelectorAll('.jump-to-citizen')) {
     btn.addEventListener('click', (ev) => {
       ev.preventDefault();
+      if (document.documentElement.classList.contains('map-mode')) {
+        setSheet(null);
+        selectCitizen(btn.dataset.id);
+        return;
+      }
       selectCitizen(btn.dataset.id);
-      panel.scrollIntoView({ behavior: prefersReducedMotion() ? 'auto' : 'smooth', block: 'start' });
+      panel.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
     });
   }
 
@@ -785,6 +953,11 @@ async function main() {
     for (let el = target; el; el = el.parentElement) {
       if (el.tagName === 'DETAILS') el.open = true;
     }
+    const sheet = target.closest('.sheet');
+    if (sheet && document.documentElement.classList.contains('map-mode')) {
+      ev.preventDefault();
+      setSheet(sheet.id);
+    }
   }, true);
 
   // ---- reveal the interactive sections, retire the static fallback -------
@@ -793,6 +966,20 @@ async function main() {
   document.getElementById('map-section').hidden = false;
   document.getElementById('list-section').hidden = false;
   document.getElementById('static-roster-section').hidden = true;
+
+  // The switch from document to application. Everything above this line has
+  // already succeeded — a city is drawn, the roster is built, the panels are
+  // wired — so this is the last thing that happens and the first thing that
+  // would not happen if any of it had thrown. That is the whole fallback
+  // contract in one class name.
+  document.documentElement.classList.add('map-mode');
+
+  // The headline finding belongs with the readouts it is a headline for.
+  // It lives outside the stage in the markup because it is also the no-JS
+  // page's first sentence, and moving it is cheaper than authoring it twice.
+  const dock = document.querySelector('.hud-dock');
+  const strip = document.getElementById('headline-strip');
+  if (dock && strip) dock.insertBefore(strip, dock.firstChild);
 
   // Framing needs a laid-out box, so it runs once the hero is no longer
   // hidden, and again whenever the space the map is given crosses a band.

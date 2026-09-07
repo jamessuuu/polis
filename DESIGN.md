@@ -346,3 +346,149 @@ the two haze planes.
 | Windows as pure ornament | Kept ONLY because count = storeys = degree; a window that encodes nothing is the prettier lie. |
 | Skewing labels into the ground plane | Beautiful once, unreadable at 27u. Only the numeral earns the skew. |
 | The beige-paper civic map | Shipped by accident as the mid-state. The serif fights the geometry; halos are a workaround for missing plates. |
+
+## 13. Map mode, and the materials that came with it
+
+**AMENDED 2026-09-07 (second pass, same day).** The pass above fixed the
+composition: the map went from a figure buried 640px down a document to the
+first thing on screen at 96% of the frame. It did not change what KIND of
+thing the site is. This one does, and it also rebuilt the lighting model,
+because a full-screen map that is still flat-shaded is a bigger flat-shaded
+thing rather than a better one.
+
+### 13.1 The site is the map
+
+`app.mjs` sets `map-mode` on `<html>` as the very last thing it does, after a
+city has actually been drawn and every panel wired. Under that class:
+
+- `html, body { height: 100%; overflow: hidden }`; the page does not scroll.
+  Measured: `scrollHeight` 1416 → 844 on a 390x844 phone, 1599 → 900 on a
+  1440x900 laptop, both now exactly the viewport.
+- `#map-section` is `position: absolute; inset: 0`. The SVG fills the frame.
+  Citizens fill 91.8% of a laptop viewport and 32.1% of a phone's, with 0 of
+  59 off screen at either size.
+- Everything else becomes an overlay. A HUD of frosted plates (nameplate,
+  toolbar, panel bar, readouts, headline finding), a right-hand inspector for
+  the selected citizen, and four left-hand sheets holding the whole of the
+  rest of the site: Find, Findings, Studio, Guide.
+
+Nothing was deleted to achieve this. The document is still in the markup in
+document order, and with JavaScript off `map-mode` is never set, none of the
+rules above apply, and the page renders as the stacked document it has always
+been — findings, status board, static roster, skills archive, footer. The
+nameplate moved OUT of the stage in this pass for exactly that reason: inside
+it, it inherited the stage's `hidden` and the no-JS page had no `<h1>` at all.
+
+### 13.2 The camera has weight
+
+Direct manipulation stays 1:1 — a map that lags the hand is lying about where
+it is. Everything after the hand lifts is new:
+
+- **Glide.** Pointer velocity is tracked with a short exponential average and
+  decays at 0.90 per frame after release.
+- **Eased zoom.** The wheel, the buttons and the keys write a TARGET; the
+  rendered state chases it at 0.24 per frame. The point under the cursor is
+  held against the target, so a run of wheel ticks compounds toward one place
+  instead of drifting.
+- **Bounds.** Previously only scale was clamped, so one hard flick could throw
+  the city off screen with no way back but Reset. At least a third of the
+  shorter frame axis of city now stays on screen.
+- **Fly-to.** Selecting a citizen eases the camera onto them at a zoom just
+  past `DIRECTOR_NAME_ZOOM`, offset for whichever drawer is about to cover
+  part of the frame — the inspector's width on a wide screen, its height on a
+  phone. Before this, selecting somebody on a phone routinely opened a full
+  record for a building that was not on screen.
+
+`prefers-reduced-motion: reduce` removes the glide and the easing entirely:
+target and state are the same numbers, applied on the spot. Every control
+still reaches everywhere it reached before.
+
+### 13.3 Materials
+
+The value ladder in §3 was right and was also the whole lighting model. Three
+flat tints per solid is what a diagram does. Four things were added, none of
+which changes a hue, a height, or anything else this map means:
+
+- **Falloff.** One shared `sheen` gradient composited over each visible face:
+  light along the wall head, ambient ink gathering at the footing, and a
+  second ramp along the light's own direction for roofs. Hue-agnostic on
+  purpose — an SVG gradient in `<defs>` resolves `var(--hue)` against the
+  root, not against the referencing element, so one definition has to serve
+  all twenty precincts.
+- **Crest.** The roof's stroke was its own fill (a seam closer). It is now
+  `--face-crest` at `l + 0.14`: the edge where a roof meets the sky catches
+  more light than either surface it joins, and drawing that is most of what
+  stops a box reading as a sticker.
+- **Contact.** A penumbra polygon — the shadow of a slightly fatter, slightly
+  longer building — under the sharp one, plus a wider AO patch. A lit
+  building's patch is warm rather than dark, because light coming out of the
+  windows has to land somewhere.
+- **Glass.** Windows were a flat tint. They are a gradient now, chosen at
+  render time from the same telemetry the figure's pose comes from: cool and
+  dark when nobody is in, warm and emissive with a glow stroke when the
+  lights are on.
+
+Plus a dusk sky in three values with the key light drawn as a glow in the
+corner it comes from, a lit ground plane, kerb shadows at every plot edge, and
+a screen-space vignette and grain layer that never re-rasterise because they
+are fixed to the screen rather than to the world.
+
+**Dusk is the default lighting.** The page used to open on the operating
+system's preference, which is daylight on most machines. Daylight is right for
+a document and wrong for a city: the lit windows, the warm road highlight and
+the lamp a working citizen carries only exist against a dark sky. Light and
+system stay one click away in the toggle that always offered them.
+
+### 13.4 What the budget is now, and why
+
+Raised from 2,400 elements to 3,200; the shipped scene renders 2,787 plus a
+132-element walker allowance. The ceiling is set from a frame-time
+measurement rather than a feeling. Recorded drag pans:
+
+| build | laptop 1440x900 | phone 390x844 |
+|---|---|---|
+| before this pass | 58.7 fps mean | 58.7 fps mean |
+| after, +600 nodes | 58.0 mean / 59.5 p95 / 33 ms worst | 60.0 mean / 59.9 p95 / 17 ms worst |
+| with a blur on the shadow layer | **24.3 mean / 8.6 p95** | — |
+
+Nodes are cheap here. Filters are not, and neither are backdrop reads: a
+Gaussian blur over the shadow layer cost 33 fps, `mix-blend-mode: overlay` on
+the grain layer cost 12, and `backdrop-filter` on the five readout chips cost
+15. All three were measured and then removed; the geometry that replaced the
+blur is two polygons per building, which is how a soft shadow was drawn before
+filters existed. `tests/budget.test.mjs` already forbade filter primitives
+outright — this pass is why.
+
+### 13.5 Targets and focus in a game surface
+
+A citizen is drawn about nine CSS pixels tall on a phone. That is the correct
+SIZE for a city of fifty-nine and an indefensible tap target, so the target is
+not the sprite: each citizen carries an unpainted `circle.hit-area` whose
+radius is driven from the live camera scale, sized for a 40px screen target
+and capped at 34 world units so it can never swallow a neighbour. Measured
+smallest hit area: 25.9px on the phone, 40.1px on the laptop, against a 25.9px
+and 42.7px sprite.
+
+Focus is drawn in the world for the same reason. `outline` on an SVG element
+is not a bet worth making across engines, and an outline around the bounding
+box of a tall isometric building says very little about which person is
+focused. `:focus-visible` makes the hit circle itself visible instead — a real
+ring around a real person, 40px across at any zoom — and lifts the silhouette
+at the same time, so the indicator is never carried by one channel alone.
+
+### 13.6 Labels stopped being stickers
+
+A solid card with mono text pasted over the city for every person on it was
+the loudest remaining "this is a diagram" signal. Citizen names are now TEXT
+with a halo (`paint-order: stroke`, the halo in `--plate` so the pairing
+inverts correctly with the lighting), which is how every serious map draws a
+place name. District titles keep their card, because a district title IS a
+piece of signage standing in the street.
+
+Two related fixes: label scale is now divided by the live camera scale, so a
+label reads at the same size whatever the camera is doing — §7 already said it
+should and then sized plates against the frame only, which left a district
+title as a caption bar lying across the city at 3x. And the off-frame cull now
+insets the visible rectangle by the HUD's own box heights, because a label
+drawn under an opaque plate is the same debris the cull exists to remove, one
+layer in.

@@ -107,6 +107,27 @@ export const ENV = {
     'bg-elevated': [0.995, 0.003, 85],
     'border-subtle': [0.86, 0.012, 75],
     'border-strong': [0.55, 0.02, 260],
+    // --- §2.3b materials. Added when the map stopped being a diagram. ---
+    // A sky needs three values, not two: a two-stop ramp is a fill, and a
+    // fill is the single loudest tell that a scene was not lit.
+    'sky-mid': [0.905, 0.038, 72],
+    // The key light itself, drawn. Every face on this map is already stepped
+    // off ONE light from the upper right; this is that light made visible in
+    // the sky it comes from, so the shading has a cause on screen.
+    sun: [0.995, 0.055, 84],
+    // The pool the key light throws on the ground plane, and the cool bounce
+    // that fills the parts of it the light does not reach.
+    'ground-pool': [0.985, 0.030, 76],
+    'ground-fill': [0.720, 0.030, 258],
+    // The sheen ramp painted down every vertical face: light catching the
+    // top of a wall, ambient occlusion gathering at its foot.
+    'sheen-hi': [1.0, 0.0, 90],
+    // Glass. Dark by day because it reflects a bright sky and reads as a
+    // hole; warm and emissive when the telemetry says somebody is in.
+    'glass-top': [0.640, 0.030, 238],
+    'glass-bottom': [0.300, 0.028, 258],
+    'glass-lit-top': [0.995, 0.055, 92],
+    'glass-lit-bottom': [0.800, 0.130, 70],
   },
   dark: {
     'sky-top': [0.135, 0.030, 268],
@@ -140,14 +161,39 @@ export const ENV = {
     'bg-elevated': [0.21, 0.015, 255],
     'border-subtle': [0.30, 0.012, 255],
     'border-strong': [0.55, 0.015, 255],
+    'sky-mid': [0.185, 0.034, 262],
+    sun: [0.760, 0.105, 58],
+    'ground-pool': [0.620, 0.055, 250],
+    'ground-fill': [0.180, 0.030, 268],
+    'sheen-hi': [0.980, 0.012, 250],
+    'glass-top': [0.330, 0.030, 245],
+    'glass-bottom': [0.150, 0.020, 255],
+    'glass-lit-top': [0.995, 0.070, 92],
+    'glass-lit-bottom': [0.780, 0.140, 66],
   },
 };
 
+/**
+ * Every alpha the scene is lit with, in one table.
+ *
+ * The material group (sun through crest) is the difference between three
+ * flat tints per solid and a solid that looks lit. They are alphas rather
+ * than colours because each one composites over a hue the renderer does not
+ * know in advance: one gradient definition serves all twenty precincts.
+ */
 export const ALPHA = {
   // rim: the silhouette edge at rest. Off in light (revealed on hover),
   // always on in dark — the compliant boundary of every wall (§2.4.2).
-  light: { shadow: 0.17, plate: 0.95, hazeGround: 0.26, hazeObject: 0.08, rim: 0.34, rimWidth: 1.0 },
-  dark: { shadow: 0.30, plate: 0.95, hazeGround: 0.26, hazeObject: 0.08, rim: 0.8, rimWidth: 1.1 },
+  light: {
+    shadow: 0.17, plate: 0.95, hazeGround: 0.30, hazeObject: 0.10, rim: 0.34, rimWidth: 1.0,
+    sun: 0.55, sunMid: 0.16, pool: 0.30, fill: 0.10,
+    sheenHi: 0.26, sheenLo: 0.19, crest: 0.50, glassGlow: 0.30, plotEdge: 0.14, spill: 0.10,
+  },
+  dark: {
+    shadow: 0.30, plate: 0.95, hazeGround: 0.34, hazeObject: 0.05, rim: 0.8, rimWidth: 1.1,
+    sun: 0.34, sunMid: 0.11, pool: 0.14, fill: 0.26,
+    sheenHi: 0.13, sheenLo: 0.42, crest: 0.34, glassGlow: 0.55, plotEdge: 0.26, spill: 0.22,
+  },
 };
 
 /** Every precinct hue token as [l, c, h] for a theme, keyed by CSS class name. */
@@ -184,6 +230,13 @@ function tokenBlock(theme, indent) {
   lines.push(`${indent}--haze-object-alpha: ${ALPHA[theme].hazeObject};`);
   lines.push(`${indent}--rim-alpha: ${ALPHA[theme].rim};`);
   lines.push(`${indent}--rim-width: ${ALPHA[theme].rimWidth};`);
+  for (const [name, key] of [
+    ['sun-alpha', 'sun'], ['sun-mid-alpha', 'sunMid'], ['pool-alpha', 'pool'], ['fill-alpha', 'fill'],
+    ['sheen-hi-alpha', 'sheenHi'], ['sheen-lo-alpha', 'sheenLo'], ['crest-alpha', 'crest'],
+    ['glass-glow-alpha', 'glassGlow'], ['plot-edge-alpha', 'plotEdge'], ['spill-alpha', 'spill'],
+  ]) {
+    lines.push(`${indent}--${name}: ${ALPHA[theme][key]};`);
+  }
   lines.push(`${indent}--plot-mix: ${Math.round(PLOT_MIX[theme] * 100)}%;`);
   for (const [cls, v] of Object.entries(hueTokens(theme))) {
     lines.push(`${indent}--${cls}: ${oklch(...v)};`);

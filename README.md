@@ -193,14 +193,28 @@ publish carelessly, so:
   successfully. If `ecosystem.json` fails to fetch, or any script error
   happens first, that section simply never gets hidden, so the page never
   degrades to blank.
+- The same switch decides what KIND of page this is. `app.mjs` sets
+  `map-mode` on `<html>` as its very last act, after a city has been drawn
+  and every panel wired; that one class turns the document into an
+  application shell — the map fills the viewport, the page stops scrolling,
+  and the findings, roster, studio and key become drawers over the city.
+  Without it, and therefore without JavaScript, the markup renders as the
+  stacked document it has always been. Nothing was deleted to build the
+  application; see DESIGN.md §13.
+- Full keyboard play. All 59 citizens are `role="button"` with a `tabindex`
+  and an `aria-label`, Enter or Space opens the record, Escape closes the
+  top layer, and focus is drawn as a visible ring around the citizen rather
+  than as an outline around a bounding box. `prefers-reduced-motion: reduce`
+  removes the camera easing, the glide and the ambient life, and every
+  control still reaches everywhere it reached before.
 
 ## Limitations (honest)
 
 - **An imported city can exceed the element budget the house map keeps to.**
-  DESIGN.md caps the map at 2,400 SVG elements and `tests/budget.test.mjs`
-  holds the shipped snapshot to it. The studio draws whatever it is handed:
-  importing this machine's real `~/.claude` (125 citizens, 171 skills, 38
-  guilds) produces 3,063 elements. It renders in well under a second and
+  DESIGN.md caps the map at 3,200 SVG elements (raised from 2,400 when every
+  solid gained a material — the number is set from a measured pan, see
+  DESIGN.md §13.4) and `tests/budget.test.mjs` holds the shipped snapshot to
+  it at 2,919. The studio draws whatever it is handed. It renders in well under a second and
   pans smoothly, but the budget is a promise about the map polis ships, not
   about a stranger's tree, and no test can hold the second one.
 - **"Offline after first load" means no further network calls, not a

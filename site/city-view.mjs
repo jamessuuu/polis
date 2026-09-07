@@ -402,10 +402,93 @@ export function renderCity({ svg, data, city, workforce = null, onSelect = null,
 
   // ---- defs ------------------------------------------------------------
   const defs = s('defs');
-  const sky = s('linearGradient', { id: gid('sky'), x1: 0, y1: 0, x2: 0, y2: 1 });
-  sky.appendChild(s('stop', { offset: 0, 'stop-color': 'var(--sky-top)' }));
-  sky.appendChild(s('stop', { offset: 1, 'stop-color': 'var(--sky-bottom)' }));
-  defs.appendChild(sky);
+
+  /**
+   * The materials, defined once and referenced by everything.
+   *
+   * The constraint that shapes all of this: an SVG gradient in <defs> is
+   * resolved against ITS OWN position in the tree, not against the element
+   * that references it, so `var(--hue)` inside a stop reads the root's hue
+   * and not the building's. That rules out the obvious approach — one
+   * gradient per precinct per face — and rules IN a better one: the flat
+   * hue-derived fill still carries the colour, and a hue-AGNOSTIC ramp is
+   * composited over it. One definition serves twenty precincts, the value
+   * ladder DESIGN.md §3 specifies is untouched, and every face gains the
+   * thing it was missing, which is a light that falls off across it.
+   */
+  const grad = (id, attrs, stops) => {
+    const g = s(attrs.cx !== undefined ? 'radialGradient' : 'linearGradient', { id: gid(id), ...attrs });
+    for (const st of stops) g.appendChild(s('stop', st));
+    defs.appendChild(g);
+    return g;
+  };
+
+  // Sky: three values, because a two-stop ramp is a fill and a fill is the
+  // loudest possible signal that nothing was lit.
+  grad('sky', { x1: 0, y1: 0, x2: 0, y2: 1 }, [
+    { offset: 0, 'stop-color': 'var(--sky-top)' },
+    { offset: 0.58, 'stop-color': 'var(--sky-mid)' },
+    { offset: 1, 'stop-color': 'var(--sky-bottom)' },
+  ]);
+
+  // The key light, drawn in the sky it comes from. Every face on this map is
+  // stepped off one light from the upper right; this gives that light a
+  // cause on screen instead of leaving it as an assertion in a comment.
+  grad('sun', { cx: 0.80, cy: 0.16, r: 0.62 }, [
+    { offset: 0, 'stop-color': 'var(--sun)', 'stop-opacity': 'var(--sun-alpha)' },
+    { offset: 0.42, 'stop-color': 'var(--sun)', 'stop-opacity': 'var(--sun-mid-alpha)' },
+    { offset: 1, 'stop-color': 'var(--sun)', 'stop-opacity': 0 },
+  ]);
+
+  // The pool that light throws on the ground plane, and the cool ambient
+  // fill that gathers everywhere it does not reach.
+  // Pool and ambient fill in ONE gradient rather than two stacked ones. Two
+  // board-sized radial fills repaint twice per frame for one effect; on a
+  // 1440x900 pan that pair alone was worth about 30 fps.
+  grad('pool', { cx: 0.63, cy: 0.28, r: 0.82 }, [
+    { offset: 0, 'stop-color': 'var(--ground-pool)', 'stop-opacity': 'var(--pool-alpha)' },
+    { offset: 0.44, 'stop-color': 'var(--ground-pool)', 'stop-opacity': 0 },
+    { offset: 0.58, 'stop-color': 'var(--ground-fill)', 'stop-opacity': 0 },
+    { offset: 1, 'stop-color': 'var(--ground-fill)', 'stop-opacity': 'var(--fill-alpha)' },
+  ]);
+
+  // The sheen: light caught along the top of a wall, ambient occlusion
+  // gathering at its foot. Painted over the flat face, in the face's own
+  // bounding box, so one definition fits every building on the map.
+  grad('sheen', { x1: 0, y1: 0, x2: 0, y2: 1 }, [
+    { offset: 0, 'stop-color': 'var(--sheen-hi)', 'stop-opacity': 'var(--sheen-hi-alpha)' },
+    { offset: 0.46, 'stop-color': 'var(--sheen-hi)', 'stop-opacity': 0 },
+    { offset: 0.62, 'stop-color': 'var(--ao-ink)', 'stop-opacity': 0 },
+    { offset: 1, 'stop-color': 'var(--ao-ink)', 'stop-opacity': 'var(--sheen-lo-alpha)' },
+  ]);
+  // A roof is nearly normal to the key light, so its ramp runs along the
+  // light's own direction rather than straight down.
+  grad('sheen-top', { x1: 0.88, y1: 0, x2: 0.12, y2: 1 }, [
+    { offset: 0, 'stop-color': 'var(--sheen-hi)', 'stop-opacity': 'var(--sheen-hi-alpha)' },
+    { offset: 0.72, 'stop-color': 'var(--sheen-hi)', 'stop-opacity': 0 },
+    { offset: 1, 'stop-color': 'var(--ao-ink)', 'stop-opacity': 0.06 },
+  ]);
+
+  // Glass. Dark by day because it reflects a bright sky and reads as a hole
+  // in a wall; warm and emissive when the telemetry says somebody is in.
+  grad('glass', { x1: 0, y1: 0, x2: 0, y2: 1 }, [
+    { offset: 0, 'stop-color': 'var(--glass-top)' },
+    { offset: 1, 'stop-color': 'var(--glass-bottom)' },
+  ]);
+  grad('glass-lit', { x1: 0, y1: 0, x2: 0, y2: 1 }, [
+    { offset: 0, 'stop-color': 'var(--glass-lit-top)' },
+    { offset: 1, 'stop-color': 'var(--glass-lit-bottom)' },
+  ]);
+
+  // There is no blur filter here, and that is a measured decision rather
+  // than a taste one. An feGaussianBlur over the whole shadow layer looks
+  // right and costs a full-scene offscreen re-rasterisation on every camera
+  // tick: measured on this scene at 1440x900 it took a clean 58 fps pan down
+  // to 34 fps mean and 12 fps at p95, with 233 ms worst frames. The penumbra
+  // below is two flat polygons per building instead — the shadow of a
+  // slightly fatter, slightly longer building under the sharp one — which is
+  // how a soft shadow was drawn before filters existed and costs nothing per
+  // frame because it is just more geometry in the same paint.
   // One radial gradient, referenced by every contact patch. Defining it per
   // building would be one gradient per building for one visual effect.
   const ao = s('radialGradient', { id: gid('ao-patch') });
@@ -413,6 +496,15 @@ export function renderCity({ svg, data, city, workforce = null, onSelect = null,
   ao.appendChild(s('stop', { offset: 0.55, 'stop-color': 'var(--ao-ink)', 'stop-opacity': 0.16 }));
   ao.appendChild(s('stop', { offset: 1, 'stop-color': 'var(--ao-ink)', 'stop-opacity': 0 }));
   defs.appendChild(ao);
+  // The same patch under a building whose lights are on. Occlusion still
+  // gathers right at the wall, and beyond it the light the windows are
+  // already drawing has to land somewhere. Same element, same cost, and it
+  // says the same thing the windows say rather than a second thing.
+  const spill = s('radialGradient', { id: gid('ao-spill') });
+  spill.appendChild(s('stop', { offset: 0, 'stop-color': 'var(--ao-ink)', 'stop-opacity': 0.26 }));
+  spill.appendChild(s('stop', { offset: 0.42, 'stop-color': 'var(--lamp)', 'stop-opacity': 'var(--spill-alpha)' }));
+  spill.appendChild(s('stop', { offset: 1, 'stop-color': 'var(--lamp)', 'stop-opacity': 0 }));
+  defs.appendChild(spill);
   // Aerial perspective: two planes, stop-opacity on the gradient so no group
   // opacity is needed anywhere but here.
   for (const [id, alpha] of [['haze-ground', 'var(--haze-ground-alpha)'], ['haze-object', 'var(--haze-object-alpha)']]) {
@@ -426,6 +518,8 @@ export function renderCity({ svg, data, city, workforce = null, onSelect = null,
   // ---- sky (environment, outside the camera) -----------------------------
   const skyRect = s('rect', { class: 'sky', fill: gurl('sky') });
   svg.appendChild(skyRect);
+  const sunRect = s('rect', { class: 'sky sun-glow', fill: gurl('sun') });
+  svg.appendChild(sunRect);
 
   // The camera. Pan and zoom move this one node, and nothing else ever does.
   // There was a wrapper here that faded the whole scene in over 900ms on
@@ -440,6 +534,10 @@ export function renderCity({ svg, data, city, workforce = null, onSelect = null,
   const boardLayer = s('g', { class: 'board-layer' });
   boardLayer.appendChild(s('polygon', { class: 'plinth-left', points: plinth.left }));
   boardLayer.appendChild(s('polygon', { class: 'plinth-right', points: plinth.right }));
+  // The plinth is a solid like any other and was the one left flat: the same
+  // falloff every wall in the city gets, on the wall the city stands on.
+  boardLayer.appendChild(s('polygon', { class: 'sheen', points: plinth.left, fill: gurl('sheen') }));
+  boardLayer.appendChild(s('polygon', { class: 'sheen', points: plinth.right, fill: gurl('sheen') }));
   boardLayer.appendChild(s('polygon', { class: 'board-outer', points: plinth.top }));
   const w = city.wall;
   // An ecosystem with no declared divisions has nothing inside a wall, so it
@@ -474,6 +572,17 @@ export function renderCity({ svg, data, city, workforce = null, onSelect = null,
   }
   camera.appendChild(plotLayer);
 
+  // The ground plane as a lit surface rather than a fill: a warm pool where
+  // the key light lands, a cool ambient fill everywhere it does not. Two
+  // rectangles, under everything that stands up.
+  const boardRect = {
+    x: b.minX, y: b.minY, w: b.maxX - b.minX, h: (b.maxY + PLINTH) - b.minY,
+  };
+  camera.appendChild(s('rect', {
+    class: 'ground-light', x: r2(boardRect.x), y: r2(boardRect.y),
+    width: r2(boardRect.w), height: r2(boardRect.h), fill: gurl('pool'),
+  }));
+
   // ---- the wall ----------------------------------------------------------
   if (walled) {
     const gates = gatesOf(w);
@@ -506,6 +615,37 @@ export function renderCity({ svg, data, city, workforce = null, onSelect = null,
   const grid = buildRoutingGrid(city);
   const router = createRouter(grid);
   const buildingsById = new Map(city.buildings.map((x) => [x.id, x]));
+
+  /**
+   * The selection marker.
+   *
+   * One ring, created once and moved. Before it existed, selecting a citizen
+   * highlighted their roads and dimmed their neighbours and left the actual
+   * subject unmarked — which on an unreachable member, whose whole building
+   * is an empty lot, meant the camera flew somewhere and nothing said where.
+   * A ring on the ground under the subject is the oldest answer in the genre
+   * and it costs three nodes for the whole map.
+   */
+  const markLayer = s('g', { class: 'mark-layer' });
+  const selectRing = s('g', { class: 'select-ring' });
+  const ringInner = s('ellipse', { class: 'select-ring-fill' });
+  const ringOuter = s('ellipse', { class: 'select-ring-edge' });
+  selectRing.appendChild(ringInner);
+  selectRing.appendChild(ringOuter);
+  markLayer.appendChild(selectRing);
+  camera.appendChild(markLayer);
+
+  function markSelection(item) {
+    if (!item) { selectRing.classList.remove('on'); return; }
+    const patch = contactPatch(item.col, item.row, footprintOf(item), 13);
+    for (const [el, grow] of [[ringInner, 0], [ringOuter, 4]]) {
+      el.setAttribute('cx', patch.cx);
+      el.setAttribute('cy', patch.cy);
+      el.setAttribute('rx', patch.rx + grow);
+      el.setAttribute('ry', patch.ry + grow / 2);
+    }
+    selectRing.classList.add('on');
+  }
 
   const roadLayer = s('g', { class: 'road-layer' });
   const roadEls = [];
@@ -564,6 +704,12 @@ export function renderCity({ svg, data, city, workforce = null, onSelect = null,
     g.dataset.id = item.id;
     g.dataset.kind = item.kind;
     g.dataset.depth = String(depthOf(item.col, item.row));
+    // Where the camera aims when this citizen is selected. Read from the
+    // plan rather than from getBBox(), because the hit area below is
+    // deliberately larger than the drawing and would drag the centre off it.
+    const centre = doorPoint(item.col, item.row, fp);
+    g.dataset.cx = String(centre.x);
+    g.dataset.cy = String(r2(centre.y - item.height * 0.45));
     if (!(item.kind === 'citizen' && item.unreachable)) {
       const pitch = (item.director ? 26 : 0) + (item.kind === 'citizen' && roofOf(item.tools) === 'gable' ? 12 : 0);
       obstacles.push({ id: item.id, ...silhouetteBox(item.col, item.row, item.height, fp, pitch) });
@@ -575,20 +721,39 @@ export function renderCity({ svg, data, city, workforce = null, onSelect = null,
       g.appendChild(s('polygon', { class: 'ruin-lot', points: plotPolygon(item.col, item.row, 1, 1, (1 - fp) / 2) }));
     } else if (item.kind === 'skill') {
       shadowLayer.appendChild(s('polygon', { class: 'cast-shadow', points: shadowPolygon(item.col, item.row, item.height, fp) }));
-      // A monopitch shed: shelving, not a house. No storeys, no edge.
+      // A monopitch shed: shelving, not a house. No storeys, no edge. It gets
+      // no penumbra either: eighty-six of them stand shoulder to shoulder in
+      // one block where no individual soft edge is legible, and they were
+      // eighty-six of the hundred and forty-five the scene was paying for.
       const faces = boxFaces(item.col, item.row, item.height, fp);
       const pitched = shedTop(item.col, item.row, item.height, fp, 3);
       g.appendChild(s('polygon', { class: 'face face-left', points: faces.left }));
       g.appendChild(s('polygon', { class: 'face face-right', points: pitched.right }));
       g.appendChild(s('polygon', { class: 'face face-top', points: pitched.top }));
+      g.appendChild(s('polygon', { class: 'sheen', points: faces.left, fill: gurl('sheen') }));
+      g.appendChild(s('polygon', { class: 'sheen', points: pitched.right, fill: gurl('sheen') }));
+      g.appendChild(s('polygon', { class: 'sheen sheen-roof', points: pitched.top, fill: gurl('sheen-top') }));
     } else {
-      shadowLayer.appendChild(s('ellipse', { class: 'ao-patch', ...contactPatch(item.col, item.row, fp), fill: gurl('ao-patch') }));
+      const home = activity === 'active' || activity === 'recent';
+      shadowLayer.appendChild(s('ellipse', {
+        class: 'ao-patch', ...contactPatch(item.col, item.row, fp, home ? 15 : 11),
+        fill: gurl(home ? 'ao-spill' : 'ao-patch'),
+      }));
+      // The sun is a disc, not a point: a wide faint shadow under a narrow
+      // dark one is a penumbra, and two polygons is the whole cost of it.
+      shadowLayer.appendChild(s('polygon', {
+        class: 'cast-shadow cast-penumbra',
+        points: shadowPolygon(item.col, item.row, item.height, Math.min(0.99, fp * 1.34), 0.63),
+      }));
       shadowLayer.appendChild(s('polygon', { class: 'cast-shadow', points: shadowPolygon(item.col, item.row, item.height, fp) }));
 
       const faces = boxFaces(item.col, item.row, item.height, fp);
       const storeys = storeysOf(item.height);
       g.appendChild(s('polygon', { class: 'face face-left', points: faces.left }));
       g.appendChild(s('polygon', { class: 'face face-right', points: faces.right }));
+      // The light, falling off down each wall. Same points, one shared ramp.
+      g.appendChild(s('polygon', { class: 'sheen', points: faces.left, fill: gurl('sheen') }));
+      g.appendChild(s('polygon', { class: 'sheen', points: faces.right, fill: gurl('sheen') }));
       const foot = footingBands(item.col, item.row, item.height, fp);
       // Footing band and doorway share one path: the door is where the
       // citizen is already standing, and it costs no element to draw it.
@@ -601,7 +766,8 @@ export function renderCity({ svg, data, city, workforce = null, onSelect = null,
       if (lines.trim()) g.appendChild(s('path', { class: 'storeys', d: lines.trim() }));
       const win = windowsPath(item.col, item.row, item.height, fp, storeys);
       if (win) {
-        const wp = s('path', { class: 'windows', d: win });
+        const lit = activity === 'active' || activity === 'recent';
+        const wp = s('path', { class: 'windows', d: win, fill: gurl(lit ? 'glass-lit' : 'glass') });
         wp.style.setProperty('--pulse-delay', `${(idx % 7) * 400}ms`);
         g.appendChild(wp);
       }
@@ -612,10 +778,12 @@ export function renderCity({ svg, data, city, workforce = null, onSelect = null,
         g.appendChild(s('polygon', { class: 'face face-gable-shade', points: gable.shade }));
         g.appendChild(s('polygon', { class: 'face face-gable-end', points: gable.end }));
         g.appendChild(s('polygon', { class: 'face face-gable-lit', points: gable.lit }));
+        g.appendChild(s('polygon', { class: 'sheen sheen-roof', points: gable.lit, fill: gurl('sheen-top') }));
         g.classList.add('roof-gable');
         apex = gable.apex;
       } else {
         g.appendChild(s('polygon', { class: 'face face-top', points: faces.top }));
+        g.appendChild(s('polygon', { class: 'sheen sheen-roof', points: faces.top, fill: gurl('sheen-top') }));
         g.classList.add('roof-flat');
         apex = faces.apex;
       }
@@ -645,6 +813,15 @@ export function renderCity({ svg, data, city, workforce = null, onSelect = null,
     }
 
     if (item.kind === 'citizen') {
+      // A target larger than the sprite, which is standard practice in every
+      // game that draws a person eight pixels tall. `fill: none` with
+      // `pointer-events: all` makes an unpainted interior hittable, so this
+      // costs one node and no ink. Its radius is driven from CSS against the
+      // live camera scale (--hit-r), so the target stays roughly constant in
+      // SCREEN pixels however far out the view is zoomed.
+      g.insertBefore(s('circle', {
+        class: 'hit-area', cx: r2(centre.x), cy: r2(centre.y - 6),
+      }), g.firstChild);
       g.setAttribute('aria-label', ariaLabel(item, wfById.get(item.id), activity));
       // A citizen is a BUTTON only where there is somewhere for the button to
       // go. The hero map opens a panel; the studio map has none, and calling
@@ -749,6 +926,29 @@ export function renderCity({ svg, data, city, workforce = null, onSelect = null,
     }
   }
   relayoutPlates(1);
+
+  /**
+   * A label is UI, and UI does not zoom.
+   *
+   * `plateScaleFor` already says so in its own comment — "a label should read
+   * at roughly the same size whatever the camera is doing" — and then sized
+   * plates against the FRAME only, so the camera was exactly the thing it did
+   * not account for. Zoomed to 3x, a district title was a caption bar lying
+   * across the city it names and a citizen's name was wider than the building
+   * wearing it. Dividing the label scale by the live camera scale is the
+   * whole fix. It is throttled to 6% steps because re-placing every plate is
+   * a real pass and a wheel emits dozens of ticks a second; between steps the
+   * labels simply ride the camera, which over 6% nobody can see.
+   */
+  function applyZoomScale(k) {
+    const eff = Math.max(0.05, k || 1);
+    if (Math.abs(eff - state.labelK) / state.labelK < 0.06) return false;
+    state.labelK = eff;
+    const f = state.frame;
+    const visible = f ? { x: (f.x - state.camX) / eff, y: (f.y - state.camY) / eff, w: f.w / eff, h: f.h / eff } : null;
+    relayoutPlates(state.plateScale / eff, visible);
+    return true;
+  }
   // Name plates: a pool created once, repositioned by transform, revealed
   // by opacity. Hover creates zero DOM nodes.
   const pool = [];
@@ -774,7 +974,7 @@ export function renderCity({ svg, data, city, workforce = null, onSelect = null,
   svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
 
   /** Switch frames as a hard cut: viewBox is not a transform and never tweens. */
-  const state = { plateScale: 1, zoom: 1 };
+  const state = { plateScale: 1, zoom: 1, labelK: 1, camX: 0, camY: 0 };
   function setFrame(f, container) {
     svg.setAttribute('viewBox', `${r2(f.x)} ${r2(f.y)} ${r2(f.w)} ${r2(f.h)}`);
     // The sky is three frames wide so a letterboxed axis reads as more sky
@@ -783,9 +983,17 @@ export function renderCity({ svg, data, city, workforce = null, onSelect = null,
     skyRect.setAttribute('y', r2(f.y - f.h));
     skyRect.setAttribute('width', r2(f.w * 3));
     skyRect.setAttribute('height', r2(f.h * 3));
+    // The glow belongs to the FRAME, not to the oversized sky plate: a
+    // radial in objectBoundingBox units on a three-frame rectangle would put
+    // the sun a whole screen off the top right corner.
+    sunRect.setAttribute('x', r2(f.x - f.w * 0.1));
+    sunRect.setAttribute('y', r2(f.y - f.h * 0.1));
+    sunRect.setAttribute('width', r2(f.w * 1.2));
+    sunRect.setAttribute('height', r2(f.h * 1.2));
     state.frame = f;
     if (container) {
       state.plateScale = plateScaleFor(f, container);
+      state.labelK = 1;
       relayoutPlates(state.plateScale, f);
     }
   }
@@ -795,9 +1003,12 @@ export function renderCity({ svg, data, city, workforce = null, onSelect = null,
     camera, citizenEls, roadEls, figures, activities, view, obstacles,
     buildLayer, buildingOrder, walkLayer, shadowLayer, plateLayer, plateBoxes,
     namePool: pool, router, buildingsById, agentsById, setFrame, cullLabels,
+    applyZoomScale, markSelection,
+    setCamera(cx, cy) { state.camX = cx; state.camY = cy; },
     set zoom(k) { state.zoom = k; },
     get zoom() { return state.zoom ?? 1; },
-    get plateScale() { return state.plateScale; },
+    // The effective label scale: the frame's own, undone by the camera's.
+    get plateScale() { return state.plateScale / state.labelK; },
     get frame() { return state.frame; },
   };
 }
@@ -891,7 +1102,13 @@ function fitToAspect(frame, container, limit) {
   } else if (wide > target) {
     const want = Math.min(out.w / target, limit ? limit.h : Infinity);
     const grow = want - out.h;
-    out.y -= grow / 2;
+    // Not centred. This branch only fires on a PORTRAIT container, where the
+    // spare space is sky above and below a wide, short city — and where the
+    // HUD is not symmetric either: readouts, the headline and the panel bar
+    // take about twice the height at the bottom that the nameplate takes at
+    // the top. Biasing the growth upward sits the city a little above centre,
+    // which is where the clear space actually is.
+    out.y -= grow * 0.42;
     out.h = want;
   }
   return out;
@@ -1100,46 +1317,139 @@ function tooltipFor(item, data, wf) {
 }
 
 /**
- * Pan and zoom, on the camera group only.
+ * The camera.
  *
  * Drag to pan, wheel to zoom, arrow keys to pan and +/- to zoom for anyone
- * not using a mouse. Zoom is clamped so the city cannot be lost off-screen,
- * which is the failure that makes a pannable map feel broken. 1:1, no
- * inertia; the only thing that idles on the camera is nothing.
+ * not using a mouse. Three things changed when this page stopped being a
+ * document with a map in it and became a map:
+ *
+ *   1. A released drag GLIDES. Direct manipulation stays 1:1 while a finger
+ *      or a cursor is down — anything else is a lie about where the map is —
+ *      and the moment it lifts, the momentum the hand actually had carries
+ *      the view and decays. That is the single difference between "a diagram
+ *      that responds to input" and "a place you are moving through".
+ *   2. Zoom is EASED toward a target rather than jumped. The wheel, the
+ *      buttons and the keys all write a target; the rendered state chases it
+ *      on a curve. The point under the cursor is held fixed against the
+ *      target, so it is still zoom-to-point.
+ *   3. There are BOUNDS. The old clamp was on scale only, so a hard flick
+ *      could throw the whole city off screen and leave a visitor looking at
+ *      an empty sky with no way back except the Reset button.
+ *
+ * `prefers-reduced-motion` turns off 1 and 2 entirely: target and state are
+ * the same object's worth of numbers, applied on the spot. Every control
+ * still works and the map still goes everywhere it went before.
  */
-export function attachCamera(svg, camera, { onReset, onZoom } = {}) {
+export function attachCamera(svg, camera, { onReset, onZoom, reduced = false } = {}) {
   const state = { x: 0, y: 0, k: 1 };
+  const target = { x: 0, y: 0, k: 1 };
   const MIN_K = 0.55;
   const MAX_K = 3.4;
+  const EASE = 0.24;
+  const FRICTION = 0.90;
+  const MIN_GLIDE = 0.12;
+
   let dragging = false;
   let last = null;
+  let raf = 0;
+  let gliding = false;
+  const vel = { x: 0, y: 0 };
+
+  // The rectangle the camera is not allowed to lose. Set by the app once the
+  // scene and its frame exist; until then the clamp is simply inert.
+  let limitBox = null;
+  let limitFrame = null;
 
   function apply() {
-    camera.setAttribute('transform', `translate(${state.x} ${state.y}) scale(${state.k})`);
+    camera.setAttribute('transform', `translate(${r(state.x)} ${r(state.y)}) scale(${r(state.k)})`);
     if (onZoom) onZoom(state.k, state);
+  }
+  const r = (n) => Math.round(n * 1000) / 1000;
+
+  /** Keep at least a third of the shortest frame axis worth of city on screen. */
+  function clampTarget() {
+    if (!limitBox || !limitFrame) return;
+    const f = limitFrame;
+    const m = Math.min(f.w, f.h) * 0.34;
+    for (const [axis, lo, size, flo, fsize] of [
+      ['x', limitBox.x, limitBox.w, f.x, f.w],
+      ['y', limitBox.y, limitBox.h, f.y, f.h],
+    ]) {
+      const min = flo + m - target.k * (lo + size);
+      const max = flo + fsize - m - target.k * lo;
+      target[axis] = min > max
+        ? (min + max) / 2
+        : Math.min(max, Math.max(min, target[axis]));
+    }
+  }
+
+  function step() {
+    raf = 0;
+    let busy = false;
+    if (gliding) {
+      target.x += vel.x;
+      target.y += vel.y;
+      vel.x *= FRICTION;
+      vel.y *= FRICTION;
+      clampTarget();
+      if (Math.hypot(vel.x, vel.y) < MIN_GLIDE) gliding = false;
+      busy = true;
+    }
+    const dx = target.x - state.x;
+    const dy = target.y - state.y;
+    const dk = target.k - state.k;
+    if (Math.abs(dx) < 0.04 && Math.abs(dy) < 0.04 && Math.abs(dk) < 0.0004) {
+      state.x = target.x; state.y = target.y; state.k = target.k;
+    } else {
+      state.x += dx * EASE;
+      state.y += dy * EASE;
+      state.k += dk * EASE;
+      busy = true;
+    }
+    apply();
+    if (busy) raf = requestAnimationFrame(step);
+  }
+
+  function run() {
+    if (reduced) {
+      gliding = false;
+      state.x = target.x; state.y = target.y; state.k = target.k;
+      apply();
+      return;
+    }
+    if (!raf) raf = requestAnimationFrame(step);
+  }
+
+  function stopMotion() {
+    gliding = false;
+    vel.x = 0; vel.y = 0;
+    if (raf) { cancelAnimationFrame(raf); raf = 0; }
+  }
+
+  /** Local (viewBox) coordinates of a client point. */
+  function toLocal(cx, cy) {
+    const ctm = svg.getScreenCTM();
+    if (!ctm) return null;
+    const pt = svg.createSVGPoint();
+    pt.x = cx; pt.y = cy;
+    return pt.matrixTransform(ctm.inverse());
   }
 
   function zoomAt(factor, cx, cy) {
-    const k = Math.min(MAX_K, Math.max(MIN_K, state.k * factor));
-    if (k === state.k) return;
-    // Keep the point under the cursor fixed while scaling.
-    const pt = svg.createSVGPoint();
-    pt.x = cx; pt.y = cy;
-    const local = pt.matrixTransform(svg.getScreenCTM().inverse());
-    state.x = local.x - ((local.x - state.x) / state.k) * k;
-    state.y = local.y - ((local.y - state.y) / state.k) * k;
-    state.k = k;
-    apply();
+    const k = Math.min(MAX_K, Math.max(MIN_K, target.k * factor));
+    if (k === target.k) return;
+    const local = toLocal(cx, cy);
+    if (!local) return;
+    // Hold the point under the cursor fixed against the TARGET, so a run of
+    // wheel ticks compounds toward the same place rather than drifting.
+    target.x = local.x - ((local.x - target.x) / target.k) * k;
+    target.y = local.y - ((local.y - target.y) / target.k) * k;
+    target.k = k;
+    gliding = false;
+    clampTarget();
+    run();
   }
 
-  // Pinch. `touch-action: none` turns off the browser's own gestures, which
-  // until now left a touch visitor with no way to zoom at all except the
-  // toolbar buttons — on a map whose whole mobile story is "get close enough
-  // to see a person". Two touch pointers, an 8px deadzone so a two-finger
-  // rest is not a zoom, an incremental frame-over-frame factor (dividing by
-  // the gesture's START distance compounds wrongly across moves), the live
-  // midpoint as the anchor so it is pinch-to-point, and the same single k
-  // clamp everything else uses. No momentum: 1:1, like the pan.
   const PINCH_DEADZONE = 8;
   const touches = new Map();
   let pinch = null;
@@ -1154,13 +1464,8 @@ export function attachCamera(svg, camera, { onReset, onZoom } = {}) {
   // and it silently broke the core verb of the whole page. With the pointer
   // captured by the <svg>, the compatibility click event retargets to the
   // capture element, so a real mouse click on a building was delivered to the
-  // map root and the citizen's own click handler never ran: the panel could
-  // only ever be opened from the roster list or the findings links. Verified
-  // against the committed build before this line changed, not assumed.
-  //
-  // So capture is deferred until the pointer has actually travelled. Under
-  // the threshold it is a click and the building gets it; over the threshold
-  // it is a pan and behaves exactly as before, 1:1 and with no inertia.
+  // map root and the citizen's own click handler never ran. So capture is
+  // deferred until the pointer has actually travelled.
   const DRAG_SLOP = 4; // CSS px
   let press = null;
 
@@ -1175,6 +1480,7 @@ export function attachCamera(svg, camera, { onReset, onZoom } = {}) {
   };
 
   svg.addEventListener('pointerdown', (ev) => {
+    stopMotion();
     if (ev.pointerType === 'touch') {
       touches.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
       if (touches.size >= 2) {
@@ -1186,19 +1492,19 @@ export function attachCamera(svg, camera, { onReset, onZoom } = {}) {
       }
     }
     if (ev.button !== 0 || pinch) return;
-    press = { id: ev.pointerId, x: ev.clientX, y: ev.clientY };
+    press = { id: ev.pointerId, x: ev.clientX, y: ev.clientY, t: ev.timeStamp };
   });
 
   svg.addEventListener('pointermove', (ev) => {
     if (ev.pointerType === 'touch' && touches.has(ev.pointerId)) {
       touches.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
     }
-    // Promote a press into a pan once it has moved far enough to mean one.
     if (press && !dragging && !pinch && ev.pointerId === press.id
       && Math.hypot(ev.clientX - press.x, ev.clientY - press.y) >= DRAG_SLOP) {
       dragging = true;
-      last = { x: press.x, y: press.y };
+      last = { x: press.x, y: press.y, t: press.t };
       dragPointerId = press.id;
+      vel.x = 0; vel.y = 0;
       svg.classList.add('grabbing');
       svg.setPointerCapture(press.id);
     }
@@ -1206,8 +1512,6 @@ export function attachCamera(svg, camera, { onReset, onZoom } = {}) {
       const [a, b] = [...touches.values()];
       const d = gap(a, b);
       if (!pinch.active) {
-        // Swallow the deadzone travel so the zoom starts from where the
-        // gesture was recognised, not from where the fingers first landed.
         if (Math.abs(d - pinch.start) >= PINCH_DEADZONE) pinch.active = true;
         pinch.last = d;
         return;
@@ -1222,61 +1526,104 @@ export function attachCamera(svg, camera, { onReset, onZoom } = {}) {
     if (!dragging || !last) return;
     const ctm = svg.getScreenCTM();
     const scale = ctm ? 1 / ctm.a : 1;
-    state.x += (ev.clientX - last.x) * scale;
-    state.y += (ev.clientY - last.y) * scale;
-    last = { x: ev.clientX, y: ev.clientY };
+    const dx = (ev.clientX - last.x) * scale;
+    const dy = (ev.clientY - last.y) * scale;
+    // Direct manipulation is 1:1 and never eased: the map goes where the
+    // hand goes, and the momentum is only read off for what happens after.
+    target.x += dx;
+    target.y += dy;
+    clampTarget();
+    state.x = target.x;
+    state.y = target.y;
+    const dt = Math.max(1, ev.timeStamp - last.t);
+    // A short exponential average, so one stuttered sample cannot fling the
+    // camera and a steady drag still lands its real speed.
+    vel.x = vel.x * 0.6 + (dx / dt) * 16 * 0.4;
+    vel.y = vel.y * 0.6 + (dy / dt) * 16 * 0.4;
+    last = { x: ev.clientX, y: ev.clientY, t: ev.timeStamp };
     apply();
   });
 
   const liftPointer = (ev) => {
+    const wasDragging = dragging;
     if (ev.pointerType === 'touch') {
       touches.delete(ev.pointerId);
-      // Panning does not resume under the remaining finger; it waits for a
-      // fresh pointerdown, so the map never lurches as a pinch ends.
       if (touches.size < 2) pinch = null;
     }
     endDrag(ev);
+    if (wasDragging && !reduced && Math.hypot(vel.x, vel.y) >= MIN_GLIDE) {
+      gliding = true;
+      run();
+    }
   };
   svg.addEventListener('pointerup', liftPointer);
   svg.addEventListener('pointercancel', liftPointer);
 
   svg.addEventListener('wheel', (ev) => {
     ev.preventDefault();
-    zoomAt(ev.deltaY < 0 ? 1.14 : 1 / 1.14, ev.clientX, ev.clientY);
+    // One curve for a mouse notch and a trackpad swipe alike, clamped so a
+    // high-resolution device cannot take four octaves of zoom in one gesture.
+    const f = Math.min(1.35, Math.max(1 / 1.35, Math.exp(-ev.deltaY * 0.0022)));
+    zoomAt(f, ev.clientX, ev.clientY);
   }, { passive: false });
 
   svg.addEventListener('keydown', (ev) => {
-    const STEP = 48;
-    const map = { ArrowUp: [0, STEP], ArrowDown: [0, -STEP], ArrowLeft: [STEP, 0], ArrowRight: [-STEP, 0] };
-    if (map[ev.key] && ev.target === svg) {
+    const STEP = 64;
+    const pan = { ArrowUp: [0, STEP], ArrowDown: [0, -STEP], ArrowLeft: [STEP, 0], ArrowRight: [-STEP, 0] };
+    if (pan[ev.key] && ev.target === svg) {
       ev.preventDefault();
-      state.x += map[ev.key][0];
-      state.y += map[ev.key][1];
-      apply();
+      gliding = false;
+      target.x += pan[ev.key][0];
+      target.y += pan[ev.key][1];
+      clampTarget();
+      run();
       return;
     }
-    if (ev.key === '+' || ev.key === '=') {
-      const r = svg.getBoundingClientRect();
-      zoomAt(1.2, r.left + r.width / 2, r.top + r.height / 2);
-    } else if (ev.key === '-' || ev.key === '_') {
-      const r = svg.getBoundingClientRect();
-      zoomAt(1 / 1.2, r.left + r.width / 2, r.top + r.height / 2);
-    } else if (ev.key === '0') {
-      reset();
-    }
+    const r0 = svg.getBoundingClientRect();
+    const cx = r0.left + r0.width / 2;
+    const cy = r0.top + r0.height / 2;
+    if (ev.key === '+' || ev.key === '=') zoomAt(1.25, cx, cy);
+    else if (ev.key === '-' || ev.key === '_') zoomAt(1 / 1.25, cx, cy);
+    else if (ev.key === '0') reset();
   });
 
   function reset() {
+    stopMotion();
+    target.x = 0; target.y = 0; target.k = 1;
     state.x = 0; state.y = 0; state.k = 1;
     apply();
     if (onReset) onReset();
   }
 
+  /**
+   * Ease the camera until a point in the scene's own coordinates sits in the
+   * middle of whatever part of the frame is not covered by a drawer.
+   *
+   * Selecting somebody used to leave the camera exactly where it was, which
+   * on a phone regularly meant opening a record for a building that was not
+   * on screen. Nothing about the geometry changed; the view now travels to
+   * the subject the way it does in every map application, and under reduced
+   * motion it arrives in one frame instead of over several.
+   */
+  function flyTo(px, py, { k = null, offsetX = 0, offsetY = 0 } = {}) {
+    if (!limitFrame) return;
+    const f = limitFrame;
+    if (k != null) target.k = Math.min(MAX_K, Math.max(MIN_K, k));
+    gliding = false;
+    target.x = f.x + f.w / 2 + offsetX - target.k * px;
+    target.y = f.y + f.h / 2 + offsetY - target.k * py;
+    clampTarget();
+    run();
+  }
+
   apply();
   return {
     reset,
-    zoomIn: () => { const r = svg.getBoundingClientRect(); zoomAt(1.25, r.left + r.width / 2, r.top + r.height / 2); },
-    zoomOut: () => { const r = svg.getBoundingClientRect(); zoomAt(1 / 1.25, r.left + r.width / 2, r.top + r.height / 2); },
+    flyTo,
+    setLimits(box, frame) { limitBox = box; limitFrame = frame; },
+    zoomIn: () => { const b = svg.getBoundingClientRect(); zoomAt(1.3, b.left + b.width / 2, b.top + b.height / 2); },
+    zoomOut: () => { const b = svg.getBoundingClientRect(); zoomAt(1 / 1.3, b.left + b.width / 2, b.top + b.height / 2); },
     get k() { return state.k; },
+    get targetK() { return target.k; },
   };
 }

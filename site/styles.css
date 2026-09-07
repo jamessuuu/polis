@@ -119,20 +119,33 @@ kbd {
   border: 0;
 }
 
+/* Hidden by clipping rather than by parking a real interactive box three rem
+   above the viewport. The parked version was counted — correctly — as a
+   control clipped by the viewport edge by every audit that asks the question,
+   including this project's own instrument. Same behaviour, same appearance on
+   focus, nothing hanging off the edge of the document. */
 .skip-link {
   position: absolute;
   left: 0.5rem;
-  top: -3rem;
+  top: 0.5rem;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
   background: var(--bg-elevated);
   color: var(--ink);
   border: 2px solid var(--focus);
-  padding: 0.5rem 0.9rem;
   border-radius: var(--radius);
   z-index: 100;
-  transition: top var(--dur-fast) var(--ease-standard);
 }
 .skip-link:focus {
-  top: 0.5rem;
+  width: auto;
+  height: auto;
+  padding: 0.5rem 0.9rem;
+  overflow: visible;
+  clip: auto;
 }
 
 /* Focus visibility: one consistent, high-contrast treatment everywhere. */
@@ -635,10 +648,8 @@ button:hover {
   stroke-opacity: 0.55;
 }
 
-/* Windows: dark glass unless telemetry says someone is home. */
-.windows { fill: var(--window-off); stroke: none; }
-.structure.act-recent .windows { fill: var(--window); opacity: 0.8; }
-.structure.act-active .windows { fill: var(--window); opacity: 1; }
+/* Windows: see the MATERIALS section at the foot of this file. The fill is a
+   gradient the renderer chooses per activity, so nothing here may set it. */
 
 /* The silhouette. Opacity only. In the dark theme it is the compliant
    boundary of every wall and stays on; in light it appears on hover. */
@@ -1895,3 +1906,744 @@ main section, main aside { margin-bottom: 1.5rem; }
    of a 390px viewport while being invisible to any reader — a control that is
    simultaneously unreachable and unhidden. Hidden means hidden. */
 .map-help:not([open]) > .map-help-body { display: none; }
+
+/* ============================================================ MAP MODE ====
+
+   The site IS the map.
+
+   Everything above this comment describes a scrolling document with a map in
+   it. That was the honest shape while the map was one figure among several;
+   it stopped being honest the moment the map became the product. So the
+   document is still there, byte for byte, and `map-mode` — set on <html> by
+   app.mjs only after a city has actually been drawn — folds it into an
+   application shell: the city fills the viewport, the page does not scroll,
+   and every panel that used to sit BELOW the map now floats OVER it.
+
+   The contract this preserves: with JavaScript off, or if the render throws,
+   `map-mode` is never set, none of these rules apply, and the visitor gets
+   exactly the stacked document that shipped before — static roster, findings,
+   status board, skills archive and all.
+   ======================================================================== */
+
+:root {
+  --dur-sheet: 320ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --hud-radius: 12px;
+  --panel-w: 380px;
+  --sheet-w: 440px;
+  --hud-gap: 0.7rem;
+}
+
+html.map-mode,
+html.map-mode body {
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+html.map-mode .page {
+  position: fixed;
+  inset: 0;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
+
+html.map-mode #main { margin: 0; }
+html.map-mode main > section,
+html.map-mode main > aside,
+html.map-mode main > div { margin-bottom: 0; }
+
+/* The stage. */
+html.map-mode #map-section {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+}
+html.map-mode .hero-map {
+  position: absolute;
+  inset: 0;
+  width: auto;
+  height: auto;
+  min-height: 0;
+  max-height: none;
+  margin: 0;
+  transform: none;
+  border: 0;
+  border-radius: 0;
+  display: block;
+}
+html.map-mode #city-map {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* Things the document needs and the application does not. */
+html.map-mode .act,
+html.map-mode #static-roster-section,
+html.map-mode .site-footer { display: none; }
+
+/* ---------- atmosphere ----------
+   Two screen-space layers over the city: a vignette that pulls the eye to the
+   middle, and luminance grain. Both are FIXED to the screen rather than to
+   the world, which is the whole point — they never re-rasterise on a pan or a
+   zoom, so they cost nothing per frame, and grain that swims with the camera
+   reads as dirt on the lens rather than as material. */
+.map-atmos {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  /* Promoted to its own compositing layer on purpose. Both children are
+     FIXED in screen space, so once rasterised they never need repainting;
+     without this hint Chromium repaints them into the same layer as the SVG
+     on every camera tick. Measured on a 1440x900 pan: 22 fps with the
+     atmosphere painting inline, 54 fps with it out of the way. */
+  transform: translateZ(0);
+  will-change: transform;
+  contain: strict;
+}
+.map-atmos::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(120% 90% at 50% 42%, transparent 38%, oklch(0.15 0.03 265 / 0.30) 100%);
+}
+.map-atmos::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  /* No `mix-blend-mode`. A blend mode must re-read the backdrop every time
+     the backdrop changes, which while panning is every single frame: it was
+     the single most expensive thing on this page (22 -> 40 fps just by
+     switching it off). Grain composited normally at a low alpha reads almost
+     identically and costs one texture. */
+  opacity: 0.055;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.35'/%3E%3C/svg%3E");
+}
+
+/* ---------- the HUD ----------
+   One absolutely positioned layer that does not itself take pointer events,
+   so the city under it stays draggable everywhere the HUD is empty. Only the
+   panels inside it are hit-testable. */
+.hud { display: none; }
+html.map-mode .hud {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  padding: var(--hud-gap);
+  gap: var(--hud-gap);
+  pointer-events: none;
+  transition: padding var(--dur-sheet) var(--ease-out);
+}
+html.map-mode .hud-top,
+html.map-mode .hud-bottom {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--hud-gap);
+}
+html.map-mode .hud-bottom { align-items: flex-end; }
+/* The figures read left, the doors read right, whatever order the DOM is in. */
+html.map-mode .hud-dock { order: -1; }
+html.map-mode .hud > * > * { pointer-events: auto; }
+
+/* The frosted plate every HUD element is drawn on. */
+.hud-panel {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--hud-radius);
+  box-shadow: 0 1px 2px -1px rgb(0 0 0 / 0.22), 0 14px 34px -12px rgb(0 0 0 / 0.42);
+}
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+  .hud-panel {
+    background: color-mix(in oklab, var(--bg-elevated) 74%, transparent);
+    -webkit-backdrop-filter: blur(10px) saturate(1.3);
+    backdrop-filter: blur(10px) saturate(1.3);
+  }
+}
+@supports (color: oklch(from red l c h)) {
+  .hud-panel {
+    border-color: oklch(from var(--border-subtle) l c h / 0.7);
+    box-shadow:
+      inset 0 1px 0 0 oklch(from var(--plate) l c h / 0.35),
+      0 1px 2px -1px oklch(from var(--shadow-ink) l c h / 0.30),
+      0 16px 40px -14px oklch(from var(--shadow-ink) l c h / 0.55);
+  }
+}
+
+html.map-mode header.site-header.hud-brand {
+  position: absolute;
+  top: var(--hud-gap);
+  left: var(--hud-gap);
+  z-index: 11;
+}
+html.map-mode .hud-top { justify-content: flex-end; }
+html.map-mode .hud-brand {
+  padding: 0.4rem 0.85rem 0.45rem;
+  margin: 0;
+  display: block;
+  max-width: 60vw;
+}
+html.map-mode .hud-brand h1 {
+  font-size: 1.05rem;
+  letter-spacing: 0.01em;
+  margin: 0;
+}
+html.map-mode .hud-brand .tagline {
+  font-size: 0.72rem;
+  line-height: 1.3;
+  margin: 0;
+  color: var(--ink-muted);
+}
+
+html.map-mode .hud-tools { display: flex; }
+html.map-mode .map-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.3rem;
+  padding: 0.32rem 0.4rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+@supports (color: oklch(from red l c h)) {
+  html.map-mode .map-toolbar { border-bottom-color: oklch(from var(--border-subtle) l c h / 0.7); }
+}
+
+html.map-mode .hud-sheets {
+  display: flex;
+  gap: 0.2rem;
+  padding: 0.28rem;
+}
+html.map-mode .hud-sheets button {
+  border: 0;
+  background: transparent;
+  border-radius: 8px;
+  padding: 0.4rem 0.75rem;
+  font-weight: 600;
+  font-size: 0.85rem;
+  min-height: 36px;
+}
+html.map-mode .hud-sheets button:hover { background: color-mix(in oklab, var(--accent) 16%, transparent); }
+html.map-mode .hud-sheets button[aria-expanded="true"] {
+  background: var(--accent);
+  color: var(--bg-elevated);
+}
+
+/* Stat chips: HUD readouts, not a list of figures under a picture. */
+html.map-mode .hud-dock {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.4rem;
+  max-width: min(58ch, 62vw);
+}
+html.map-mode #map-figures {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+html.map-mode #map-figures .figure {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.01em;
+  padding: 0.24rem 0.55rem;
+  border-radius: 999px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  color: var(--ink-muted);
+  white-space: nowrap;
+}
+html.map-mode #map-figures .figure b { color: var(--ink); font-weight: 700; }
+html.map-mode #map-figures .figure-warn { color: var(--warn); border-color: var(--warn); }
+html.map-mode #map-figures .figure-warn b { color: var(--warn); }
+/* No backdrop-filter on the chips. Five more elements each re-reading the
+   moving map behind them cost more than the frosting was worth; a flat
+   translucent fill over a dark city is nearly indistinguishable. */
+html.map-mode #map-figures .figure {
+  background: color-mix(in oklab, var(--bg-elevated) 88%, transparent);
+}
+
+/* The headline finding, floated into the HUD rather than stacked under it. */
+html.map-mode #headline-strip {
+  /* app.mjs moves this node into the dock in map mode, so it flows with the
+     stat chips instead of being positioned against them and overlapping. */
+  margin: 0;
+  max-width: min(46ch, calc(100vw - 2 * var(--hud-gap)));
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.2rem 0.5rem;
+  padding: 0.5rem 0.8rem;
+  border-radius: var(--hud-radius);
+  font-size: 0.82rem;
+  line-height: 1.4;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  border-left: 3px solid var(--warn);
+  pointer-events: auto;
+  transition: transform var(--dur-sheet) var(--ease-out), opacity var(--dur-sheet) var(--ease-out);
+}
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+  html.map-mode #headline-strip {
+    background: color-mix(in oklab, var(--bg-elevated) 82%, transparent);
+    -webkit-backdrop-filter: blur(10px) saturate(1.3);
+    backdrop-filter: blur(10px) saturate(1.3);
+  }
+}
+html.map-mode #headline-strip .finding-strip-count {
+  font-size: 1.25rem;
+  line-height: 1;
+  color: var(--warn);
+}
+html.map-mode #headline-strip a[href="#findings-section"] { display: none; }
+
+/* ---------- sheets ----------
+   Off in the document, drawers in the application. */
+html.map-mode .sheet {
+  position: fixed;
+  z-index: 40;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: min(var(--sheet-w), 100vw);
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-elevated);
+  border-right: 1px solid var(--border-subtle);
+  box-shadow: 0 0 60px -10px rgb(0 0 0 / 0.55);
+  transform: translateX(-101%);
+  visibility: hidden;
+  transition: transform var(--dur-sheet) var(--ease-out), visibility 0s linear var(--dur-sheet);
+}
+html.map-mode .sheet.sheet-wide { width: min(720px, 100vw); }
+html.map-mode .sheet.is-open {
+  transform: none;
+  visibility: visible;
+  transition: transform var(--dur-sheet) var(--ease-out), visibility 0s;
+}
+.sheet-head { display: none; }
+html.map-mode .sheet-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.7rem 0.75rem 0.7rem 1.1rem;
+  border-bottom: 1px solid var(--border-subtle);
+  flex: 0 0 auto;
+}
+html.map-mode .sheet-title {
+  margin: 0;
+  border: 0;
+  padding: 0;
+  font-size: 1.05rem;
+}
+.sheet-close { font-size: 1.2rem; line-height: 1; padding: 0.25rem 0.6rem; }
+html.map-mode .sheet-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0.9rem 1.1rem 3rem;
+}
+/* Inside a sheet the section headings are redundant with the sheet's own. */
+html.map-mode .sheet-body > section > .panel > summary,
+html.map-mode .sheet-body > div > section > .panel > summary { display: none; }
+html.map-mode .sheet-body section { margin-bottom: 1.4rem; }
+html.map-mode #provenance-section > .panel > summary { display: list-item; }
+html.map-mode .sheet-body h2 { font-size: 1.05rem; }
+
+.sheet-scrim { display: none; }
+html.map-mode .sheet-scrim {
+  display: block;
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  background: oklch(0.12 0.02 265 / 0.42);
+  opacity: 0;
+  transition: opacity var(--dur-sheet) var(--ease-out);
+  pointer-events: none;
+}
+html.map-mode .sheet-scrim.is-on { opacity: 1; pointer-events: auto; }
+html.map-mode .sheet-scrim[hidden] { display: none; }
+
+/* ---------- the citizen panel, as an inspector ---------- */
+html.map-mode .citizen-panel {
+  position: fixed;
+  z-index: 35;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(var(--panel-w), 100vw);
+  margin: 0;
+  max-width: none;
+  border: 0;
+  border-left: 1px solid var(--border-subtle);
+  border-radius: 0;
+  background: var(--bg-elevated);
+  box-shadow: 0 0 60px -10px rgb(0 0 0 / 0.55);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 1rem 1.1rem 3rem;
+  transform: translateX(101%);
+  transition: transform var(--dur-sheet) var(--ease-out);
+}
+html.map-mode .citizen-panel[hidden] {
+  display: block;
+  transform: translateX(101%);
+  visibility: hidden;
+  pointer-events: none;
+}
+html.map-mode .citizen-panel:not([hidden]) { transform: none; visibility: visible; }
+
+/* When the inspector is out, the top-right controls step aside rather than
+   hiding under it. WCAG 2.4.11: a focused control must not be obscured. */
+html.map-mode.panel-open .hud { padding-right: calc(min(var(--panel-w), 100vw) + var(--hud-gap)); }
+html.map-mode.sheet-open .hud { padding-left: calc(min(var(--sheet-w), 100vw) + var(--hud-gap)); }
+html.map-mode.sheet-open #headline-strip { opacity: 0; pointer-events: none; }
+
+/* ---------- phone: drawers become bottom sheets ---------- */
+@media (max-width: 719px) {
+  html.map-mode .sheet {
+    top: auto;
+    left: 0;
+    right: 0;
+    width: auto;
+    height: min(86dvh, 100%);
+    border-right: 0;
+    border-top: 1px solid var(--border-subtle);
+    border-radius: 16px 16px 0 0;
+    transform: translateY(101%);
+  }
+  html.map-mode .sheet.sheet-wide { width: auto; }
+  html.map-mode .citizen-panel {
+    top: auto;
+    left: 0;
+    right: 0;
+    width: auto;
+    max-height: min(72dvh, 100%);
+    border-left: 0;
+    border-top: 1px solid var(--border-subtle);
+    border-radius: 16px 16px 0 0;
+    transform: translateY(101%);
+  }
+  html.map-mode .citizen-panel[hidden] { transform: translateY(101%); }
+  html.map-mode.panel-open .hud,
+  html.map-mode.sheet-open .hud { padding-left: var(--hud-gap); padding-right: var(--hud-gap); }
+  html.map-mode.panel-open #headline-strip,
+  html.map-mode.panel-open .hud-bottom { opacity: 0; pointer-events: none; }
+  html.map-mode .hud-brand .tagline { display: none; }
+  html.map-mode .hud-top { align-items: flex-start; }
+  html.map-mode .hud-bottom {
+    flex-direction: column;
+    align-items: stretch;
+    transition: opacity var(--dur-sheet) var(--ease-out);
+  }
+  html.map-mode .hud-dock { order: 0; }
+  html.map-mode .hud-sheets { order: 1; justify-content: space-between; }
+  html.map-mode .hud-sheets button { flex: 1 1 0; padding: 0.5rem 0.3rem; }
+  html.map-mode #headline-strip { max-width: none; }
+  html.map-mode .map-toolbar { max-width: 62vw; }
+}
+
+/* ---------- reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  html.map-mode .sheet,
+  html.map-mode .citizen-panel,
+  html.map-mode .sheet-scrim,
+  html.map-mode .hud,
+  html.map-mode #headline-strip { transition: none; }
+}
+
+/* =========================================================== MATERIALS ====
+
+   What separates a rendered scene from coloured rectangles.
+
+   The value ladder in DESIGN.md §3 was already right — one key light from the
+   upper right, three faces of every solid at three lightnesses — and it was
+   also the whole of the lighting model. Three flat tints is what a diagram
+   does. A surface does four more things, and each of them is a rule here:
+
+     falloff   light is brighter where it strikes and dies toward the ground
+     contact   volumes gather occlusion where they meet the plane and each other
+     crest     an edge that catches light is brighter than either face it joins
+     medium    air between the eye and a distant object is not free
+
+   None of it changes a hue, a height, or anything else this map means.
+   ======================================================================== */
+
+.sun-glow,
+.ground-light,
+.sheen { pointer-events: none; }
+.sheen { stroke: none; }
+
+/* Falloff. One shared ramp composited over each hue-derived face: bright
+   along the wall head, ambient ink gathering at the footing. */
+.sheen-roof { opacity: 0.85; }
+
+/* Crest. The edge where a roof meets the sky and its own walls catches more
+   light than either surface, and drawing it is most of what stops a box
+   reading as a sticker. It replaces the same-colour seam stroke that was
+   there before, so it closes the antialiasing gap exactly as that did. */
+.face-top,
+.face-gable-lit {
+  stroke: var(--face-crest);
+  stroke-opacity: var(--crest-alpha);
+  stroke-width: 0.9;
+}
+.structure,
+.figure {
+  --face-crest: color-mix(in oklab, var(--hue) 62%, white);
+}
+@supports (color: oklch(from red l c h)) {
+  .structure,
+  .figure { --face-crest: oklch(from var(--hue) calc(l + 0.14) calc(c * 0.72) h); }
+}
+
+/* Contact. The gutter line where a plot meets the street: a real kerb
+   shadow rather than a hairline grid pretending to be one. */
+.plot-ground {
+  stroke: var(--ao-ink);
+  stroke-opacity: var(--plot-edge-alpha);
+  stroke-width: 2.4;
+  stroke-linejoin: round;
+}
+
+/* Glass. The fill is a gradient chosen at render time (city-view picks lit or
+   unlit from the same telemetry the figure's pose comes from), so this file
+   must not set `fill` — a CSS declaration would beat the attribute and put
+   every window back to a flat tint. Lit glass also throws a little light
+   onto the wall around it, which is a stroke rather than a blur because a
+   blur per building is 145 offscreen composites. */
+.windows { stroke: none; }
+.structure.act-recent .windows { opacity: 0.9; }
+.structure.act-active .windows {
+  opacity: 1;
+  stroke: var(--window);
+  stroke-width: 1.5;
+  stroke-opacity: var(--glass-glow-alpha);
+}
+
+/* Focus, drawn in the world.
+   `outline` on an SVG element is not something to bet a keyboard user's
+   whole experience on: engines disagree about it, and even where it paints,
+   an outline around the BOUNDING BOX of a tall isometric building is a tall
+   thin rectangle that says very little about which person is focused. The
+   hit target is already a circle centred on the citizen, so focus simply
+   makes it visible. It is a real ring around a real person, it is 40 CSS px
+   across at any zoom, and it works in every engine that can draw a circle.
+   The silhouette lifts at the same time, so the indicator is never carried
+   by one channel alone. */
+.structure:focus-visible .hit-area {
+  stroke: var(--focus);
+  stroke-width: 2.5;
+  stroke-opacity: 1;
+}
+.structure:focus-visible .edge {
+  stroke: var(--focus);
+  stroke-width: calc(var(--rim-width) * 2);
+  opacity: 1;
+}
+/* The default UA outline would then draw a second, worse indicator on top. */
+#city-map .structure:focus-visible { outline: none; }
+
+/* The target, not the sprite.
+   A citizen is drawn about nine CSS pixels tall on a 390px phone, which is
+   the correct SIZE for a city of fifty-nine and an indefensible tap target.
+   Every game draws a small sprite and hits a large box; `r` is a real CSS
+   property on an SVG circle, so the box is sized from the live camera scale
+   (app.mjs writes --hit-r) and stays roughly constant in screen pixels
+   however far out the view is. */
+.hit-area {
+  fill: none;
+  pointer-events: all;
+  r: var(--hit-r, 18px);
+}
+#city-map.roads-off .hit-area { pointer-events: none; }
+
+/* ---------- the bypass link is a bypass, not a label ----------
+   `Skip to list` sat permanently in the toolbar as a blue underlined word,
+   which is a control spending HUD space on people who are not using it. It
+   still exists, still comes first in the tab order, and now appears the
+   instant it is focused, like every other skip link on the page. */
+.map-skip {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+.map-skip:focus {
+  position: static;
+  width: auto;
+  height: auto;
+  margin: 0;
+  padding: 0.3rem 0.55rem;
+  overflow: visible;
+  clip: auto;
+}
+
+/* The penumbra: wider, longer, and much fainter than the shadow it sits
+   under. Two flat polygons in the same paint beat one Gaussian blur that
+   cost this scene 24 fps, measured. */
+.cast-penumbra { fill-opacity: calc(var(--shadow-alpha) * 0.42); }
+
+/* ---------- the selection marker ---------- */
+.select-ring {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--dur-cross) var(--ease-standard);
+}
+.select-ring.on { opacity: 1; }
+.select-ring-fill { fill: var(--lamp); fill-opacity: 0.14; stroke: none; }
+.select-ring-edge {
+  fill: none;
+  stroke: var(--lamp);
+  stroke-width: 2;
+  stroke-opacity: 0.85;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* A slow breath, not a strobe: one cycle every 2.4s, opacity only, and it
+     runs on a single element rather than on anything the camera paints. */
+  @keyframes select-breathe {
+    0%, 100% { stroke-opacity: 0.85; }
+    50% { stroke-opacity: 0.35; }
+  }
+  .select-ring.on .select-ring-edge {
+    animation: select-breathe 2.4s var(--ease-ambient) infinite;
+  }
+
+  /* Hover and selection lift the building off the plane. Four pixels of
+     translate is the whole of it, and it is the difference between a picture
+     of a city that changes colour when you point at it and a thing that
+     responds to being touched. */
+  .structure.kind-citizen:hover,
+  .structure.kind-citizen.active { transform: translate(0, -4px); }
+}
+
+/* ---------- phone: the HUD gets out of the city's way ---------- */
+@media (max-width: 719px) {
+  /* On a phone the five readouts are ONE bar, not five pills. Five pills
+     wrap to three rows and eat 90px of an 844px screen for information that
+     reads perfectly well as a single dense line. */
+  html.map-mode .hud-dock {
+    align-self: stretch;
+    max-width: none;
+  }
+  html.map-mode #map-figures {
+    gap: 0 0.55rem;
+    padding: 0.3rem 0.6rem;
+    border-radius: var(--hud-radius);
+    background: color-mix(in oklab, var(--bg-elevated) 84%, transparent);
+    border: 1px solid var(--border-subtle);
+  }
+  html.map-mode #map-figures .figure {
+    font-size: 0.64rem;
+    padding: 0;
+    border: 0;
+    background: none;
+    border-radius: 0;
+  }
+  html.map-mode #headline-strip {
+    font-size: 0.74rem;
+    padding: 0.4rem 0.6rem;
+    gap: 0.15rem 0.4rem;
+    display: block;
+  }
+  /* The count leads the sentence and the invitation ends it, on one run of
+     text rather than three stacked blocks. */
+  html.map-mode #headline-strip .finding-strip-count { margin-right: 0.3rem; }
+  html.map-mode #headline-strip .strip-go {
+    display: inline-block;
+    margin-left: 0.3rem;
+    vertical-align: baseline;
+  }
+  html.map-mode #headline-strip .finding-strip-count { font-size: 1.05rem; }
+  html.map-mode #headline-strip .strip-go { font-size: 0.7rem; padding: 0.2rem 0.5rem; }
+  html.map-mode .hud-sheets button { font-size: 0.8rem; }
+  html.map-mode .hud-dock { gap: 0.3rem; }
+}
+
+/* ---------- labels stop being stickers ----------
+
+   The single loudest remaining "this is a diagram" signal was a solid box
+   with mono text pasted over the city for every person on it. Every serious
+   map draws a place name as TEXT with a halo, not as a label on a card: the
+   halo does the contrast work against whatever happens to be underneath, and
+   nothing opaque covers the thing being named. The plate's box is kept in the
+   DOM because the placement pass measures it and the leader mounts to it —
+   it simply stops being painted.
+
+   Contrast is carried by the halo, and the halo is the plate colour: near
+   black behind near white in the dusk lighting, near white behind near black
+   in daylight, so the pairing inverts correctly with the theme rather than
+   depending on what the label happens to be standing on. */
+.name-plate .plate-bg { fill: none; stroke: none; }
+.plate-name {
+  fill: var(--ink);
+  stroke: var(--plate);
+  stroke-width: 5;
+  stroke-linejoin: round;
+  paint-order: stroke fill;
+}
+@supports not (paint-order: stroke) {
+  /* An engine that cannot put the stroke behind the fill would draw the halo
+     ON TOP of the word. Give it the box back instead. */
+  .name-plate .plate-bg { fill: var(--plate); fill-opacity: var(--plate-alpha); }
+  .plate-name { stroke: none; }
+}
+/* A leader is a hint about which roof a moved label belongs to, not a wire. */
+.name-plate .plate-leader { stroke-width: 0.8; }
+
+/* Precinct plates keep their card, because a district title IS a piece of
+   signage standing in the street, and soften into the world a little. */
+.precinct-plate .plate-bg { rx: 5; }
+
+/* The "More" popover, anchored in map mode.
+   `.map-help-body` is positioned against the nearest positioned ancestor,
+   which used to be `.hero-map`. In map mode the toolbar floats inside an
+   absolutely positioned HUD, so the popover resolved against the wrong box
+   and ran 23px off the right edge of a 390px phone, clipping the Life toggle
+   and half of every line of the hint. It is anchored to the toolbar it
+   belongs to now, and capped at the viewport minus the HUD's own gutters. */
+html.map-mode .hud-tools { position: relative; }
+html.map-mode .map-help-body {
+  top: calc(100% + 0.4rem);
+  right: 0;
+  left: auto;
+  width: min(42ch, calc(100vw - 2 * var(--hud-gap)));
+  max-width: none;
+}
+
+/* The dark-half readout, back on the map. It is a finding about what the
+   visitor is looking at, so it belongs where they are looking, and it exists
+   only while that mode is on. */
+.hud-caption { display: none; }
+html.map-mode .hud-caption {
+  display: block;
+  margin: 0;
+  max-width: min(52ch, 90vw);
+  padding: 0.45rem 0.75rem;
+  border-radius: var(--hud-radius);
+  border: 1px solid var(--border-subtle);
+  border-left: 3px solid var(--lamp);
+  background: color-mix(in oklab, var(--bg-elevated) 86%, transparent);
+  font-size: 0.76rem;
+  line-height: 1.4;
+  color: var(--ink);
+}
+html.map-mode .hud-caption[hidden] { display: none; }
