@@ -39,6 +39,8 @@
  * and every reload — which is what makes the committed HTML diffable.
  */
 
+import { TILE_W, TILE_H } from './iso.mjs';
+
 const STREET = 1; // tiles of clear space between neighbouring plots
 const SIDEWALK = 1; // tiles of clear space inside a plot, before buildings
 const WALL_MARGIN = 2; // tiles between the outermost district and the wall
@@ -92,28 +94,66 @@ function rectsClash(a, b, gap) {
 }
 
 /**
- * Candidate origins for a plot, ordered: nearest ring first, and within a
- * ring, closest bearing to `preferredAngle` first. Ties broken on raw
- * coordinates so the order is total and therefore reproducible.
+ * Candidate origins for a plot, ordered by how far the plot would sit from
+ * the plaza ON SCREEN, with a bias toward a preferred screen bearing.
+ *
+ * This used to order by Chebyshev ring in TILE space, and that was the single
+ * biggest reason the city looked like a thin ribbon. The projection is 2:1:
+ * one tile step along (1,-1) moves 64 screen units sideways, one step along
+ * (1,1) moves 32 down. So a plan that is round in tile space is drawn as a
+ * diamond twice as wide as it is tall, and a ring of guild halls spread at
+ * uniform TILE bearings lands with two halls flung far out east and west and
+ * nothing above or below them. Measured on the real snapshot: citizens
+ * spanned 1472 x 650 screen units, an aspect of 2.26, inside frames whose
+ * aspect is 1.6 (laptop) or 0.46 (phone). Fitting 2.26:1 content into a 1.6:1
+ * frame can never use more than 71% of it however good the fit is, because
+ * the letterbox is arithmetic, not a bug in the fitting.
+ *
+ * So distance and bearing are both measured in SCREEN units here. The plan
+ * that comes out is round where it used to be flat, which is what makes it
+ * fill a frame. `preferredAngle` is therefore a screen bearing: -PI/2 is the
+ * back of the scene, +PI/2 the front, 0 due right.
+ *
+ * Ties break on raw coordinates so the order is total and reproducible: same
+ * snapshot in, same city out, which is what keeps the built HTML diffable.
  */
+const BEARING_BIAS = 1.15; // how much a wrong bearing costs, as a share of distance
+/**
+ * How much cheaper a sideways step is than a step toward the camera.
+ *
+ * 1.0 is a city that is round on screen; 2.0 is the old tile-space ordering
+ * and the 2.26:1 ribbon it produced. The hero frame this city is composed for
+ * is about 2:1, so the plan is deliberately a little wider than round — a
+ * poster is composed for its format. Measured aspects of the citizen extent:
+ * 1.29 at 1.0, 1.52 across the whole 1.45-1.70 plateau, 2.26 at 2.0. The
+ * value sits mid-plateau on purpose: placement is discrete, so an aspect that
+ * only appears at one knife-edge value is an aspect the next roster change
+ * would lose.
+ */
+const SPREAD = 1.55;
+
+/** Screen displacement of a tile-space offset, in screen units. */
+function screenDelta(dc, dr) {
+  return { x: (dc - dr) * (TILE_W / 2), y: (dc + dr) * (TILE_H / 2) };
+}
+
 function* spiralCandidates(size, preferredAngle, maxRing = 60) {
   const halfC = Math.floor(size.cols / 2);
   const halfR = Math.floor(size.rows / 2);
-  for (let ring = 0; ring <= maxRing; ring++) {
-    const cells = [];
-    for (let dc = -ring; dc <= ring; dc++) {
-      for (let dr = -ring; dr <= ring; dr++) {
-        if (Math.max(Math.abs(dc), Math.abs(dr)) !== ring) continue;
-        const angle = Math.atan2(dr, dc);
-        let diff = Math.abs(angle - preferredAngle) % (Math.PI * 2);
-        if (diff > Math.PI) diff = Math.PI * 2 - diff;
-        cells.push({ dc, dr, diff });
-      }
+  const cells = [];
+  for (let dc = -maxRing; dc <= maxRing; dc++) {
+    for (let dr = -maxRing; dr <= maxRing; dr++) {
+      const s = screenDelta(dc, dr);
+      const dist = Math.hypot(s.x / SPREAD, s.y);
+      let diff = Math.abs(Math.atan2(s.y, s.x) - preferredAngle) % (Math.PI * 2);
+      if (diff > Math.PI) diff = Math.PI * 2 - diff;
+      // Distance dominates; the bearing decides between equally close spots.
+      cells.push({ dc, dr, cost: dist * (1 + BEARING_BIAS * (diff / Math.PI)) });
     }
-    cells.sort((a, b) => a.diff - b.diff || a.dc - b.dc || a.dr - b.dr);
-    for (const c of cells) {
-      yield { col: c.dc - halfC, row: c.dr - halfR };
-    }
+  }
+  cells.sort((a, b) => a.cost - b.cost || a.dc - b.dc || a.dr - b.dr);
+  for (const c of cells) {
+    yield { col: c.dc - halfC, row: c.dr - halfR };
   }
 }
 

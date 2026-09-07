@@ -288,8 +288,17 @@ export function plateCandidates(city) {
     .sort((a, b) => a.depth - b.depth || a.key.localeCompare(b.key));
 }
 
-/** Run the T1 pass and write the result back onto each candidate. */
-export function placePlates(candidates, placed, scale, obstacles) {
+/**
+ * Run the T1 pass and write the result back onto each candidate.
+ *
+ * `frame` is the viewBox the plates will be drawn into. Passing it stops the
+ * placer solving a crowded plan by walking a plate off the edge of the
+ * picture — which it could always do, because `insideFrame` had nothing to
+ * check against. It also lets the frame itself be tight: the default view no
+ * longer has to reserve a band of empty street at the bottom on the chance
+ * that a plate lands there, because a plate can no longer land outside.
+ */
+export function placePlates(candidates, placed, scale, obstacles, frame = null) {
   const labels = candidates.map((p) => {
     const w = p.wUnits * scale;
     const h = PLATE_H * scale;
@@ -304,7 +313,7 @@ export function placePlates(candidates, placed, scale, obstacles) {
       compact: { w: cw, h: ch, natural: { cx: p.front.x, cy: p.front.y + 10 + ch / 2 } },
     };
   });
-  const { placements } = placeLabels(labels, { obstacles });
+  const { placements } = placeLabels(labels, { obstacles, frame });
   for (const p of candidates) {
     const got = placements.get(p.key);
     p.box = got.box;
@@ -720,9 +729,9 @@ export function renderCity({ svg, data, city, workforce = null, onSelect = null,
   }
 
   /** Re-place and redraw every precinct plate at a new label scale. */
-  function relayoutPlates(scale) {
+  function relayoutPlates(scale, frame = null) {
     plateBoxes.length = 0;
-    placePlates(plates, plateBoxes, scale, obstacles);
+    placePlates(plates, plateBoxes, scale, obstacles, frame);
     for (const p of plates) {
       p.el.setAttribute('transform', `translate(${r2(p.x)} ${r2(p.y)}) scale(${r2(scale)})`);
       p.el.classList.toggle('compact', p.compactForm);
@@ -777,7 +786,7 @@ export function renderCity({ svg, data, city, workforce = null, onSelect = null,
     state.frame = f;
     if (container) {
       state.plateScale = plateScaleFor(f, container);
-      relayoutPlates(state.plateScale);
+      relayoutPlates(state.plateScale, f);
     }
   }
   setFrame(view);
@@ -808,12 +817,21 @@ export function renderCity({ svg, data, city, workforce = null, onSelect = null,
  * true when the roster grows.
  */
 export const FIGURE_UNITS = 22;
-const ROOF_HEADROOM = 46; // banner poles and pennants above the tallest roof
-const LABEL_HEADROOM = 108; // the plate stack, which now hangs BELOW its plot
-const LATERAL = 14; // a sliver of street either side, in screen units
-const RING_MAX = 6;
-const FLOOR_MIN = 24; // a head resolves to ~6.3px here: a region, not a pixel
-const FLOOR_COMFORTABLE = 28;
+/**
+ * The street kept around the subject, in world units.
+ *
+ * These were 46 above, 108 below and 14 either side, and they were sized for
+ * a frame built out of PLOT rectangles — which already carry a sidewalk, so
+ * the padding was being paid twice. On a 1440x900 laptop the citizens ended
+ * up filling 1209x551 of a 1438x716 map: a fifth of the hero was margin
+ * around a margin. The frame is now built from the citizens themselves, so
+ * the numbers only have to cover what actually sticks out of a silhouette
+ * box: a director's banner pole above the roof, and the precinct plate that
+ * hangs in the street in front of the nearest plot.
+ */
+const EDGE_SIDE = 10;
+const EDGE_TOP = 4;
+const EDGE_BOTTOM = 10;
 
 export function bandFor(width) {
   if (width < 600) return 'phone';
@@ -821,42 +839,33 @@ export function bandFor(width) {
   return 'desktop';
 }
 
-const centroidOf = (p) => ({ col: p.col + p.cols / 2, row: p.row + p.rows / 2 });
-
-/** The plot the plan itself put at the middle: the plaza, whatever it is called. */
-function focalPlot(city) {
-  let best = null;
-  let bestD = Infinity;
-  for (const p of city.plots.values()) {
-    if (p.kind !== 'district') continue;
-    const c = centroidOf(p);
-    const d = c.col * c.col + c.row * c.row;
-    if (d < bestD) { bestD = d; best = p; }
-  }
-  return best;
-}
-
-/** Screen box around a set of plots, with room for what stands and hangs on them. */
-function frameOfPlots(city, list) {
+/**
+ * The screen box that contains every citizen: the subject of the whole page.
+ *
+ * Built from the citizens themselves rather than from the plots they stand
+ * on. A plot is a rectangle in tile space and becomes a diamond on screen, so
+ * a box around plots is always bigger than a box around the people — and the
+ * people are what has to be reachable. `null` when an ecosystem has no
+ * citizens at all, which is a real case for an imported folder of skills.
+ */
+export function subjectBox(city) {
   let minX = Infinity; let maxX = -Infinity; let minY = Infinity; let maxY = -Infinity;
-  const keys = new Set(list.map((p) => p.key));
-  for (const p of list) {
-    const b = screenBounds(p.col, p.row, p.col + p.cols, p.row + p.rows);
-    minX = Math.min(minX, b.minX); maxX = Math.max(maxX, b.maxX);
-    minY = Math.min(minY, b.minY); maxY = Math.max(maxY, b.maxY);
+  let any = false;
+  for (const item of city.buildings) {
+    if (item.kind !== 'citizen') continue;
+    any = true;
+    const pitch = (item.director ? 26 : 0) + (roofOf(item.tools) === 'gable' ? 12 : 0);
+    const b = silhouetteBox(item.col, item.row, item.height, footprintOf(item), pitch);
+    const bottom = b.cy + b.h / 2;
+    // A citizen stands at their own door. On a ruin there is no volume at all,
+    // so the PERSON is the tallest thing on the lot and the box has to hold
+    // them: an unreachable member is the finding this map exists to show, and
+    // framing them out of the picture would be the one unforgivable crop.
+    const top = Math.min(b.cy - b.h / 2, bottom - FIGURE_UNITS);
+    minX = Math.min(minX, b.cx - b.w / 2); maxX = Math.max(maxX, b.cx + b.w / 2);
+    minY = Math.min(minY, top); maxY = Math.max(maxY, bottom);
   }
-  const inside = (bld) => list.some((p) => bld.col >= p.col && bld.col < p.col + p.cols
-    && bld.row >= p.row && bld.row < p.row + p.rows);
-  for (const bld of city.buildings) {
-    if (!keys.size || !inside(bld)) continue;
-    minY = Math.min(minY, toScreen(bld.col, bld.row).y - (bld.height || 0));
-  }
-  return {
-    x: minX - LATERAL,
-    y: minY - ROOF_HEADROOM,
-    w: (maxX - minX) + LATERAL * 2,
-    h: (maxY - minY) + ROOF_HEADROOM + LABEL_HEADROOM,
-  };
+  return any ? { minX, minY, maxX, maxY } : null;
 }
 
 /**
@@ -895,50 +904,38 @@ export function legibilityOf(frame, container) {
 }
 
 /**
- * The default frame for a container. `cityFrame` is the whole-plan rectangle
- * renderCity already computed; the other two are grown from the plaza until
- * they stop being legible, then backed off one step.
+ * The default frame: the whole subject, fitted to the box the map is given.
+ *
+ * There used to be three defaults chosen by breakpoint — one district on a
+ * phone, a ring of plots on a tablet, the plan on a desktop — on the theory
+ * that a phone should trade coverage for a legible citizen. Measured on a
+ * 390x844 phone, that theory cost 37 of 69 citizens: they were not small,
+ * they were OUTSIDE THE PICTURE, and buildings ran off the right edge with no
+ * hint that anything was there. A map whose default view hides half its
+ * subject is not a map, and no amount of zoom fixes a thing you cannot see is
+ * missing.
+ *
+ * So there is one rule at every width now: compute the extent of the people
+ * and fit it to the frame. What changes with width is how big the frame is,
+ * not how much of the city is in it. Legibility becomes a zoom, which is a
+ * verb the visitor controls, rather than a crop, which is one they cannot
+ * undo.
+ *
+ * `cityFrame` is the whole-plan rectangle renderCity computed, Archive
+ * included; it stays the fallback for an ecosystem with no citizens and is
+ * still one click away behind "Whole city".
  */
 export function computeFocusFrame(city, container, cityFrame) {
   const band = bandFor(container.width);
-  if (band === 'desktop') {
-    // The desktop default is the SUBJECT, not the plan. The Archive is 86
-    // sheds that DESIGN.md §7 already calls a backdrop; framing to include
-    // all of it pushed a 22-unit citizen down to 15 CSS px and left nearly
-    // half the hero as ground nobody built on. Everything inside the wall
-    // plus the guild ring is the default; "Whole city" is one click away and
-    // is the only thing that changed about how you reach the Archive.
-    const subject = [...city.plots.values()].filter((p) => p.kind !== 'archive');
-    if (!subject.length) return { name: 'city', band, ...cityFrame };
-    const core = frameOfPlots(city, subject);
-    return { name: 'subject', band, ...fitToAspect(core, container, null) };
-  }
-  const focus = focalPlot(city);
-  if (!focus) return { name: 'city', band, ...cityFrame };
-
-  const district = frameOfPlots(city, [focus]);
-  if (band === 'phone') return { name: 'district', band, ...fitToAspect(district, container, null) };
-
-  // FOCUS_RING: the plaza plus its nearest neighbours, as many as still read.
-  const others = [...city.plots.values()]
-    .filter((p) => p.key !== focus.key)
-    .map((p) => {
-      const a = centroidOf(focus); const b = centroidOf(p);
-      return { p, d: (a.col - b.col) ** 2 + (a.row - b.row) ** 2 };
-    })
-    .sort((x, y) => x.d - y.d || x.p.key.localeCompare(y.p.key));
-
-  let best = district;
-  let bestSet = [focus];
-  for (let k = 1; k <= Math.min(RING_MAX, others.length); k++) {
-    const set = [focus, ...others.slice(0, k).map((o) => o.p)];
-    const frame = frameOfPlots(city, set);
-    if (legibilityOf(frame, container) < FLOOR_MIN) break;
-    best = frame;
-    bestSet = set;
-    if (legibilityOf(frame, container) < FLOOR_COMFORTABLE) break;
-  }
-  return { name: 'ring', band, members: bestSet.map((p) => p.key), ...fitToAspect(best, container, null) };
+  const box = subjectBox(city);
+  if (!box) return { name: 'city', band, ...cityFrame };
+  const core = {
+    x: box.minX - EDGE_SIDE,
+    y: box.minY - EDGE_TOP,
+    w: (box.maxX - box.minX) + EDGE_SIDE * 2,
+    h: (box.maxY - box.minY) + EDGE_TOP + EDGE_BOTTOM,
+  };
+  return { name: 'subject', band, ...fitToAspect(core, container, null) };
 }
 
 /**

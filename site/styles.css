@@ -78,7 +78,7 @@ h1, h2, h3, h4 {
   color: var(--ink);
 }
 
-h1 { font-size: 2.03rem; margin: 0 0 0.2em; }
+h1 { font-size: 1.35rem; margin: 0 0 0.2em; }
 h2 { font-size: 1.42rem; margin: 0 0 0.6em; border-bottom: 1px solid var(--border-subtle); padding-bottom: 0.35em; }
 h3 { font-size: 1.125rem; margin: 1.4em 0 0.4em; }
 h4 { font-size: 1rem; margin: 1em 0 0.3em; }
@@ -154,7 +154,7 @@ svg :focus-visible {
 .page {
   max-width: 1180px;
   margin: 0 auto;
-  padding: 1.5rem 1.25rem 3rem;
+  padding: 0.4rem 1.25rem 3rem;
 }
 
 /* The header is a nameplate, not a front page. It used to stack a title, a
@@ -163,8 +163,13 @@ svg :focus-visible {
    thing a visitor saw was chrome. Everything that can live over the map now
    lives over the map. */
 header.site-header {
-  padding: 0.85rem 0 0.7rem;
-  margin-bottom: 0.85rem;
+  /* A nameplate, and nothing more. Every pixel here is a pixel the map does
+     not get, and the map is the product: at 1440x900 the header plus the
+     control strip used to spend 106px of a 900px viewport before the city
+     started. Halved, deliberately, and the tagline shortened so it stops
+     being truncated with an ellipsis on a phone. */
+  padding: 0.2rem 0 0.15rem;
+  margin-bottom: 0.25rem;
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
@@ -188,15 +193,28 @@ header.site-header {
 }
 
 /* A second bypass, in the header, for anyone who tabs in before the map has
-   mounted its own. Invisible until focused, like the page skip link. */
+   mounted its own. Invisible until focused, like the page skip link.
+
+   Hidden by clipping, not by `left: -9999px`. The old technique parks a real
+   interactive box five screens to the left of the viewport, which is a
+   control hanging off the edge of the document — harmless to a person, and
+   counted (correctly) by any audit that asks "is anything clipped by the
+   viewport edge". Clipping keeps the box where it belongs and 1px wide. */
 .header-skip {
   position: absolute;
-  left: -9999px;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
   font-weight: 600;
 }
 .header-skip:focus {
   position: static;
-  left: auto;
+  width: auto; height: auto;
+  margin: 0;
+  overflow: visible;
+  clip: auto;
 }
 
 .header-controls {
@@ -207,7 +225,9 @@ header.site-header {
 
 .theme-toggle {
   font-family: var(--font-mono);
-  font-size: 0.89rem;
+  font-size: 0.82rem;
+  padding: 0.25rem 0.55rem;
+  white-space: nowrap;
 }
 
 main section, main aside {
@@ -422,8 +442,12 @@ button:hover {
      visitor touched anything. preserveAspectRatio letterboxes whichever axis
      is not binding, and the sky rect is three frames wide, so the spare space
      reads as more sky rather than an empty bar. */
-  height: min(72vh, 620px);
-  min-height: 430px;
+  /* Tall enough that the whole city fits AND is worth looking at. The frame
+     fits the citizens to whatever box it is given (city-view computeFocusFrame),
+     so this number IS how big the city is drawn. Measured at 1440x900: the map
+     was 716px of a 900px viewport and the citizens filled 51% of the screen. */
+  height: min(58vh, 460px);
+  min-height: 320px;
   /* The controls live INSIDE the map's own frame rather than in the page
      above it, so the city is the first thing a visitor sees. They are a
      strip in normal flow, not an overlay: an overlay floating on the city
@@ -436,10 +460,18 @@ button:hover {
 }
 #city-map { flex: 1 1 auto; min-height: 0; }
 @media (min-width: 600px) {
-  .hero-map { height: min(78vh, 700px); min-height: 480px; }
+  .hero-map { height: min(74vh, 700px); min-height: 460px; }
 }
 @media (min-width: 1024px) {
-  .hero-map { height: min(84vh, 800px); min-height: 560px; }
+  /* The hero is the viewport minus its own chrome: the compact header above it
+     (about 46px with the page's top padding) and nothing else. `dvh` rather
+     than `vh` so a mobile browser's collapsing URL bar does not leave the map
+     taller than the screen. */
+  .hero-map {
+    height: calc(100dvh - 40px);
+    max-height: 1000px;
+    min-height: 560px;
+  }
 }
 
 #city-map {
@@ -895,10 +927,11 @@ button:hover {
   flex-wrap: wrap;
   align-items: center;
   gap: 0.4rem 0.6rem;
-  font-size: 0.84rem;
+  font-size: 0.82rem;
   /* A control bar on glass: it belongs to the map, so it is drawn on the map,
      tinted by the sky underneath rather than sitting on the page background. */
-  padding: 0.4rem 0.55rem;
+  padding: 0.22rem 0.5rem;
+  line-height: 1.25;
   border-bottom: 1px solid var(--border-subtle);
   background: var(--bg-elevated);
 }
@@ -908,7 +941,7 @@ button:hover {
 }
 .map-toolbar button {
   font: inherit;
-  padding: 0.22rem 0.55rem;
+  padding: 0.12rem 0.5rem;
   min-width: 2rem;
   border: 1px solid var(--border-strong);
   border-radius: var(--radius);
@@ -925,10 +958,16 @@ button:hover {
 /* Two paragraphs of instructions used to sit between the visitor and the
    city. They are one disclosure now: closed by default, still text, still
    keyboard-reachable, and no longer the first thing anybody reads. */
-.map-help { position: relative; }
+/* The popover is positioned against the TOOLBAR, not against its own summary.
+   Anchored to the summary it ran off the right edge of a 390px phone — the
+   summary sits near the end of the bar, and `width: min(46ch, 78vw)` from
+   there is wider than the screen has left. Two checkboxes and a link were
+   measurably outside the viewport. Both edges are pinned to the toolbar now,
+   so the panel can never be wider than the map it belongs to, at any width. */
+.map-help { position: static; }
 .map-help > summary {
   cursor: pointer;
-  padding: 0.22rem 0.55rem;
+  padding: 0.12rem 0.5rem;
   border: 1px solid var(--border-strong);
   border-radius: var(--radius);
   background: var(--bg-elevated);
@@ -939,9 +978,11 @@ button:hover {
 .map-help[open] > summary { border-color: var(--accent); }
 .map-help-body {
   position: absolute;
-  top: calc(100% + 0.4rem);
-  left: 0;
-  width: min(46ch, 78vw);
+  top: calc(100% + 0.3rem);
+  left: 0.4rem;
+  right: 0.4rem;
+  width: auto;
+  max-width: 46ch;
   z-index: 3;
   padding: 0.7rem 0.85rem;
   border: 1px solid var(--border-strong);
@@ -1207,22 +1248,25 @@ footer.site-footer p { margin: 0 0 0.5em; }
 @media (max-width: 599px) {
   h1 { font-size: 1.60rem; }
   .stats-grid dd { font-size: 1.42rem; }
-  .page { padding: 0.85rem 0.85rem 2.5rem; }
+  .page { padding: 0.5rem 0.85rem 2.5rem; }
   header.site-header {
-    padding: var(--space-2) 0 var(--space-3);
-    margin-bottom: var(--space-4);
-    gap: var(--space-2) var(--space-4);
+    padding: var(--space-1) 0 var(--space-2);
+    margin-bottom: var(--space-2);
+    gap: var(--space-1) var(--space-3);
   }
   /* On a phone the tagline was three lines of chrome between the visitor and
      the city. It is one quiet line under the title, and the theme control
      rides beside the title rather than on a row of its own. */
   header.site-header { flex-wrap: nowrap; align-items: center; }
   .site-header .titles { flex: 1 1 auto; min-width: 0; display: block; }
+  /* It WRAPS, it does not trail off. The one-line-with-ellipsis rule was
+     written when the tagline was twelve words; on a 390px phone it rendered
+     "James Lorenz Santos's agent ecosystem, dr…" — a sentence that stops
+     mid-word is worse than a sentence on two lines, and it is the first thing
+     on the page. The tagline is seven words now and fits in two short lines. */
   .tagline {
-    font-size: 0.84rem;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    font-size: 0.8rem;
+    line-height: 1.35;
   }
   .finding-strip {
     display: block;
@@ -1232,21 +1276,22 @@ footer.site-footer p { margin: 0 0 0.5em; }
   }
   .finding-strip a { margin-left: 0; }
   .hero-section h2 { margin-bottom: var(--space-2); }
-  /* One row that scrolls, not four that wrap: a wrapped toolbar was eating
-     110px off the top of a 608px map. Every control is still there and still
-     in the same order, it is just reached by swiping the bar instead of by
-     the map getting shorter. */
+  /* It WRAPS. It used to be one row that scrolled sideways, on the reasoning
+     that a wrapped toolbar ate 110px off the map. What it actually did was
+     slice the last control in half at the viewport edge — the screenshot at
+     390px showed a button reading "R" — and hide four more off-screen with no
+     scroll affordance to say they were there. Measured: 39 controls clipped by
+     the viewport edge at 390x844. A control you cannot see is not a control.
+     The bar is short enough to wrap into two rows now because everything
+     secondary moved behind "More". */
   .map-toolbar {
     font-size: 0.78rem;
     gap: 0.3rem 0.45rem;
     padding: 0.3rem 0.4rem;
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    overscroll-behavior-x: contain;
-    scrollbar-width: none;
+    flex-wrap: wrap;
+    overflow-x: clip;
   }
-  .map-toolbar::-webkit-scrollbar { display: none; }
-  .map-toolbar > * { flex: none; white-space: nowrap; }
+  .map-toolbar > * { flex: 0 1 auto; white-space: nowrap; min-width: 0; }
   .map-toolbar .map-hint { font-size: 0.79rem; }
   .map-help-body { width: min(40ch, 86vw); white-space: normal; }
   .map-help-body .map-hint { white-space: normal; }
@@ -1691,3 +1736,162 @@ footer.site-footer p { margin: 0 0 0.5em; }
   #studio-map *, #studio-map { animation: none !important; transition: none !important; }
   .studio-drop, .studio-card { transition: none !important; }
 }
+
+/* ---------- the figures, the action, and the panels ----------
+
+   The page used to render 836 words at rest, most of them statistical prose
+   sitting between the map and the visitor: "34 of 59 citizens are dark: 28
+   have never been dispatched, 8 are named by no charter, and 2 are both."
+   That sentence is TRUE and worth keeping — it is just not worth reading
+   before you have looked at the thing it describes. So the numbers became
+   chips, the prose went behind disclosures, and nothing was deleted. */
+
+.map-underbar {
+  margin-top: 0.55rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+}
+
+.map-figures {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.5rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.map-figures .figure {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.32em;
+  font-size: 0.83rem;
+  color: var(--ink-muted);
+  padding: 0.18rem 0.5rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 999px;
+  background: var(--bg-elevated);
+  white-space: nowrap;
+}
+.map-figures .figure b {
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+/* The one figure that is a finding rather than an inventory. */
+.map-figures .figure-warn { border-color: var(--warn-border, var(--border-strong)); }
+.map-figures .figure-warn b { color: var(--warn-ink, var(--ink)); }
+
+.map-notes > summary,
+.panel > summary {
+  cursor: pointer;
+  list-style: none;
+}
+.map-notes > summary::-webkit-details-marker,
+.panel > summary::-webkit-details-marker { display: none; }
+
+.map-notes > summary {
+  font-size: 0.83rem;
+  color: var(--ink-muted);
+  padding: 0.18rem 0.5rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 999px;
+  background: var(--bg-elevated);
+}
+.map-notes > summary::before { content: "› "; }
+.map-notes[open] > summary::before { content: "⌄ "; }
+.map-notes > summary:hover { border-color: var(--accent); }
+.map-notes-body { padding-top: 0.6rem; }
+.map-notes-body .map-hint { max-width: 70ch; }
+
+/* One primary action. Not the only thing you can do — the only thing the page
+   RECOMMENDS you do. Everything else on the page is a button among sixty-nine
+   buttons; this is the one with weight. */
+.act {
+  display: flex;
+  justify-content: center;
+  margin: 1.1rem 0 1.4rem;
+}
+.cta {
+  display: inline-block;
+  font-family: var(--font-display);
+  font-size: 1.02rem;
+  font-weight: 650;
+  letter-spacing: -0.005em;
+  text-decoration: none;
+  color: var(--bg-elevated);
+  background: var(--accent);
+  border: 1.5px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 0.62rem 1.5rem;
+}
+.cta:hover {
+  filter: brightness(1.08);
+  text-decoration: none;
+}
+.cta:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+
+/* A section that opens. The heading stays a heading — it is still the
+   document outline, still the target of every in-page link — it just also
+   happens to be the control that reveals its own section. */
+.panel > summary { display: block; }
+.panel > summary > h2 {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  margin-bottom: 0;
+}
+.panel > summary > h2::after {
+  content: "›";
+  font-family: var(--font-mono);
+  font-weight: 400;
+  color: var(--ink-muted);
+  margin-left: auto;
+}
+.panel[open] > summary > h2::after { content: "⌄"; }
+.panel > summary:hover > h2 { color: var(--accent); }
+.panel > summary:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+.panel[open] > summary > h2 { margin-bottom: 0.6em; }
+
+/* The secondary controls that moved out of the toolbar. */
+.map-help-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.6rem;
+  padding-bottom: 0.5rem;
+  margin-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+/* Sections are closer together now that most of them are one line tall. */
+main section, main aside { margin-bottom: 1.5rem; }
+.hero-section { margin-bottom: 0.5rem; }
+
+/* Provenance is a footnote, not a farewell address. The two paragraphs that
+   say where every number came from are the page's honesty story and they stay
+   — behind a disclosure, because 60 words of methodology is not what a
+   visitor reads on arrival. The maker's mark stays visible. */
+.footer-note > summary {
+  cursor: pointer;
+  list-style: none;
+  font-size: 0.86rem;
+  color: var(--ink-muted);
+  margin-bottom: 0.6rem;
+}
+.footer-note > summary::-webkit-details-marker { display: none; }
+.footer-note > summary::before { content: "› "; }
+.footer-note[open] > summary::before { content: "⌄ "; }
+.footer-note > summary:hover { color: var(--accent); }
+
+/* A closed disclosure must not lay out its contents.
+   Chromium keeps an absolutely-positioned child of a closed <details> in the
+   layout tree: `::details-content` is `content-visibility: hidden`, which
+   skips PAINTING but still gives descendants boxes. So the two checkboxes and
+   the link inside this popover reported rectangles hanging off the right edge
+   of a 390px viewport while being invisible to any reader — a control that is
+   simultaneously unreachable and unhidden. Hidden means hidden. */
+.map-help:not([open]) > .map-help-body { display: none; }

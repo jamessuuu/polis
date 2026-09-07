@@ -32,8 +32,10 @@ import { fileURLToPath } from 'node:url';
 import { computeCity } from '../site/layout.mjs';
 import {
   obstacleBoxes, plateCandidates, placePlates, nameWidth, NAME_H, NAME_POOL,
+  computeFocusFrame, plateScaleFor,
 } from '../site/city-view.mjs';
 import { placeLabels, intersectionArea, collisions } from '../site/labels.mjs';
+import { screenBounds } from '../site/iso.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const snap = JSON.parse(readFileSync(join(ROOT, 'data', 'ecosystem.json'), 'utf8'));
@@ -48,12 +50,33 @@ const byId = new Map(city.buildings.map((b) => [b.id, b]));
 /** The label scales the three bands really produce, plus the extremes. */
 const SCALES = [1, 0.72, 0.5, 0.34];
 
-function plates(scale) {
+function plates(scale, frame = null) {
   const boxes = [];
   const cands = plateCandidates(city);
-  placePlates(cands, boxes, scale, obstacles);
+  placePlates(cands, boxes, scale, obstacles, frame);
   return { cands, boxes };
 }
+
+/**
+ * The frames the page really uses, and the label scale each one produces.
+ *
+ * `placePlates` takes a frame now, so the placer can no longer solve a
+ * crowded plan by walking a plate off the edge of the picture. That is a new
+ * constraint on a solver that was only ever tested unconstrained, and a
+ * constrained solver has different failure modes — it falls back to the
+ * least-bad position more often. So the real frames are exercised here, not
+ * just the scales.
+ */
+const cityRect = (() => {
+  const b = screenBounds(city.bounds.minCol, city.bounds.minRow, city.bounds.maxCol, city.bounds.maxRow);
+  const PAD = 64;
+  return { x: b.minX - PAD, y: b.minY - 200, w: b.maxX - b.minX + PAD * 2, h: b.maxY - b.minY + 214 };
+})();
+const CONTAINERS = [
+  { name: 'phone', width: 388, height: 426 },
+  { name: 'tablet', width: 768, height: 560 },
+  { name: 'laptop', width: 1438, height: 827 },
+];
 
 /**
  * The T2/T3 pass, built exactly the way `refreshNamePlates` builds it but
@@ -82,6 +105,26 @@ test('every precinct is labelled, at every label scale', () => {
     const { cands } = plates(scale);
     assert.equal(cands.length, city.plots.size, `scale ${scale}`);
     for (const c of cands) assert.ok(c.box, `${c.key} got no box at scale ${scale}`);
+  }
+});
+
+test('no two precinct plates share a pixel, in the frames the page really uses', () => {
+  for (const c of CONTAINERS) {
+    const frame = computeFocusFrame(city, c, cityRect);
+    const scale = plateScaleFor(frame, c);
+    const { boxes, cands } = plates(scale, frame);
+    const hits = collisions(boxes).map((h) => {
+      const find = (bx) => cands.find((k) => k.box.cx === bx.cx && k.box.cy === bx.cy);
+      const a = find(h.a); const b = find(h.b);
+      return `${a ? a.key : '?'} x ${b ? b.key : '?'} (${Math.round(h.area)}u2)`;
+    });
+    assert.deepEqual(hits, [], `overlapping plates on ${c.name} (scale ${scale.toFixed(2)})`);
+    // And every plate is inside the picture, which is the point of the frame.
+    for (const k of cands) {
+      assert.ok(k.box.cx - k.box.w / 2 >= frame.x - 0.5 && k.box.cx + k.box.w / 2 <= frame.x + frame.w + 0.5
+        && k.box.cy - k.box.h / 2 >= frame.y - 0.5 && k.box.cy + k.box.h / 2 <= frame.y + frame.h + 0.5,
+      `${c.name}: the ${k.key} plate is outside the frame`);
+    }
   }
 });
 

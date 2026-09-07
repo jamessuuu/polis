@@ -245,7 +245,8 @@ const skillCollections = [
 ].filter(([, list]) => list.length);
 
 const skillsHtml = [
-  '      <h2 id="skills-heading">The archive &mdash; skills</h2>',
+  '      <details class="panel">',
+  '        <summary><h2 id="skills-heading">The archive &mdash; skills</h2></summary>',
   `      <p>${snap.skills.length} procedures the citizens draw on, in ${skillCollections.length} collections. Skills are not citizens: they carry no division, no Director, and no wiring of their own.</p>`,
   '      <ul class="static-district-list">',
   skillCollections.map(([name, list]) => districtDetails(
@@ -253,6 +254,7 @@ const skillsHtml = [
     ['        <ul class="static-skill-list">', list.map(skillLi).join('\n'), '        </ul>'].join('\n'),
   )).join('\n'),
   '      </ul>',
+  '      </details>',
 ].join('\n');
 
 
@@ -318,16 +320,38 @@ const stripHtml = [
 ].filter(Boolean).join('\n');
 
 const rosterHtml = [
-  '      <h2 id="static-roster-heading">Districts and citizens</h2>',
+  '      <details class="panel">',
+  '        <summary><h2 id="static-roster-heading">Districts and citizens</h2></summary>',
   `      <p>Generated from <code>ecosystem.json</code> by <code>bin/build-site.mjs</code>. Snapshot taken ${esc(snap.generatedAt)}.</p>`,
   withheldNote,
   '      <ul class="static-district-list">',
   districts.join('\n'),
   '      </ul>',
+  '      </details>',
 ].filter(Boolean).join('\n');
+
+/**
+ * The figures under the map, as chips rather than a paragraph.
+ *
+ * Same numbers as the stats grid, same source, one generator: a second author
+ * of the same number is how this page once published 45 citizens while the
+ * repo said 59. The chips are what a reader sees at rest; the grid is still
+ * there under Status for anyone who wants the whole board.
+ */
+const figures = [
+  ['citizens', s.agents, ''],
+  ['districts', s.divisions, ''],
+  ['roads', s.edges, ''],
+  ['skills', s.skills, ''],
+  ['unreachable', s.unreachable, ' figure-warn'],
+];
+const figuresHtml = figures
+  .map(([label, value, cls]) => `          <li class="figure${cls}"><b>${value}</b> ${label}</li>`)
+  .join('\n');
 
 let html = readFileSync(INDEX, 'utf8');
 html = replaceRegion(html, /<dl class="stats-grid">/, '</dl>', statsHtml, 'stats grid');
+html = replaceRegion(html, /<ul class="map-figures" id="map-figures" aria-label="What is on the map">/, '</ul>', figuresHtml, 'map figures');
 html = replaceRegion(html, /<section aria-labelledby="static-roster-heading" id="static-roster-section">/, '</section>', rosterHtml, 'static roster');
 html = replaceRegion(html, /<section aria-labelledby="skills-heading">/, '</section>', skillsHtml, 'skills archive');
 html = replaceRegion(html, /<div class="finding finding-warn" id="unreachable-finding">/, '</div>', unreachableHtml, 'unreachable finding');

@@ -62,7 +62,13 @@ const DIRECTIONS = Array.from({ length: DIR_COUNT }, (_, i) => {
 });
 
 /** Cost weights. Tuned against the real plan; gated by tests/labels.test.mjs. */
-const W_BUILDING = 5.0; // hiding a silhouette is the expensive mistake
+// Raised from 5.0 when the plan was compacted (layout.mjs SPREAD). In a
+// sparse city the nearest clean spot was a few units away, so distance and
+// cover traded off sensibly at 5.0. In a dense one the nearest clean spot is
+// a whole plot away, and at 5.0 the placer started buying a 38%-covered
+// building to save the walk. Hiding the thing you are naming is the one
+// mistake this placer exists to prevent, so it now costs three times the trip.
+const W_BUILDING = 8.0; // hiding a silhouette is the expensive mistake
 const W_DISTANCE = 2.6; // but fleeing to empty ground is a mistake too: a
                         // label three plots from its subject is a puzzle
 const W_DIRECTION = 0.7;

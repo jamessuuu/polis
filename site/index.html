@@ -29,7 +29,7 @@
   <header class="site-header">
     <div class="titles">
       <h1>Polis</h1>
-      <p class="tagline">James Lorenz Santos's agent ecosystem, drawn as a city you can walk around.</p>
+      <p class="tagline">James Lorenz Santos's ecosystem, drawn as a city.</p>
     </div>
     <div class="header-controls">
       <a class="header-skip" href="#list-heading">Skip the map, go to the list</a>
@@ -43,19 +43,21 @@
       <h2 id="map-heading" class="visually-hidden">The map</h2>
       <div class="hero-map">
         <div class="map-toolbar" role="group" aria-label="Map controls">
-          <a class="map-skip" href="#list-heading">Skip the map, go to the list</a>
-          <button type="button" id="map-dark-half" class="map-mode" aria-pressed="false">Show the dark half</button>
-          <span class="tool-group">
+          <a class="map-skip" href="#list-heading">Skip to list</a>
+          <span class="tool-group" role="group" aria-label="Zoom">
             <button type="button" id="map-zoom-in" aria-label="Zoom in">+</button>
             <button type="button" id="map-zoom-out" aria-label="Zoom out">&minus;</button>
-            <button type="button" id="map-reset">Reset view</button>
-            <button type="button" id="map-whole-city">Whole city</button>
+            <button type="button" id="map-reset" aria-label="Reset the view">Reset</button>
           </span>
-          <label><input type="checkbox" id="map-roads"> All roads</label>
-          <label><input type="checkbox" id="map-life" checked> Life</label>
+          <button type="button" id="map-dark-half" class="map-mode" aria-pressed="false">Dark half</button>
           <details class="map-help">
-            <summary>How to read this</summary>
+            <summary aria-label="More map controls and how to read the map">More</summary>
             <div class="map-help-body">
+              <div class="map-help-controls">
+                <button type="button" id="map-whole-city">Whole city</button>
+                <label><input type="checkbox" id="map-roads"> All roads</label>
+                <label><input type="checkbox" id="map-life" checked> Life</label>
+              </div>
               <p class="map-hint">Drag to pan, scroll to zoom. With the map focused: arrows pan, <kbd>+</kbd>/<kbd>-</kbd> zoom, <kbd>0</kbd> resets.</p>
               <p class="map-hint">Hover or focus a citizen to see its roads highlighted, its name, its neighbours' names, and the citizens it has actually worked alongside. Click one to open its record, then click any citizen the map just lit to keep going. Click a walker mid-stride to follow that partnership &mdash; pause with the Life toggle first if you would rather they held still. Districts are named at every zoom; the people in them are named once you zoom past 1.3&times;, or whenever you point at one. <a href="#list-heading">Use the list below</a> to browse by keyboard alone, with no need to touch the map at all.</p>
             </div>
@@ -65,11 +67,27 @@
         </svg>
       </div>
       <div class="map-underbar">
-        <p class="map-hint" id="map-dark-note"></p>
-        <p class="map-hint" id="map-life-note"></p>
-        <ul class="legend" id="map-legend" aria-label="District colour key"></ul>
+        <ul class="map-figures" id="map-figures" aria-label="What is on the map">
+          <li class="figure"><b>59</b> citizens</li>
+          <li class="figure"><b>8</b> districts</li>
+          <li class="figure"><b>219</b> roads</li>
+          <li class="figure"><b>86</b> skills</li>
+          <li class="figure figure-warn"><b>8</b> unreachable</li>
+      </ul>
+        <details class="map-notes">
+          <summary>Read the map</summary>
+          <div class="map-notes-body">
+            <p class="map-hint" id="map-dark-note"></p>
+            <p class="map-hint" id="map-life-note"></p>
+            <ul class="legend" id="map-legend" aria-label="District colour key"></ul>
+          </div>
+        </details>
       </div>
     </section>
+
+    <div class="act">
+      <a class="cta" href="#studio-heading" id="cta-studio">Map your own ecosystem</a>
+    </div>
 
     <p class="finding finding-strip" id="headline-strip">
         <strong class="finding-strip-count">8</strong>
@@ -80,7 +98,8 @@
 
     <div class="findings-status">
     <section aria-labelledby="findings-heading" id="findings-section">
-      <h2 id="findings-heading">What the wiring gets wrong</h2>
+      <details class="panel">
+        <summary><h2 id="findings-heading">What the wiring gets wrong</h2></summary>
       <div class="finding finding-warn" id="unreachable-finding">
         <h3>Unreachable &mdash; 8</h3>
         <p>Nobody hands these 8 citizens work through the declared wiring: no charter names them UPSTREAM or DOWNSTREAM. The constitution's reciprocity rule calls that a violation, not a curiosity.</p>
@@ -100,10 +119,12 @@
         <h3>Withheld &mdash; 2</h3>
         <p>2 members are not shown here. Their id or description names a real client or employer, so they are counted honestly and withheld, not published. The identifiers are left out too, on purpose: the point of withholding is to publish nothing that could identify who they name, and that judgment should hold even when an identifier looks harmless.</p>
       </div>
+      </details>
     </section>
 
     <section aria-labelledby="status-heading" class="status-board" id="status-board">
-      <h2 id="status-heading">Status</h2>
+      <details class="panel">
+        <summary><h2 id="status-heading">Status</h2></summary>
       <p>Every number here is written by <code>bin/build-site.mjs</code> straight out of <code>ecosystem.json</code>. None of it is typed by hand, because the numbers on this page went stale once already when they were.</p>
       <dl class="stats-grid">
         <div><dt>Citizens</dt><dd>59</dd></div>
@@ -114,6 +135,7 @@
         <div><dt>Unreachable</dt><dd>8</dd></div>
         <div><dt>Withheld</dt><dd>2</dd></div>
       </dl>
+      </details>
     </section>
     </div>
 
@@ -131,7 +153,8 @@
          showing controls that do nothing.
          ================================================================== -->
     <section aria-labelledby="studio-heading" id="studio-section" class="studio">
-      <h2 id="studio-heading">Your turn</h2>
+      <details class="panel" id="studio-panel">
+        <summary><h2 id="studio-heading">Map your own ecosystem</h2></summary>
 
       <p class="studio-lead" id="studio-lead">The same map, drawn from your own <code>.claude</code> folder or from a starter template.</p>
 
@@ -241,11 +264,13 @@
           </div>
         </div>
       </div>
+      </details>
     </section>
 
 
     <section aria-labelledby="filters-heading" id="filters-section" hidden>
-      <h2 id="filters-heading">Find a citizen</h2>
+      <details class="panel">
+        <summary><h2 id="filters-heading">Find a citizen</h2></summary>
       <p>Search by name or description, or narrow by district, tool, or Director status. Filters affect the map and the list below together.</p>
       <form id="filter-form">
         <div class="field-row">
@@ -273,16 +298,20 @@
         </div>
         <p id="filter-summary" role="status" aria-live="polite">Showing 45 of 45 citizens.</p>
       </form>
+      </details>
     </section>
 
 
     <section aria-labelledby="list-heading" id="list-section" hidden>
-      <h2 id="list-heading">Districts and citizens</h2>
-      <div id="roster-list"></div>
+      <details class="panel" id="list-panel">
+        <summary><h2 id="list-heading">Districts and citizens</h2></summary>
+        <div id="roster-list"></div>
+      </details>
     </section>
 
     <section aria-labelledby="static-roster-heading" id="static-roster-section">
-      <h2 id="static-roster-heading">Districts and citizens</h2>
+      <details class="panel">
+        <summary><h2 id="static-roster-heading">Districts and citizens</h2></summary>
       <p>Generated from <code>ecosystem.json</code> by <code>bin/build-site.mjs</code>. Snapshot taken 2026-09-05T20:35:57.122Z.</p>
       <p class="static-meta">2 member(s) withheld: id or description names a client or employer; id or description names a client or employer. Their names are not printed.</p>
       <ul class="static-district-list">
@@ -742,10 +771,12 @@
         </details>
       </li>
       </ul>
+      </details>
       </section>
 
     <section aria-labelledby="skills-heading">
-      <h2 id="skills-heading">The archive &mdash; skills</h2>
+      <details class="panel">
+        <summary><h2 id="skills-heading">The archive &mdash; skills</h2></summary>
       <p>86 procedures the citizens draw on, in 7 collections. Skills are not citizens: they carry no division, no Director, and no wiring of their own.</p>
       <ul class="static-district-list">
       <li class="static-district">
@@ -884,6 +915,7 @@
         </details>
       </li>
       </ul>
+      </details>
       </section>
 
     <aside class="citizen-panel" id="citizen-panel" aria-labelledby="panel-heading" hidden>
@@ -923,8 +955,11 @@
   </main>
 
   <footer class="site-footer">
-    <p>Polis renders James Lorenz Santos's agent ecosystem as a place you can walk around. Every number on this page comes from <code>ecosystem.json</code>, generated by <code>bin/snapshot.mjs</code> reading the real agent and skill files off disk.</p>
-    <p>Generated <time datetime="2026-09-05T17:36:44.332Z">2026-09-05</time>. Charter bodies are never published; members whose id or description names a real client or employer are withheld and counted, not shown.</p>
+    <details class="footer-note">
+      <summary>Provenance</summary>
+      <p>Polis renders James Lorenz Santos's agent ecosystem as a place you can walk around. Every number on this page comes from <code>ecosystem.json</code>, generated by <code>bin/snapshot.mjs</code> reading the real agent and skill files off disk.</p>
+      <p>Generated <time datetime="2026-09-05T17:36:44.332Z">2026-09-05</time>. Charter bodies are never published; members whose id or description names a real client or employer are withheld and counted, not shown.</p>
+    </details>
     <p class="aj-attribution">
   <svg class="aj-attribution__mark" viewBox="0 0 64 64" width="20" height="20" role="img" aria-label="Agent James"><path fill="currentColor" fill-rule="evenodd" d="M4 16h8v4h-8zM52 16h8v4h-8zM16 4h4v8h-4zM16 52h4v8h-4zM4 28h8v4h-8zM52 28h8v4h-8zM28 4h4v8h-4zM28 52h4v8h-4zM4 40h8v4h-8zM52 40h8v4h-8zM40 4h4v8h-4zM40 52h4v8h-4zM12 12h40v40h-40zM16 16v32h32v-32zM36 20h4v20h-16v-4h12z"/><rect x="20" y="20" width="4" height="4" fill="var(--aj-attribution-signal, #B45309)"/></svg>Built by <a href="https://agentjames.vercel.app" rel="me noopener">James Lorenz Santos</a><span class="aj-attribution__sep" aria-hidden="true">&middot;</span><a href="https://www.linkedin.com/in/james-lorenz-santos-720776251/" rel="me noopener" target="_blank">LinkedIn</a>
 </p>

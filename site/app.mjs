@@ -285,7 +285,7 @@ async function main() {
     svg.classList.toggle('dark-half', on);
     if (darkToggle) {
       darkToggle.setAttribute('aria-pressed', String(on));
-      darkToggle.textContent = on ? 'Leave the dark half' : 'Show the dark half';
+      darkToggle.textContent = on ? 'Leave dark half' : 'Dark half';
       darkToggle.setAttribute('aria-label', on
         ? 'Leave the dark half and show the whole city'
         : `Show the dark half: the ${darkCounts.never} citizens never dispatched and the ${darkCounts.unnamed} named by no charter`);
@@ -761,6 +761,31 @@ async function main() {
       panel.scrollIntoView({ behavior: prefersReducedMotion() ? 'auto' : 'smooth', block: 'start' });
     });
   }
+
+  // ---- disclosures open for the link that points into them ---------------
+  //
+  // Most of this page is now behind <details>, because 836 rendered words
+  // above a map is a wall, not a page. That is only an improvement if a link
+  // to something inside a closed panel still WORKS: a skip link that lands on
+  // a collapsed heading is a bypass that bypasses nothing, and the primary
+  // action points at a studio that starts closed. So any in-page link opens
+  // every disclosure between the page and its target before the browser
+  // scrolls, which is what a reader means by "go there". Capture phase,
+  // because the browser scrolls on the default action and a panel that opens
+  // afterwards has already moved the target out from under it.
+  //
+  // The `.jump-to-citizen` buttons do not need this: they preventDefault and
+  // open the citizen on the map instead of travelling to the roster.
+  document.addEventListener('click', (ev) => {
+    const a = ev.target.closest && ev.target.closest('a[href^="#"]');
+    if (!a) return;
+    const id = a.getAttribute('href').slice(1);
+    const target = id && document.getElementById(id);
+    if (!target) return;
+    for (let el = target; el; el = el.parentElement) {
+      if (el.tagName === 'DETAILS') el.open = true;
+    }
+  }, true);
 
   // ---- reveal the interactive sections, retire the static fallback -------
 
