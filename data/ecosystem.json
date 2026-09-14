@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-05T20:35:57.122Z",
+  "generatedAt": "2026-09-11T15:50:56.847Z",
   "scope": "personal",
   "divisions": [
     {
@@ -53,7 +53,7 @@
         "Grep",
         "Bash"
       ],
-      "model": null,
+      "model": "sonnet",
       "division": "03 Engineering",
       "guild": null,
       "director": false,
@@ -85,7 +85,7 @@
         "Grep",
         "WebFetch"
       ],
-      "model": null,
+      "model": "sonnet",
       "division": "03 Engineering",
       "guild": null,
       "director": false,
@@ -93,7 +93,7 @@
     },
     {
       "id": "architect",
-      "description": "System designer. Use to turn an approved idea or feature into an implementation plan — data model, module boundaries, API shape, failure handling, migration path. Produces specs the main session codes against; does not write application code.",
+      "description": "System designer. Use before any non-trivial feature or new project gets coded — turns an approved idea into an implementation plan: data model, module boundaries, API shape, failure handling, migration path. Produces the Spec the main session codes against; does not write application code itself, and does not decide whether the idea is worth building — that go/no-go is cto's or product-strategist's call, made before this agent starts.",
       "tools": [
         "Read",
         "Glob",
@@ -115,7 +115,7 @@
         "Grep",
         "Write"
       ],
-      "model": null,
+      "model": "opus",
       "division": "00 Cabinet",
       "guild": null,
       "director": true,
@@ -181,7 +181,7 @@
         "WebFetch",
         "WebSearch"
       ],
-      "model": null,
+      "model": "sonnet",
       "division": "05 Growth & Revenue",
       "guild": null,
       "director": false,
@@ -198,7 +198,7 @@
         "WebFetch",
         "WebSearch"
       ],
-      "model": null,
+      "model": "sonnet",
       "division": "00 Cabinet",
       "guild": null,
       "director": false,
@@ -206,7 +206,7 @@
     },
     {
       "id": "copywriter",
-      "description": "Voice and copy specialist. Use for launch essays, READMEs, landing pages, product naming, App/store listings, and build-in-public posts. Writes in James's voice with receipts — never marketing slop.",
+      "description": "Voice and copy specialist. Use before any public-facing text ships — launch essays, READMEs, landing pages, product naming, App/store listings, build-in-public posts — or whenever a draft reads like a template wrote it. Produces finished copy in James's voice with receipts, never marketing slop. Does not decide positioning, pricing, or which claims to make — that is product-strategist/product-manager's call; this agent writes the words for a decision already made.",
       "tools": [
         "Read",
         "Glob",
@@ -229,7 +229,7 @@
         "WebFetch",
         "WebSearch"
       ],
-      "model": null,
+      "model": "sonnet",
       "division": "00 Cabinet",
       "guild": null,
       "director": false,
@@ -245,7 +245,7 @@
         "WebFetch",
         "WebSearch"
       ],
-      "model": null,
+      "model": "opus",
       "division": "04 Design & Story",
       "guild": null,
       "director": true,
@@ -253,7 +253,7 @@
     },
     {
       "id": "cto",
-      "description": "Technical strategy advisor. Use for stack decisions, build-vs-buy calls, architecture direction across projects, feasibility checks on new project ideas, and \"is this worth building\" technical judgment. Advises and decides — does not write code.",
+      "description": "Technical strategy advisor. Use before committing to a stack, a build-vs-buy call, or a new project idea's feasibility — whenever the question is \"is this worth building\" rather than \"how do we build it\". Produces a decisive technical Verdict (go/no-go, stack choice, the rejected alternative). Advises and decides but never writes code — architect takes the decided direction and designs the system that follows from it.",
       "tools": [
         "Read",
         "Glob",
@@ -303,7 +303,7 @@
     },
     {
       "id": "devops",
-      "description": "Deployment and operations specialist for the Cloudflare stack. Use for wrangler config, CI/CD, migrations on live data, monitoring/alerting, incident diagnosis, and free-tier cost/limit management across projects.",
+      "description": "Deployment and operations specialist for the Cloudflare stack. Use before any diff ships to production, when a migration must run against live data, or after a deploy misbehaves and needs incident diagnosis — wrangler config, CI/CD, monitoring/alerting, and free-tier cost/limit management. Does not decide what ships — that is architect/the main session's call; this agent gets an approved change live safely and keeps it observable.",
       "tools": [
         "Read",
         "Glob",
@@ -329,7 +329,7 @@
         "WebFetch",
         "WebSearch"
       ],
-      "model": null,
+      "model": "sonnet",
       "division": "07 Knowledge & Craft",
       "guild": null,
       "director": false,
@@ -361,7 +361,7 @@
         "WebFetch",
         "WebSearch"
       ],
-      "model": null,
+      "model": "sonnet",
       "division": "05 Growth & Revenue",
       "guild": null,
       "director": true,
@@ -377,7 +377,7 @@
         "Bash",
         "WebFetch"
       ],
-      "model": null,
+      "model": "opus",
       "division": "06 Trust & Operations",
       "guild": null,
       "director": false,
@@ -393,7 +393,7 @@
         "WebFetch",
         "WebSearch"
       ],
-      "model": null,
+      "model": "sonnet",
       "division": "04 Design & Story",
       "guild": null,
       "director": false,
@@ -410,7 +410,7 @@
         "Write",
         "Edit"
       ],
-      "model": null,
+      "model": "sonnet",
       "division": "07 Knowledge & Craft",
       "guild": null,
       "director": false,
@@ -426,7 +426,7 @@
         "WebFetch",
         "WebSearch"
       ],
-      "model": null,
+      "model": "sonnet",
       "division": "06 Trust & Operations",
       "guild": null,
       "director": false,
@@ -459,7 +459,7 @@
         "Write",
         "Edit"
       ],
-      "model": null,
+      "model": "sonnet",
       "division": null,
       "guild": null,
       "director": false,
@@ -467,7 +467,7 @@
     },
     {
       "id": "metrics-analyst",
-      "description": "Product and growth measurement specialist. Use to design privacy-lean instrumentation, read the numbers, and write \"what the data says\" briefs that feed boards and the outcomes ledger. Owns metrics definitions, funnel analysis, and experiment scorekeeping. Nothing ships a hypothesis without a pre-registered success metric.",
+      "description": "Product and growth measurement specialist. Use before any hypothesis or experiment ships (it needs a pre-registered success metric), on a weekly cadence to read the numbers, or whenever a board needs to know what the data actually says before deliberating. Designs privacy-lean instrumentation and writes the outcomes-ledger verdict. Does not run growth experiments itself — that is growth-engineer; this agent is the only one allowed to say what worked.",
       "tools": [
         "Read",
         "Glob",
@@ -476,7 +476,7 @@
         "WebFetch",
         "WebSearch"
       ],
-      "model": null,
+      "model": "sonnet",
       "division": "01 Intelligence",
       "guild": null,
       "director": false,
@@ -526,7 +526,7 @@
         "WebFetch",
         "WebSearch"
       ],
-      "model": null,
+      "model": "sonnet",
       "division": "02 Product",
       "guild": null,
       "director": false,
@@ -540,7 +540,7 @@
         "Glob",
         "Grep"
       ],
-      "model": null,
+      "model": "sonnet",
       "division": "02 Product",
       "guild": null,
       "director": true,
@@ -548,7 +548,7 @@
     },
     {
       "id": "product-strategist",
-      "description": "Business-side strategist. Use for niche selection, positioning, pricing, monetization models, distribution/launch planning, and honest go/no-go calls on project ideas. Grounds every recommendation in verified 2026 solo-dev base rates.",
+      "description": "Business-side strategist. Use before a new project idea gets built, or whenever niche selection, positioning, a monetization model, or a distribution plan needs an honest go/no-go call grounded in verified 2026 solo-dev base rates. Produces the Brief (verdict, buyer, positioning, pricing model, distribution sequence, riskiest assumption). Does not set the actual price points — that is pricing-strategist, which prices the model this agent already chose.",
       "tools": [
         "Read",
         "Glob",
@@ -607,7 +607,7 @@
         "WebSearch",
         "Write"
       ],
-      "model": null,
+      "model": "sonnet",
       "division": "05 Growth & Revenue",
       "guild": null,
       "director": false,
@@ -639,7 +639,7 @@
         "WebFetch",
         "WebSearch"
       ],
-      "model": null,
+      "model": "sonnet",
       "division": "05 Growth & Revenue",
       "guild": null,
       "director": false,
@@ -656,7 +656,7 @@
         "WebFetch",
         "WebSearch"
       ],
-      "model": null,
+      "model": "sonnet",
       "division": "04 Design & Story",
       "guild": null,
       "director": false,
@@ -679,7 +679,7 @@
     },
     {
       "id": "support-community",
-      "description": "Support and community specialist for live products. Use to draft user replies, triage reports and moderation queues (e.g. Klik's admin queue), turn recurring complaints into product briefs, and keep community tone human. Drafts only — James sends anything outward-facing.",
+      "description": "Support and community specialist for live products. Use whenever a user ticket, moderation-queue report (e.g. Klik's admin queue), or community message needs a reply, or once three-plus tickets share a theme and it's time to write the product brief. Produces drafted replies, triage calls, and moderation recommendations — drafts only, James sends anything outward-facing. Does not investigate the underlying defect itself — that is debugger; this agent hands off the repro and answers the user.",
       "tools": [
         "Read",
         "Glob",
@@ -688,7 +688,7 @@
         "WebFetch",
         "WebSearch"
       ],
-      "model": null,
+      "model": "sonnet",
       "division": "06 Trust & Operations",
       "guild": null,
       "director": false,
@@ -705,7 +705,7 @@
         "Write",
         "Edit"
       ],
-      "model": null,
+      "model": "sonnet",
       "division": "07 Knowledge & Craft",
       "guild": null,
       "director": false,
@@ -723,7 +723,7 @@
         "WebSearch",
         "Write"
       ],
-      "model": null,
+      "model": "opus",
       "division": "06 Trust & Operations",
       "guild": null,
       "director": true,
@@ -741,7 +741,7 @@
         "Bash",
         "WebFetch"
       ],
-      "model": null,
+      "model": "sonnet",
       "division": "04 Design & Story",
       "guild": null,
       "director": false,
@@ -774,7 +774,7 @@
         "WebFetch",
         "WebSearch"
       ],
-      "model": null,
+      "model": "sonnet",
       "division": "02 Product",
       "guild": null,
       "director": false,
@@ -782,7 +782,7 @@
     },
     {
       "id": "agentic-director",
-      "description": "Field director for AI and agent engineering. Use for agent-system architecture decisions, MCP-vs-skill-vs-hook design calls, eval strategy for any agentic capability, context-engineering reviews, and judging whether an agentic design is real or theater. Directs and judges — implementation happens in the main session.",
+      "description": "Field director for AI and agent engineering. Use before any agentic system is designed — MCP-vs-skill-vs-hook calls, eval strategy, context-engineering reviews — or whenever a design needs the theater test (is it wired and verifiable, or just vocabulary). Directs and judges; implementation happens in the main session, and MCP servers themselves are built by mcp-engineer, not this agent.",
       "tools": [
         "Read",
         "Glob",
@@ -814,7 +814,7 @@
     },
     {
       "id": "mcp-engineer",
-      "description": "MCP server implementation specialist. Use to design and build MCP servers — tool/resource surfaces, stateless Workers-hosted architecture, OAuth flows, version negotiation, Connectors compatibility — and to review existing servers for spec compliance and security. The hands for what the agentic-director green-lights.",
+      "description": "MCP server implementation specialist. Use once agentic-director has green-lit an MCP server design, or whenever an existing server needs a spec-compliance/security review — tool/resource surfaces, stateless Workers-hosted architecture, OAuth flows, version negotiation, Connectors compatibility. Builds and reviews; does not decide whether a server should exist or which mechanism fits — that architecture call belongs to agentic-director.",
       "tools": [
         "Read",
         "Glob",
@@ -850,7 +850,7 @@
     },
     {
       "id": "backend-director",
-      "description": "Field director for backend and platform engineering. Use for API design arbitration, data-model reviews, query/schema performance judgment, reliability decisions (idempotency, retries, consistency), and platform-fit calls beyond the Cloudflare defaults. Directs and judges — implementation happens in the main session.",
+      "description": "Field director for backend and platform engineering. Use before endpoints get built on top of a data model, whenever an API/schema/query design needs arbitration or a reliability decision (idempotency, retries, consistency), or when a workload's platform fit beyond the Cloudflare defaults is in doubt. Directs and judges; implementation happens in the main session, and api-designer turns the arbitrated contract into the concrete route table.",
       "tools": [
         "Read",
         "Glob",
@@ -865,7 +865,7 @@
     },
     {
       "id": "creative-dev",
-      "description": "Creative-technology advisor for WebGL/Three.js/R3F, canvas, shaders, and heavy animation. Use to judge whether fancy tech earns its place, pick the lightest technique that achieves an effect, set performance budgets, and design fallbacks. Advises and prototypes approaches — production code happens in the main session.",
+      "description": "Creative-technology advisor for WebGL/Three.js/R3F, canvas, shaders, and heavy animation. Use before any fancy-tech effect gets built, or whenever a scroll-driven scene, shader, or physics interaction needs the lightest-technique judgment and a performance budget. Advises and prototypes; production code happens in the main session, and interaction-designer owns micro-interaction/gesture motion rather than heavy rendering technique.",
       "tools": [
         "Read",
         "Glob",
@@ -881,7 +881,7 @@
     },
     {
       "id": "design-director",
-      "description": "Field director for frontend and design. Use to set the design direction for a project or feature, arbitrate visual/UX decisions, define a project's design DNA, plan interface work across specialists, and judge whether shipped UI meets the bar. Directs and judges — implementation happens in the main session.",
+      "description": "Field director for frontend and design. Use before any project or feature's design direction is set, whenever a visual/UX decision needs arbitration, or once shipped UI is ready to be judged against the design DNA. Directs and judges; implementation happens in the main session, and design-reviewer is the closed-loop gate that renders and grades the actual output this agent's DNA governs.",
       "tools": [
         "Read",
         "Glob",
@@ -927,7 +927,7 @@
     },
     {
       "id": "game-designer",
-      "description": "Systems and mechanics designer for games. Use to define a game's core loop and verbs, design progression/economy/difficulty curves, diagnose why a prototype is boring, judge whether a level's space earns itself (the Level Verdict), and turn a vague game idea into a one-page design with an explicit cut list. Designs what the player DOES; does not write engine code or set store/business strategy.",
+      "description": "Systems and mechanics designer for games. Use once a game-director Brief exists and the core loop needs defining, whenever a prototype plays boring and the cause needs diagnosing, or before a level's greybox locks (the Level Verdict). Designs what the player DOES — loop, verbs, progression, economy — and does not write engine code or set store/business strategy; game-director owns the ladder rung and release gates.",
       "tools": [
         "Read",
         "Glob",
@@ -943,7 +943,7 @@
     },
     {
       "id": "game-director",
-      "description": "Field director for game development. Use to choose the engine and rung for a game project, decide what gets built versus bought versus tooled, arbitrate scope against a real finish line, sequence the capability ladder from browser games through an engine and a store release and onward, run the hands-on protocol where James writes the gameplay and agents verify it, and judge whether a build is ready to leave the workshop. Directs and judges — implementation happens in the main session, and gameplay is James's.",
+      "description": "Field director for game development. Use once a game project starts (choosing the engine and ladder rung), whenever scope needs arbitrating against a real finish line, or at every hands-on-protocol gate to judge whether a build is ready to leave the workshop. Directs and judges; implementation happens in the main session, gameplay itself is James's under the hands-on protocol, and game-designer owns loop/mechanics diagnosis rather than this agent.",
       "tools": [
         "Read",
         "Glob",
@@ -977,7 +977,7 @@
     },
     {
       "id": "aeo-specialist",
-      "description": "AI-search visibility executor. Use to run AEO/GEO audits per the house runbook (tracked-prompt share-of-voice testing, entity/schema work, source-layer mapping), implement the fixes, and produce the monthly share-of-voice reports that justify retainers. The hands for the audit method the growth-director sells.",
+      "description": "AI-search visibility executor. Use once growth-director has commissioned an AEO/GEO engagement, on a monthly cadence for share-of-voice reporting, or whenever a page needs schema/entity work to become citable in AI answers. Runs the tracked-prompt audit runbook and implements the fixes; growth-director sells and arbitrates the strategy, this agent is the hands that execute it.",
       "tools": [
         "Read",
         "Glob",
@@ -996,7 +996,7 @@
     },
     {
       "id": "growth-director",
-      "description": "Field director for marketing and growth. Use to plan distribution for a launch, sequence growth experiments, arbitrate SEO/content/pricing strategy, and judge marketing plans against evidence and budget reality. Directs and judges — assets get produced by the copywriter and main session.",
+      "description": "Field director for marketing and growth. Use before a launch's distribution gets planned, whenever growth experiments need sequencing or SEO/content/pricing strategy needs arbitrating, or once a marketing plan is drafted and needs judging against evidence and budget reality. Directs and judges; assets get produced by copywriter and the main session, and aeo-specialist executes the AI-search audit method this agent sells.",
       "tools": [
         "Read",
         "Glob",
@@ -1084,6 +1084,11 @@
     },
     {
       "from": "product-manager",
+      "to": "api-designer",
+      "kind": "upstream"
+    },
+    {
+      "from": "backend-director",
       "to": "api-designer",
       "kind": "upstream"
     },
@@ -1793,6 +1798,11 @@
       "kind": "downstream"
     },
     {
+      "from": "sales-engineer",
+      "to": "automation-engineer",
+      "kind": "downstream"
+    },
+    {
       "from": "chief-of-staff",
       "to": "security-auditor",
       "kind": "upstream"
@@ -2043,17 +2053,132 @@
       "kind": "downstream"
     },
     {
-      "from": "ui-designer",
-      "to": "design-reviewer",
+      "from": "chief-of-staff",
+      "to": "agentic-director",
       "kind": "upstream"
     },
     {
-      "from": "creative-dev",
-      "to": "design-reviewer",
+      "from": "agentic-director",
+      "to": "eval-engineer",
+      "kind": "downstream"
+    },
+    {
+      "from": "agentic-director",
+      "to": "mcp-engineer",
+      "kind": "downstream"
+    },
+    {
+      "from": "ai-engineer",
+      "to": "eval-engineer",
+      "kind": "upstream"
+    },
+    {
+      "from": "eval-engineer",
+      "to": "agentic-director",
+      "kind": "downstream"
+    },
+    {
+      "from": "architect",
+      "to": "mcp-engineer",
+      "kind": "upstream"
+    },
+    {
+      "from": "mcp-engineer",
+      "to": "devops",
+      "kind": "downstream"
+    },
+    {
+      "from": "mcp-engineer",
+      "to": "security-auditor",
+      "kind": "downstream"
+    },
+    {
+      "from": "mcp-engineer",
+      "to": "eval-engineer",
+      "kind": "downstream"
+    },
+    {
+      "from": "automation-engineer",
+      "to": "controller",
+      "kind": "downstream"
+    },
+    {
+      "from": "architect",
+      "to": "backend-director",
+      "kind": "upstream"
+    },
+    {
+      "from": "chief-of-staff",
+      "to": "backend-director",
+      "kind": "upstream"
+    },
+    {
+      "from": "backend-director",
+      "to": "data-engineer",
+      "kind": "downstream"
+    },
+    {
+      "from": "backend-director",
+      "to": "devops",
+      "kind": "downstream"
+    },
+    {
+      "from": "backend-director",
+      "to": "security-auditor",
+      "kind": "downstream"
+    },
+    {
+      "from": "ui-designer",
+      "to": "creative-dev",
       "kind": "upstream"
     },
     {
       "from": "design-director",
+      "to": "creative-dev",
+      "kind": "upstream"
+    },
+    {
+      "from": "creative-dev",
+      "to": "performance-engineer",
+      "kind": "downstream"
+    },
+    {
+      "from": "creative-dev",
+      "to": "design-reviewer",
+      "kind": "downstream"
+    },
+    {
+      "from": "cto",
+      "to": "design-director",
+      "kind": "upstream"
+    },
+    {
+      "from": "product-strategist",
+      "to": "design-director",
+      "kind": "upstream"
+    },
+    {
+      "from": "design-strategist",
+      "to": "design-director",
+      "kind": "upstream"
+    },
+    {
+      "from": "design-director",
+      "to": "interaction-designer",
+      "kind": "downstream"
+    },
+    {
+      "from": "design-director",
+      "to": "ui-designer",
+      "kind": "downstream"
+    },
+    {
+      "from": "design-director",
+      "to": "design-reviewer",
+      "kind": "downstream"
+    },
+    {
+      "from": "ui-designer",
       "to": "design-reviewer",
       "kind": "upstream"
     },
@@ -2061,6 +2186,21 @@
       "from": "design-reviewer",
       "to": "design-director",
       "kind": "downstream"
+    },
+    {
+      "from": "cto",
+      "to": "design-strategist",
+      "kind": "upstream"
+    },
+    {
+      "from": "market-researcher",
+      "to": "design-strategist",
+      "kind": "upstream"
+    },
+    {
+      "from": "product-strategist",
+      "to": "design-strategist",
+      "kind": "upstream"
     },
     {
       "from": "game-director",
@@ -2105,6 +2245,51 @@
     {
       "from": "playtest-engineer",
       "to": "game-director",
+      "kind": "downstream"
+    },
+    {
+      "from": "seo-specialist",
+      "to": "aeo-specialist",
+      "kind": "upstream"
+    },
+    {
+      "from": "growth-director",
+      "to": "aeo-specialist",
+      "kind": "upstream"
+    },
+    {
+      "from": "aeo-specialist",
+      "to": "content-strategist",
+      "kind": "downstream"
+    },
+    {
+      "from": "aeo-specialist",
+      "to": "copywriter",
+      "kind": "downstream"
+    },
+    {
+      "from": "aeo-specialist",
+      "to": "growth-director",
+      "kind": "downstream"
+    },
+    {
+      "from": "chief-of-staff",
+      "to": "growth-director",
+      "kind": "upstream"
+    },
+    {
+      "from": "growth-director",
+      "to": "content-strategist",
+      "kind": "downstream"
+    },
+    {
+      "from": "growth-director",
+      "to": "copywriter",
+      "kind": "downstream"
+    },
+    {
+      "from": "growth-director",
+      "to": "seo-specialist",
       "kind": "downstream"
     }
   ],
@@ -2310,6 +2495,11 @@
       "guild": null
     },
     {
+      "id": "shopify-build",
+      "description": "Build a Shopify store or app for a client where there is no server to touch, the plan tier decides what is buildable, and the store vehicle is chosen once or the store gets rebuilt — theme development on the current CLI, catalogue and metafields, the plan-gated checkout surface, and the app path on the template Shopify actually maintains today. Use after web-qualify has passed and a client engagement needs Shopify theme, storefront or app work built.",
+      "guild": null
+    },
+    {
       "id": "social-ops",
       "description": "Per-project social media operations — generates platform-adapted post drafts from real project milestones, reply drafts, and researched prospect lists with personalized outreach drafts, all landing in a review queue James approves and sends himself. Use via /social-ops <project> or when a project ships something worth posting.",
       "guild": null
@@ -2345,13 +2535,28 @@
       "guild": null
     },
     {
+      "id": "web-handoff",
+      "description": "Verify a client website against thresholds and a human's judgement, then hand it over so it survives without you — the accessibility, performance and security gate a build must clear, the migration onto the client's real host chosen against what that host can actually do, the itemised checklist of steps only the client can perform, licence position, and revoking our own access. Use when a WordPress or Shopify build is finished and needs to become the client's, or when a site must move hosts.",
+      "guild": null
+    },
+    {
       "id": "web-perf",
       "description": "Analyzes web performance using Chrome DevTools MCP. Measures Core Web Vitals (LCP, INP, CLS) and supplementary metrics (FCP, TBT, Speed Index), identifies render-blocking resources, network dependency chains, layout shifts, caching issues, and accessibility gaps. Use when asked to audit, profile, debug, or optimize page load performance, Lighthouse scores, or site speed. Biases towards retrieval from current documentation over pre-trained knowledge.",
       "guild": null
     },
     {
+      "id": "web-qualify",
+      "description": "Decide go or no-go on a website engagement BEFORE it is quoted — probe the client's real host and platform rather than believing the brief, establish who owns which plugin or app licence, check the plan tier against what the client is asking for, and state the refusals. Use the moment a client brief names WordPress, WooCommerce, Elementor, Kadence, Shopify, a site rebuild, replatform or rescue, and before any price, timeline or scope leaves the building.",
+      "guild": null
+    },
+    {
       "id": "workers-best-practices",
       "description": "Reviews and authors Cloudflare Workers code against production best practices. Load when writing new Workers, reviewing Worker code, configuring wrangler.jsonc, or checking for common Workers anti-patterns (streaming, floating promises, global state, secrets, bindings, observability). Biases towards retrieval from Cloudflare docs over pre-trained knowledge.",
+      "guild": null
+    },
+    {
+      "id": "wp-build",
+      "description": "Build or replatform a WordPress site for a client on the local SQLite stack — the builder decision with its lock-in consequence stated to the client, block or builder authoring, the WooCommerce catalogue, tax, shipping and test-mode payment track, and content migration checked by a before/after diff rather than trusted. Use after web-qualify has passed and a client engagement needs a WordPress, WooCommerce, Elementor or Kadence site actually built.",
       "guild": null
     },
     {
@@ -2542,24 +2747,15 @@
   ],
   "stats": {
     "agents": 59,
-    "skills": 86,
+    "skills": 90,
     "divisions": 8,
     "guilds": 6,
-    "edges": 219,
+    "edges": 256,
     "directors": 7,
-    "unreachable": 8,
+    "unreachable": 0,
     "withheld": 2
   },
-  "unreachable": [
-    "agentic-director",
-    "eval-engineer",
-    "mcp-engineer",
-    "automation-engineer",
-    "backend-director",
-    "design-strategist",
-    "aeo-specialist",
-    "growth-director"
-  ],
+  "unreachable": [],
   "withheld": [
     {
       "id": "prompt-engineer",

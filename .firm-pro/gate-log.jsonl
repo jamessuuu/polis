@@ -7,3 +7,10 @@
 {"at":"2026-09-06T07:33:07.130Z","kind":"gate","gate":"verify-shipgauge","exit":null,"result":"UNKNOWN","source":"none","gates_in_command":1,"observed":true}
 {"at":"2026-09-06T07:35:43.979Z","kind":"gate","gate":"verify-site","exit":null,"result":"UNKNOWN","source":"none","gates_in_command":1,"observed":true}
 {"at":"2026-09-06T07:38:23.912Z","kind":"gate","gate":"verify-site","exit":null,"result":"UNKNOWN","source":"none","gates_in_command":1,"observed":true}
+{"at":"2026-09-06T12:32:43.035Z","kind":"gate","gate":"verify-shots","exit":null,"result":"UNKNOWN","source":"none","gates_in_command":1,"observed":true}
+{"at":"2026-09-06T12:33:45.918Z","kind":"gate","gate":"verify-shots","exit":null,"result":"UNKNOWN","source":"none","gates_in_command":1,"observed":true}
+{"at":"2026-09-06T12:34:35.382Z","kind":"gate","gate":"verify-shots","exit":null,"result":"UNKNOWN","source":"none","gates_in_command":1,"observed":true}
+{"at":"2026-09-06T12:35:15.068Z","kind":"gate","gate":"verify-shots2","exit":null,"result":"UNKNOWN","source":"none","gates_in_command":1,"observed":true}
+{"at":"2026-09-06T12:35:46.981Z","kind":"gate","gate":"verify-shots3","exit":null,"result":"UNKNOWN","source":"none","gates_in_command":1,"observed":true}
+{"at":"2026-09-06T19:31:08.971Z","kind":"gate","gate":"verify-import-local","exit":null,"result":"UNKNOWN","source":"none","gates_in_command":1,"observed":true}
+{"at":"2026-09-06T19:31:23.237Z","kind":"gate","gate":"verify-import-local","exit":null,"result":"UNKNOWN","source":"none","gates_in_command":1,"observed":true}
